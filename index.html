@@ -19,8 +19,8 @@
             box-sizing: border-box; /* パディングを幅に含める */
         }
         .img-button {
-            width: 25vw; /* ビューポート幅の30% */
-            height: 25vw; /* 高さは自動調整 */
+            width: 30vw; /* ビューポート幅の30% */
+            height: 30vw; /* 高さは自動調整 */
             border: none;
             border-radius: 2vw;
             cursor: pointer;
@@ -37,10 +37,11 @@
 </head>
 <body>
     <h1>CoCoめだか</h1>
+      <div class="button-container">
 <a href="QRCR_r.html"><img src="QRCR_r1.jpg" class="img-button" alt="QRコードリーダー"></a>
 <a href="numberForm.html"><img src="4kfm1.jpg" class="img-button" alt="コード入力フォーム"></a>
 <a href="reservation.html"><img src="RSVT1.jpg" class="img-button" alt="予約注文"></a>
-    
+      </div>  
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             liff.init({ liffId: "1657196041-ALeOLrEa" }, () => {
