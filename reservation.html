@@ -1,4 +1,4 @@
-
+  /*   許可されるポイント数とランクは444行周辺で変更。Line messaging api GASと必ず合わせる。  */
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -441,7 +441,7 @@ const now_today0 = `${now_today.getFullYear()}/${now_today.getMonth() + 1}/${now
               console.log(response);
               const jsonData = JSON.parse(response);
 
-              if (jsonData.score >= 10) {
+              if (jsonData.score >= 15) {
 
                 resolve();
               } else {
