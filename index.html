@@ -6,22 +6,32 @@
     <link rel="stylesheet" href="css/style_4kfm.css">
     <script src="https://static.line-scdn.net/liff/edge/versions/2.14.0/sdk.js"></script>
     <style>
-        body {
+          body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin: 2vw;
+            margin: 0;
+            padding: 0;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between; /* ボタンを横に均等に並べる */
+            padding: 2vw; /* コンテナ内の余白 */
+            box-sizing: border-box; /* パディングを幅に含める */
         }
         .img-button {
-            display: inline-block;
-            width: 20vw; /* ボタンの幅 */
-            height: 20vw; /* ボタンの高さ */
+            width: 30vw; /* ビューポート幅の30% */
+            height: 30vw; /* 高さは自動調整 */
             border: none;
-            border-radius: 5px;
+            border-radius: 2vw;
             cursor: pointer;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s ease;
         }
         .img-button:hover {
-            opacity: 0.8; /* ホバー時の効果 */
+            opacity: 0.8;
+        }
+        a {
+            display: block;
+            text-decoration: none;
         }
     </style>
 </head>
