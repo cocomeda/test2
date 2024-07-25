@@ -1,0 +1,477 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>メダカ予約注文</title>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
+
+<link rel="stylesheet" href="css/style.css">
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  
+<style>
+  /* プルダウンメニューのスタイル */
+  select {
+
+    text-align: center; /* テキストを中央に揃える */
+    text-align-last: center; /* 最後の選択肢も中央に揃える */
+  }
+
+  /* プルダウンメニューのアイテムのスタイル */
+  select option {
+    text-align: center; /* アイテムのテキストも中央に揃える */
+  }
+
+  /* スライダーのスタイル */
+  .slider {
+    width: 80%; /* スライダーの幅 */
+    margin: 20px auto; /* スライダーを中央に配置 */
+  }
+
+  .slider img {
+    width: 100%; /* 画像の幅をスライダーに合わせる */
+    height: auto; /* 高さを自動調整 */
+  }
+
+  .thumbnail-slider {
+    width: 80%; /* サムネイルスライダーの幅 */
+    margin: 20px auto; /* サムネイルスライダーを中央に配置 */
+  }
+
+  .thumbnail-slider img {
+    width: 100px; /* サムネイルの幅 */
+    height: auto; /* 高さを自動調整 */
+    cursor: pointer; /* マウスポインタを表示 */
+  }
+
+
+
+  /* 大きなチェックボックスのスタイル */
+  input[type="checkbox"] {
+    transform: scale(2); /* サイズを1.5倍にする */
+    margin-right: 1.5vw; /* チェックボックスとラベルの間にスペースを追加 */
+  }
+
+  label {
+    font-size: 5vw; /* チェックボックスラベルのフォントサイズを調整 */
+  }
+
+
+
+
+  
+  #loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4vw;
+    z-index: 9999;
+  }
+
+
+
+    #submit-button {
+      padding: 1vw 5vw; 
+      font-size: 8vw; 
+      border: 2px solid #4CAF50; 
+      background-color: #eee; 
+      color: black; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      border-color: black; 
+    }
+    #submit-button:disabled {
+      background-color: #eee; 
+      cursor: not-allowed; 
+      color: #ccc; 
+      border-color: #ccc; 
+    }
+
+hr {
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* 実線 */
+.hr1 {
+  border-top: 1px solid #aaa;
+}
+
+
+h1.b_n{ 
+font-weight: bold;
+color: black;
+text-align: center;
+font-size: 5vw;
+margin-bottom: 1vw;
+margin-top: 1vw;
+}
+
+
+
+  #main-content {
+    display: none;
+  }
+
+
+	
+#price-details-container {
+  min-height: 2em; /* 必要に応じて高さを調整 */
+  /* その他のスタイルがあれば追加 */
+}
+
+
+
+	
+</style>
+</head>
+<body>
+  <div id="loading">Loading...</div>
+  <div id="main-content">
+    <h1 class = "goukei">メダカ予約注文</h1>
+    
+<hr class="hr1">
+
+    <h1>※①〜③を指定し、最後にチェックを入れて確定ボタンを押してください。</h1>
+    <BR>
+    <form id="order-form">
+       <h1 class="b_n"><label for="species">①品種名:</label>
+      <select id="species" name="species" required onchange="updateSlider()">
+        <!-- Options will be populated dynamically -->
+      </select><br>
+
+      <label for="quantity">②数量:</label>
+      <select id="quantity" name="quantity" required onchange="updatePrice()">
+        <option value="">匹数を選択</option>
+        <option value="1">1匹</option>
+        <option value="2">2匹</option>
+        <option value="3">3匹</option>
+        <option value="4">4匹</option>
+        <option value="5">5匹</option>
+        <option value="2">1ペア</option>
+      </select><br></h1>
+
+
+      <h1 class="b_n">③受取希望日
+      <input type="date" name="daytime" class="button" id="tomorrow" style="font-size:6vw" required onchange="toggleSubmitButton()"></h1>
+
+	    
+      <div class="slider">
+        <!-- Images will be populated dynamically -->
+      </div>
+
+      <div class="thumbnail-slider">
+        <!-- Thumbnails will be populated dynamically -->
+      </div>
+	    
+<h1 class="b_n" id="price-details-container">
+  単価×数量: <span id="price-details">未選択</span>
+</h1>	   
+	    
+<h1 class = "goukei">合計金額: <span id="total-price">0</span>円</h1>
+    <h1>※当日、代金箱にお入れください。</h1>
+	
+ <h1 class="t"><br></h1>
+  <h1 class="cp">
+<label for="agreement">
+        <input type="checkbox" id="agreement" name="agreement" onchange="toggleSubmitButton()">
+       キャンセル時、CoCoポイントが10pt消失します。
+      </label></h1>
+
+      <h1 class="top"><button type="button" id="submit-button" onclick="submitOrder()" disabled>確定</button></h1>
+
+
+
+    </form>
+  
+<hr style="border:0;border-top:1px solid;">
+
+<h1 class="m1">© Coco Medaka35</h1>
+
+<h1 class="htu"></h1>
+	  
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+  <script>
+  let data = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await start_aaa();
+    first_aaaa();
+  } catch (error) {
+    console.error('Error in start_aaa:', error);
+  }
+});
+    
+    function first_aaaa(){
+      fetch('https://script.google.com/macros/s/AKfycbxTVVYyrzHIbXt1kpm55r6vWUkeyAyeovxTnbge-3qpqDf_-m0hD0zn7MOWBT6TJWs/exec')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(result => {
+          data = result.map(item => ({
+            species: item[0],
+            price: item[1],
+            imageUrl: item[2]
+          }));
+
+
+      const d = new Date();
+      d.setDate(d.getDate() + 2);
+      document.getElementById("tomorrow").setAttribute("min", d.toISOString().substr(0, 10));
+      const d1 = new Date();
+      d1.setDate(d1.getDate() + 2 + 12);
+      document.getElementById("tomorrow").setAttribute("max", d1.toISOString().substr(0, 10));
+
+
+
+
+          populateSelect();
+          initializeSlider();
+
+          
+          document.getElementById('loading').style.display = 'none'; // Hide loading screen
+          document.getElementById('main-content').style.display = 'block'; // Show main content
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          document.getElementById('loading').innerText = 'データの取得に失敗しました'; // Show error message
+        });
+    }
+
+
+
+
+    
+
+    function populateSelect() {
+      const select = document.getElementById('species');
+      select.innerHTML = '<option value="">-- 品種を選択 --</option>'; // Default option
+      data.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.species;
+        option.textContent = item.species;
+        select.appendChild(option);
+      });
+    }
+function initializeSlider() {
+  const slider = document.querySelector('.slider');
+  const thumbnailSlider = document.querySelector('.thumbnail-slider');
+  data.forEach(item => {
+    const img = document.createElement('img');
+    img.src = item.imageUrl;
+    img.alt = item.species;
+    slider.appendChild(img);
+
+    const thumbnail = document.createElement('img');
+    thumbnail.src = item.imageUrl;
+    thumbnail.alt = item.species;
+    thumbnailSlider.appendChild(thumbnail);
+  });
+
+  $('.slider').slick({
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    dots: true,
+    arrows: true,
+    infinite: true,
+    asNavFor: '.thumbnail-slider'
+  });
+
+  $('.thumbnail-slider').slick({
+    slidesToShow: 5,
+    slidesToScroll: 1,
+    asNavFor: '.slider',
+    dots: false,
+    centerMode: true,
+    focusOnSelect: true
+  });
+
+  // スライド変更後のイベントリスナー
+  $('.slider').on('afterChange', function(event, slick, currentSlide) {
+    const species = data[currentSlide].species;
+    document.getElementById('species').value = species;
+    updatePrice(); // スライド変更後に価格を更新
+  });
+}
+
+
+    
+    function updateSlider() {
+      const selectedSpecies = document.getElementById('species').value;
+      const selectedImage = data.find(item => item.species === selectedSpecies)?.imageUrl;
+      if (selectedImage) {
+        const slideIndex = data.findIndex(item => item.imageUrl === selectedImage);
+        $('.slider').slick('slickGoTo', slideIndex);
+      }
+
+    }
+
+  
+
+    function calculatePrice(species, quantity) {
+      return data.find(item => item.species === species)?.price * quantity || 0;
+    }
+
+
+
+
+
+
+
+
+	  
+function updatePrice() {
+  const species = document.getElementById('species').value;
+  const quantity = document.getElementById('quantity').value;
+  const item = data.find(item => item.species === species);
+  const unitPrice = item?.price || 0;
+  const totalPrice = unitPrice * quantity;
+
+  if (species && quantity) {
+    document.getElementById('price-details').textContent = `${unitPrice}円 × ${quantity}`;
+	  
+  } else {
+    document.getElementById('price-details').textContent = '未選択'; // 選択されていない場合のデフォルトテキスト
+  }
+  
+  document.getElementById('total-price').textContent = totalPrice;
+  toggleSubmitButton(); // ボタンの状態をチェック
+}
+
+  
+
+   // function updatePrice() {
+    //  const species = document.getElementById('species').value;
+   //   const quantity = document.getElementById('quantity').value;
+   //   const totalPrice = calculatePrice(species, quantity);
+	    
+  //    data.find(item => item.species === species)?.price * quantity || 0;    
+  //    toggleSubmitButton(); // Check the state of the submit button
+ //   }
+
+	  
+    function toggleSubmitButton() {
+      const species = document.getElementById('species').value;
+      const quantity = document.getElementById('quantity').value;
+      const date = document.getElementById('tomorrow').value;
+      const agreementChecked = document.getElementById('agreement').checked;
+      const submitButton = document.getElementById('submit-button');
+    
+     if (species && quantity && date && agreementChecked) {
+        submitButton.disabled = false;
+      } else {
+        submitButton.disabled = true;
+      }
+    }
+
+    
+  async function submitOrder() {
+      
+    
+      const species = document.getElementById('species').value;
+      const quantity = document.getElementById('quantity').value;
+      const date = document.getElementById('tomorrow').value;
+      const price = calculatePrice(species, quantity);
+    　const now_today = new Date();
+const now_today0 = `${now_today.getFullYear()}/${now_today.getMonth() + 1}/${now_today.getDate()}/${now_today.getHours()}:${('0' + now_today.getMinutes()).slice(-2)}`;
+   
+    const quantitySelect = document.getElementById('quantity');
+    const selectedIndex = quantitySelect.selectedIndex;
+    const selected_quantity = quantitySelect.options[selectedIndex].text;
+   
+      const message = `【注文内容】${now_today0}\n==============================\n品種名: ${species}\n数量: ${selected_quantity}\n代金: ${price}円\n==============================\n受け取り希望日: ${date}`;
+
+      try {
+        await liff.sendMessages([{
+          type: 'text',
+          text: message
+        }]);
+        // Close the LIFF window
+        liff.closeWindow();
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    }
+    
+    async function main() {
+      await liff.init({ liffId: "1657196041-ALeOLrEa" });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      }
+    }
+
+    main();
+
+
+
+
+
+ async function start_aaa() {
+      return new Promise((resolve, reject) => {
+        liff.init({ liffId: '1657196041-ALeOLrEa' }, async () => {
+          if (liff.isLoggedIn()) {
+            const idToken = liff.getIDToken();
+            $('#loading').show();
+
+            try {
+              const response = await $.ajax({
+                url: 'https://script.google.com/macros/s/AKfycbz4I7jwbEU7UFqtoFQnCzVqKtG5xA9dBUw0s-jR8aBxbZ5LzIF8ISLXU7czUhVPYTBnjQ/exec',
+                type: 'POST',
+                data: { idToken: idToken },
+              });
+
+              console.log(response);
+              const jsonData = JSON.parse(response);
+
+              if (jsonData.score >= 10) {
+
+                resolve();
+              } else {
+                alert('シルバーランク以上で使用できます。');
+                liff.closeWindow();
+                reject('シルバーランク以上で使用できます。');
+              }
+            } catch (error) {
+              console.error(error);
+              alert('Failed to send ID Token to GAS.');
+              liff.closeWindow();
+              reject('Failed to send ID Token to GAS.');
+            }
+          } else {
+            liff.login();
+          }
+        });
+      });
+    }
+
+
+
+
+
+
+    
+  </script>
+</body>
+</html>
+
+
+
+       

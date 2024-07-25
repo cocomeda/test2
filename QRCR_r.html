@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Code Reader for CoCo medaka</title>
+
+	
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+</head>
+<body>
+
+<script>
+// LIFFの初期化
+liff.init({ liffId: '1657196041-ALeOLrEa' }).then(() => {
+    if (!liff.isLoggedIn()) {
+        // ログインが必要な場合、ログインページを表示
+        liff.login();
+    } else {
+        // ユーザーがログインしている場合、直ちにQRコードリーダーを開く
+        openQRCodeReader1();
+    }
+}).catch((err) => {
+    console.error('LIFFの初期化に失敗しました', err);
+});
+
+// QRコードリーダーを開く関数
+function openQRCodeReader1() {
+    liff.scanCode()
+        .then(result => {
+            if (result.value) {
+                // QRコードのスキャンが成功した場合
+                console.log("QRコードスキャン結果:", result.value);
+                let qr_data = result.value; // QRコードのデータ
+
+let msg = {};
+msg = ["QRD:"+ qr_data];
+
+         sendText(String(msg)); 
+ 
+            } else {
+                console.error('No QR code is detected');
+            }
+        })
+        .catch(err => {
+            console.error('Error scanning QR code:', err);
+        })
+        .finally(() => {
+            // QRコードリーダーを閉じる
+           // liff.closeWindow();
+        });
+}
+
+	
+
+function sendText(text) {
+    // sendMessages(text);
+// }
+
+// LINEトーク画面上でメッセージ送信
+// function sendMessages(text) {
+    liff.sendMessages([{
+        'type': 'text',
+        'text': text
+    }]).then(function () {  
+        liff.closeWindow();
+        
+    }).catch(function (error) {
+        window.alert('Failed to send message ' + error);
+    });
+}
+
+
+
+
+</script>
+</body>
+</html>
