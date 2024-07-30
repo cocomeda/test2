@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           initializeSlider();
 
           
-          document.getElementById('loading').style.display = 'none'; // Hide loading screen
+          
           document.getElementById('main-content').style.display = 'block'; // Show main content
         })
         .catch(error => {
@@ -479,6 +479,8 @@ const now_today0 = `${now_today.getFullYear()}/${now_today.getMonth() + 1}/${now
 
               if (jsonData.score >= 15) {
 
+document.getElementById('loading').style.display = 'none'; // Hide loading screen
+		      
                 resolve();
               } else {
                 alert('シルバーランク以上で使用できます。');
