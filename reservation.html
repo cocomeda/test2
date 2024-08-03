@@ -342,12 +342,24 @@ function initializeSlider() {
     focusOnSelect: true
   });
 
+  // スライドが初期化される際に、最初のスライドのインデックスを保存
+  $('.slider').on('init', function(event, slick) {
+    initialSlideIndex = slick.currentSlide;
+  });	
+
   // スライド変更後のイベントリスナー
   $('.slider').on('afterChange', function(event, slick, currentSlide) {
     const species = data[currentSlide].species;
     document.getElementById('species').value = species;
     updatePrice(); // スライド変更後に価格を更新
+
+    // 最初のスライドを非表示にする
+    if (currentSlide === initialSlideIndex) {
+      const slides = document.querySelectorAll('.slider img');
+      slides[initialSlideIndex].style.display = 'none'; // 初期スライドだけ非表示にする
+    }	  
   });
+	
 }
 
 
