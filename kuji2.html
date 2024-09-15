@@ -358,6 +358,52 @@ showLoading(); // ローディング表示
 
 
 
+
+
+
+        
+ function sendResultToGAS(result) {
+            const idToken = liff.getIDToken();
+
+            // ローディング画像表示
+            $('#loading-overlay').show();
+
+            // IDトークンをGASに送信
+            $.ajax({
+                url: 'https://script.google.com/macros/s/AKfycbwbGTrY7_QkkuVhfNm1NtppwWy6cu7QbXy8hKALraLo1PBzbSsqY8XSm00iHinW3eAu/exec',
+                type: 'POST',
+                data: { idToken: idToken,
+                         result: result
+                      },
+                success: function (response) {
+                    // 成功時
+                    console.log(response);
+                    showPopup(JSON.stringify(response));
+                },
+                error: function (error) {
+                    // エラー時
+                   // console.error(error);
+                    //alert('Failed to send ID Token to GAS.');
+                },
+                complete: function () {
+                    // 通信完了時の処理（ローディング画像を非表示にし、コンテンツを表示）
+                    $('#loading-overlay').hide();
+                    $('#content').show();
+                }
+            });
+        }
+
+
+
+        
+
+
+
+
+
+
+
+        
         
         function showLoading(overlayId) {
             document.getElementById(overlayId).style.display = 'flex';
