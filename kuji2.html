@@ -314,7 +314,7 @@ showLoading(); // ローディング表示
           
         const idToken = await liff.getIDToken();
                 
-        const response = await fetch('https://script.google.com/macros/s/AKfycbwbGTrY7_QkkuVhfNm1NtppwWy6cu7QbXy8hKALraLo1PBzbSsqY8XSm00iHinW3eAu/exec', {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbyfuFtM-jflnKELAvNyzmVtNyaFLkKggAfPnKbSXEpAfPE04m4MqT1IGoqQD5BUwIN0/exec', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -366,7 +366,7 @@ showLoading(); // ローディング表示
 
             // IDトークンをGASに送信
             $.ajax({
-                url: 'https://script.google.com/macros/s/AKfycbwbGTrY7_QkkuVhfNm1NtppwWy6cu7QbXy8hKALraLo1PBzbSsqY8XSm00iHinW3eAu/exec',
+                url: 'https://script.google.com/macros/s/AKfycbyfuFtM-jflnKELAvNyzmVtNyaFLkKggAfPnKbSXEpAfPE04m4MqT1IGoqQD5BUwIN0/exec',
                 type: 'POST',
                 data: { idToken: idToken,
                          result: result
