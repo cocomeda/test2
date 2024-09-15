@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -171,8 +170,7 @@
             {start: '#909090', end: '#505050'},
             {start: '#808080', end: '#404040'}
         ];
-        
-        const labels = ['1点', '4点', '7点', '1点', '9点', '2点'];
+       const labels = ['0点', '4点', '7点', '1点', '9点', '2点'];
         const totalSlices = labels.length;
         let currentAngle = 0;
         let isSpinning = false;
@@ -359,10 +357,6 @@ showLoading(); // ローディング表示
 
 
 
-
-
-
-
         
  function sendResultToGAS(result) {
             const idToken = liff.getIDToken();
@@ -400,12 +394,6 @@ showLoading(); // ローディング表示
         
 
 
-
-
-
-
-
-        
         
         function showLoading(overlayId) {
             document.getElementById(overlayId).style.display = 'flex';
@@ -446,3 +434,12 @@ function hideLoading() {
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
