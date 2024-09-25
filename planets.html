@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravity Simulation</title>
+    <style>
+        canvas {
+            background-color: #fff; /* 背景を白に設定 */
+            display: block;
+            margin: 0;
+            padding: 0;
+            width: 200vw; /* 画面いっぱいに表示 */
+            height: 200vh;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #000;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="gravityCanvas"></canvas>
+<div id="info">
+    <p>天体の数: <span id="planetCount">0</span></p>
+    <p>最大の天体の質量: <span id="maxMass">0.00</span></p>
+    <p>最大質量の天体との距離: <span id="maxMassDistance">0.00</span></p>
+</div>
+
+<script>
+    const canvas = document.getElementById('gravityCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // デバイスのピクセル密度を考慮してキャンバスのサイズを設定
+    function resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        ctx.scale(dpr, dpr);  // キャンバスの描画をスケーリング
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const mass_ini = 0.1;
+    const G = 0.1; // 重力定数
+    const planets = [];
+
+    const scale = 0.5; // スケール設定
+
+    class Planet {
+        constructor(x, y, mass, color, velocity) {
+            this.x = x;
+            this.y = y;
+            this.mass = mass;
+            this.color = color; // 引数の color を使用
+            this.radius = Math.sqrt(this.mass) * 2; // 半径は質量に基づく
+            this.velocity = velocity || { x: 0, y: 0 };
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2);
+            ctx.fillStyle = this.color; // 色を設定
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        update() {
+            for (let planet of planets) {
+                if (planet !== this) {
+                    const dx = planet.x - this.x;
+                    const dy = planet.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    // 衝突の判定と融合処理
+                    if (distance < this.radius + planet.radius) {
+                        this.merge(planet);
+                    } else {
+                        // 重力の影響を計算
+                        const force = (G * this.mass * planet.mass) / (distance * distance);
+                        const ax = (force * dx) / distance / this.mass;
+                        const ay = (force * dy) / distance / this.mass;
+
+                        this.velocity.x += ax;
+                        this.velocity.y += ay;
+                    }
+                }
+            }
+
+            this.x += this.velocity.x;
+            this.y += this.velocity.y;
+        }
+
+        // 天体を融合する
+        merge(planet) {
+            const totalMass = this.mass + planet.mass;
+
+            // 新しい位置は質量に基づいた重心
+            this.x = (this.x * this.mass + planet.x * planet.mass) / totalMass;
+            this.y = (this.y * this.mass + planet.y * planet.mass) / totalMass;
+
+            // 新しい速度は質量に基づく速度の合成
+            this.velocity.x = (this.velocity.x * this.mass + planet.velocity.x * planet.mass) / totalMass;
+            this.velocity.y = (this.velocity.y * this.mass + planet.velocity.y * planet.mass) / totalMass;
+
+            // 質量と半径の更新
+            this.mass = totalMass;
+            this.radius = Math.sqrt(this.mass) * 2;
+
+            // 衝突した天体を削除
+            const index = planets.indexOf(planet);
+            if (index > -1) {
+                planets.splice(index, 1);
+            }
+        }
+    }
+
+    function addPlanet(x, y, velocity) {
+        const mass = mass_ini; // 一定の質量を設定
+        const color = 'blue'; // 新しく追加する天体は青色
+        planets.push(new Planet(x / scale, y / scale, mass, color, velocity));
+        updateInfo(); // 情報を更新
+    }
+
+    let startX, startY, isDragging = false;
+
+    canvas.addEventListener('mousedown', (e) => {
+        startX = e.clientX;
+        startY = e.clientY;
+        isDragging = true;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            // 速度ベクトルを示すためのラインを描画
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let planet of planets) {
+                planet.draw();
+            }
+            ctx.beginPath();
+            ctx.moveTo(startX * scale, startY * scale);
+            ctx.lineTo(e.clientX * scale, e.clientY * scale);
+            ctx.strokeStyle = '#000';
+            ctx.stroke();
+        }
+    });
+
+    canvas.addEventListener('mouseup', (e) => {
+        if (isDragging) {
+            const velocity = {
+                x: (e.clientX - startX) * 0.05,
+                y: (e.clientY - startY) * 0.05
+            };
+            addPlanet(startX, startY, velocity);
+            isDragging = false;
+        }
+    });
+
+    function updateInfo() {
+        const planetCountElem = document.getElementById('planetCount');
+        const maxMassElem = document.getElementById('maxMass');
+        const maxMassDistanceElem = document.getElementById('maxMassDistance');
+
+        // 天体の数を更新
+        planetCountElem.textContent = planets.length;
+
+        // 最大の天体の質量を計算し、その天体を赤色に変更
+        let maxMass = 0;
+        let maxMassPlanet = null; // 最大質量の天体を保持
+
+        for (let planet of planets) {
+            if (planet.mass > maxMass) {
+                maxMass = planet.mass;
+                maxMassPlanet = planet; // 最大質量の天体を記録
+            }
+        }
+
+        // 最大質量の天体を赤色にする
+        if (maxMassPlanet) {
+            maxMassPlanet.color = 'red'; // 色を赤に設定
+            maxMassElem.textContent = maxMass.toFixed(2);
+
+            // 最大質量の天体との距離を計算
+            let maxDistance = 0;
+
+            for (let planet of planets) {
+                if (planet !== maxMassPlanet) {
+                    const dx = planet.x - maxMassPlanet.x;
+                    const dy = planet.y - maxMassPlanet.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance > maxDistance) {
+                        maxDistance = distance;
+                    }
+                }
+            }
+
+            maxMassDistanceElem.textContent = maxDistance.toFixed(2);
+        } else {
+            maxMassElem.textContent = '0.00';
+            maxMassDistanceElem.textContent = '0.00';
+        }
+
+        // 残りの天体は青色に設定
+        for (let planet of planets) {
+            if (planet !== maxMassPlanet) {
+                planet.color = 'blue'; // 色を青に設定
+            }
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let planet of planets) {
+            planet.update();
+            planet.draw();
+        }
+        updateInfo(); // 情報を更新
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+</script>
+
+</body>
+</html>
