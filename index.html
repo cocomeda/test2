@@ -16,39 +16,34 @@
 	
 <style>
     
-        .marquee-container {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.7); /* 半透明の白背景 */
-            padding: 10px 0;
-            z-index: 1000; /* 他の要素より前に表示されるように */
-            overflow: hidden;
-        }
+.marquee-container {
+    width: 300px; /* コンテナの幅を指定 */
+    overflow: hidden; /* コンテンツがはみ出る場合に隠す */
+    white-space: nowrap; /* テキストを1行で表示 */
+    position: relative;
+}
 
-        .marquee {
-            display: inline-block;
-            white-space: nowrap;
-            will-change: transform;
-        }
+#marquee {
+    display: inline-block;
+    white-space: nowrap;
+}
 
-        /* テキストを流すアニメーション */
-        .scrolling {
-            animation: marquee 15s linear infinite;
-        }
+#marquee.scrolling {
+    animation: marquee 10s linear infinite;
+}
 
-        @keyframes marquee {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                transform: translateX(-100%);
-            }
-        }
+@keyframes marquee {
+    0% {
+        transform: translateX(0); /* 右端からスタート */
+    }
+    100% {
+        transform: translateX(-100%); /* 左端まで移動 */
+    }
+}
 
-
-
-   body {
+	
+	
+　　　　body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 0;
@@ -333,10 +328,13 @@ margin-left: 2vw;
 <div id="main">
 
 <section>
+
+
 <div class="marquee-container">
-<div class="marquee" id="marquee">
-　　　　　⚠代金未払い案件が発生した為、監視カメラを稼働させています。15秒に一度撮影され、サーバーに送られたデータは12時間で完全に消去されます。
-</div>
+    <div id="marquee">
+        <span>⚠代金未払い案件が発生した為、監視カメラを稼働させます。ご迷惑おかけします。15秒に一度撮影され、データは12時間で完全に消去されます。
+</span>
+    </div>
 </div>
 
 <br>
@@ -565,17 +563,14 @@ honbun"></h1>
 
 
       window.onload = function() {
-        const marqueeContainer = document.querySelector('.marquee-container');
-        const marquee = document.getElementById('marquee');
+    const marqueeContainer = document.querySelector('.marquee-container');
+    const marquee = document.getElementById('marquee');
 
-        // テキストの幅がコンテナの幅を超えているかをチェック
-        if (marquee.scrollWidth > marqueeContainer.clientWidth) {
-            marquee.classList.add('scrolling'); // 超えていればアニメーションを追加
-        }
-    };
-
-
-
+    // テキストの幅がコンテナの幅を超えているかをチェック
+    if (marquee.scrollWidth > marqueeContainer.clientWidth) {
+        marquee.classList.add('scrolling'); // 超えていればアニメーションを追加
+    }
+};
 
 
 	    
