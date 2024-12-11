@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4択クイズ</title>
+
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    
+    <style>
+            /* 既存のスタイル */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(100, 100, 100, 0.99);
+            z-index: 220;
+        }
+        #popup {
+            font-size: 5vw;
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw; 
+            height: 55vw;/* 上からの距離 */
+            border: 0.5vw solid #ccc;
+            background-color: #fff;
+            box-shadow: 0px 0px 1vw rgba(0, 0, 0, 0.2);
+            z-index: 250;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #popup-message {
+            position: fixed;
+            left: 50%;
+            top: 40%;
+            transform: translateX(-50%) translateY(-50%);
+            text-align: center;
+            font-size: 4.5vw;
+        }
+
+        
+
+    /* ローディングオーバーレイ */
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(100, 100, 95, 0.99);
+
+        }
+
+        /* ローディングメッセージ */
+        #loading-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+ 
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4vw;
+    z-index: 200;
+    font-weight: bold;
+        }
+
+    /* ローディングオーバーレイ */
+        #loading-overlay2 {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(100, 100, 95, 0.99);
+
+        }
+
+        /* ローディングメッセージ */
+        #loading-message2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+ 
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4vw;
+    z-index: 9999;
+    font-weight: bold;
+        }
+
+        
+        #close-btn {
+            position: absolute;
+            top: 1vw; /* 上からの距離 */
+            right: 1vw; /* 右からの距離 */
+            font-size: 7vw; /* バツボタンのサイズ */
+            cursor: pointer;
+        }
+        
+    
+
+        .hidden {
+            display: none;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 3vw;
+     
+
+        }
+
+        .quiz-container {
+            max-width: 95vw;
+            margin: 0 auto;
+        }
+
+        .quiz-question {
+            font-size: 5vw;
+            margin-bottom: 3vw;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2×2の正方形レイアウト */
+            gap: 1vw; /* 選択肢間のスペース */
+            padding: 0;
+            list-style: none;
+            margin: 0;
+        }
+
+        .quiz-option {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 4vw;
+            cursor: pointer;
+            border-radius: 1vw;
+            text-align: center;
+            font-size: 5vw; /* フォントサイズを調整 */
+            box-sizing: border-box;
+            aspect-ratio: 1 / 1; /* 正方形を確保 */
+            display: flex; /* フレックスボックスを使って中央揃え */
+            align-items: center; /* 垂直中央揃え */
+            justify-content: center; /* 水平中央揃え */
+        }
+
+        .quiz-option:hover {
+            background-color: #e0e0e0;
+        }
+
+        .quiz-option:active {
+            transform: scale(0.96);
+        }
+
+        .fade {
+            opacity: 1;
+            transition: opacity 2.0s ease;
+        }
+
+        .fade.hidden {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+    </style>
+</head>
+<body>
+
+    
+    <div id="overlay" onclick="closePopup()"></div>
+    <div id="popup">
+        <span id="close-btn" onclick="closePopup()">×</span>
+        <div id="popup-message"></div>
+    </div>
+   
+    <!-- ローディング表示のためのオーバーレイ -->
+    <div id="loading-overlay">
+        <div id="loading-message">読み込み中…</div>
+    </div>
+
+ 
+   
+    <!-- ローディング表示のためのオーバーレイ -->
+    <div id="loading-overlay2">
+        <div id="loading-message2">読み込み中…</div>
+    </div>
+
+
+
+
+
+
+    
+    <div class="quiz-container">
+        <div class="quiz-question" id="question">質問がここに表示されます</div>
+        <ul class="quiz-options">
+            <li class="quiz-option" onclick="answerQuestion(0)">選択肢1</li>
+            <li class="quiz-option" onclick="answerQuestion(1)">選択肢2</li>
+            <li class="quiz-option" onclick="answerQuestion(2)">選択肢3</li>
+            <li class="quiz-option" onclick="answerQuestion(3)">選択肢4</li>
+        </ul>
+    </div>
+
+  <br>
+    <br>
+<div id="quiz-counter"></div>
+
+
+
+
+    <script>
+        let quizzes = [];
+        let currentQuiz = 0;
+        const answers = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                document.getElementById('loading-overlay2').style.display = 'block'; // Show loading screen
+                await loadQuiz();
+            } catch (error) {
+                console.error('Error in start_aaa:', error);
+            }
+        });
+
+
+        
+        async function loadQuiz() {
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbwP1OkJYftnAmAKDbA-R65xBNiiDgHOIHh5_l5HNskh-WVOVLsnDa3ZSTN5ZdZsayCU/exec'); // GASのウェブアプリのURLに置き換えてください
+                quizzes = await response.json();
+
+                if (!Array.isArray(quizzes) || quizzes.length === 0) {
+                    throw new Error('クイズデータが不正です。');
+                }
+
+                showCurrentQuiz();
+            } catch (error) {
+                console.error('データ取得エラー:', error);
+                alert('データ取得エラーが発生しました。');
+            }
+        }
+
+
+
+        function answerQuestion(index) {
+            answers[currentQuiz] = index;
+            currentQuiz++;
+            showCurrentQuiz(); // 次の問題を表示
+        }
+
+
+        function showCurrentQuiz() {
+            document.getElementById('loading-overlay2').style.display = 'none'; // Hide loading screen
+
+            if (currentQuiz < quizzes.length) {
+                const quiz = quizzes[currentQuiz];
+                document.getElementById('question').innerText = quiz.question;
+
+                
+                 // クイズの番号を表示
+        const counterElement = document.getElementById('quiz-counter');
+        counterElement.innerText = `${currentQuiz + 1}/${quizzes.length}`;
+
+
+                const options = document.querySelectorAll('.quiz-option');
+                options.forEach((option, index) => {
+                    option.innerText = quiz.options[index];
+                    option.onclick = () => answerQuestion(index);
+                });
+            } else {
+
+
+                
+                initializeLiff0003(); // 最後の問題が答えられたら自動で送信
+            }
+        }
+
+
+
+
+function initializeLiff0003() {
+
+ document.getElementById('loading-overlay').style.display = 'block'; // Hide loading screen
+       
+      liff.init({ liffId: '1657313823-VWk8Yr5E' })
+        .then(() => {
+          if (liff.isLoggedIn()) {
+            sendIdTokenToGAS_00A3(); // IDトークンをGASに送信する関数を呼び出す
+          } else {
+            liff.login(); // ログインしていない場合はログインページにリダイレクト
+          }
+        })
+        .catch(error => {
+          console.error('LIFFの初期化エラー:', error);
+          alert('LIFFの初期化に失敗しました。');
+        });
+    }
+
+
+        
+  async function sendIdTokenToGAS_00A3() {
+      try {
+          
+showLoading(); // ローディング表示
+          
+        const idToken = await liff.getIDToken();
+          
+　　const adjustedAnswers = answers.map(answer => answer + 1);
+      
+        const response = await fetch('https://script.google.com/macros/s/AKfycbwy8sbG8Y15Q2Pk42ec9fGT4eBzlHBeWqbbI10JUucRBRm4UyhJ_fr9E4TUN8h0agcZxQ/exec', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+ 　　　　　　　body: JSON.stringify({
+                'idToken': idToken,
+                'answers': adjustedAnswers // JSON形式で送信
+            })
+        });
+
+        if (!response.ok) {
+          console.error('HTTPエラー:', response.status);
+          alert('HTTPエラーが発生しました。ステータスコード: ' + response.status);
+          return;
+        }
+
+        const data = await response.json();
+        if (data.status === 'success') {
+            
+          showPopup(data.message);
+
+
+            
+        } else {
+            
+            
+          showPopup('エラー: ' + data.message);
+
+            
+        }
+      } catch (error) {
+        console.error('通信エラー:', error);
+        alert('通信エラーが発生しました。');
+      } finally {
+                hideLoading(); // ローディング表示を非表示
+            }
+    }
+
+
+
+
+
+        function showPopup(message) {
+            document.getElementById('popup-message').innerText = message;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('popup').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('popup').style.display = 'none';
+            
+setTimeout(closePopup, 2000); // 3秒後にポップアップを閉じる          
+ window.location.href = 'index.html';
+            
+        }
+
+function showLoading() {
+    document.getElementById('loading-overlay').style.display = 'flex';
+}
+
+function hideLoading() {
+    document.getElementById('loading-overlay').style.display = 'none';
+}
+
+function showLoading2() {
+    document.getElementById('loading-overlay2').style.display = 'flex';
+}
+
+function hideLoading2() {
+    document.getElementById('loading-overlay2').style.display = 'none';
+}
+
+        
+
+        
+        loadQuiz(); // 最初のクイズをロード
+
+
+
+
+
+        
+    </script>
+</body>
+</html>
