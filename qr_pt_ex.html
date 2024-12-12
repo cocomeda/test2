@@ -322,8 +322,6 @@ margin-left: 1vw;
 <h1>
 	
 </h1>
-
-<h1>ランク:</h1><div id="data-container3">-</div>
 <h1>保有ポイント:</h1><div id="data-container2">now loading...</div>
 
 
@@ -409,10 +407,6 @@ margin-left: 1vw;
 　　　　container2.textContent = ""; // 既存のコンテンツをクリア
         container2.appendChild(paragraph2);
 
-        const paragraph3 = document.createElement("p_rank");
-        paragraph3.textContent = `${jsonData.rank} `;　//rank
-　　　　container3.textContent = ""; // 既存のコンテンツをクリア
-        container3.appendChild(paragraph3);
 
 	    
         document.querySelector("pa").style.border = "1vw double gray";
