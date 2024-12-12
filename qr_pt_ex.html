@@ -16,6 +16,19 @@
 	
 <style>
 
+.points-container {
+    display: flex;
+    align-items: center; /* 縦方向を中央揃え */
+    gap: 10px; /* 要素間の間隔 */
+}
+
+#data-container2 {
+    min-width: 100px; /* 固定幅または最小幅を指定 */
+    text-align: left; /* 左揃え */
+}
+
+	
+
  body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -150,11 +163,10 @@ margin-right: 0vw;
 </h1>
 
 
-<div>
-    <h1 style="display: inline;">保有ポイント:</h1>
-    <div id="data-container2" style="display: inline;">now loading...</div>
+<div class="points-container">
+    <h1>保有ポイント:</h1>
+    <div id="data-container2">now loading...</div>
 </div>
-
 	
 
     <script>
