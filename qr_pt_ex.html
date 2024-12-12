@@ -1,3 +1,7 @@
+
+
+
+
 <!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
@@ -133,7 +137,6 @@ margin-right: 0vw;
 
 
 </style>
-
 <div id="main">
 
 <section>
@@ -142,138 +145,56 @@ margin-right: 0vw;
 	
 <h1 class="topo">C o C o め だ か</h1>
 <h1 class="topo2">無 人 販 売 所</h1>
-	
-
-
-
-	
-
-
-	
 
 </div>
-
-	
-  <div style="width: 100%; border: 0.2vw solid #ccc;">
-   
-  </div>
-	
-<h1>
-	
-</h1>
-
 
 <div class="points-container">
     <h1>保有ポイント:</h1>
     <div id="data-container2">now loading...</div>
 </div>
-	
 
-    <script>
+<!-- ここにフォームを追加 -->
+<div id="input-container">
+    <form id="point-form">
+        <label for="point-input">ポイントを入力してください (上限: <span id="max-score">0</span>):</label><br>
+        <input type="number" id="point-input" name="point" min="1" max="0" required>
+        <button type="submit">送信</button>
+    </form>
+    <p id="form-message" style="color: red; display: none;">入力したポイントは上限を超えています。</p>
+</div>
 
-	    
-        // LIFFの初期化
-        liff.init({ liffId: '1657196041-ALeOLrEa' }, () => {
-            if (liff.isLoggedIn()) {
-                // ユーザーがログインしている場合
-                sendIdTokenToGAS();
-            } else {
-                // ログインが必要な場合、ログインページを表示
-                liff.login();
-            }
-        });
-
-        // IDトークンをGASに送信する関数
-        function sendIdTokenToGAS() {
-            const idToken = liff.getIDToken();
-
-            // ローディング画像表示
-            $('#loading').show();
-
-            // IDトークンをGASに送信
-            $.ajax({
-                url: 'https://script.google.com/macros/s/AKfycbwU-jlTWnEyMNN7WHoD-tQjFyV_7opWSvNSB6n4nDqub7Hr7TDLmwHW3FBgmkfZ2VEfFw/exec',
-                type: 'POST',
-                data: { idToken: idToken },
-                success: function (response) {
-                    // 成功時
-                    console.log(response);
-                    displayData(response);
-                },
-                error: function (error) {
-                    // エラー時
-                   // console.error(error);
-                    //alert('Failed to send ID Token to GAS.');
-                },
-                complete: function () {
-                    // 通信完了時の処理（ローディング画像を非表示にし、コンテンツを表示）
-                    $('#loading').hide();
-                    $('#content').show();
-                }
-            });
-        }
-  
- // メッセージを表示する関数
-    function displayMessage(message) {
-        const messageElement = document.createElement('p');
-        messageElement.textContent = message;
-        document.body.appendChild(messageElement);
-    }
-
-    // 取得したデータをHTMLに表示する関数
+<script>
     function displayData(data) {
         const jsonData = JSON.parse(data);
 
-
-  // const progressBar0 = document.getElementById('progressBar_vertical');
-   // progressBar0.textContent = `あと${jsonData.nextRank} pt `; 
- // progressBar0.style.height = `${jsonData.progress_rate*100}`+'%';
- //progressBar0.style.height = "10"+"vw";
-
-
-
-  // const progressBar = document.getElementById('progressBar');
-   // progressBar.textCont//ent = `${jsonData.score} `; 
- // progressBar.style.width = `${jsonData.progress_rate*100}`+'vw';
- //progressBar.style.height = "10"+"vw";
-
-
-
         const container2 = document.getElementById("data-container2");
-        const container3 = document.getElementById("data-container3");
-        const container4 = document.getElementById("data-container4");
+        container2.textContent = `${jsonData.score}pt`;
 
-        const paragraph2 = document.createElement("p_pt");
-        paragraph2.textContent =`${jsonData.score}pt `;　// pt
-　　　　container2.textContent = ""; // 既存のコンテンツをクリア
-        container2.appendChild(paragraph2);
-
-
-	    
-        document.querySelector("pa").style.border = "1vw double gray";
-	    
- //document.querySelector(".vertical-progress-bar").style.border = "0.2vw solid gray";
-
-
-
-  if (jsonData.rank === "レギュラー") {
-      document.querySelector("pa").style.backgroundColor = "#f5deb3";
-    } else if (jsonData.rank === "シルバー") {
-      document.querySelector("pa").style.backgroundColor = "#f5f5f5";
-    } else if (jsonData.rank === "ゴールド") {
-      document.querySelector("pa").style.backgroundColor = "#f0e68c";
-    } else if (jsonData.rank === "プラチナ") {
-      document.querySelector("pa").style.backgroundColor = "#add8e6";
-    } else if (jsonData.rank === "ダイヤモンド") {
-      document.querySelector("pa").style.backgroundColor = "#1e90ff";
-    } else {
-      // その他の場合のデフォルトの背景色を設定
-      document.querySelector("pa").style.backgroundColor = "#f5f5dc";
+        // フォームの最大値をjsonData.scoreに設定
+        const maxScore = jsonData.score;
+        document.getElementById("max-score").textContent = maxScore;
+        document.getElementById("point-input").max = maxScore;
     }
 
-    }
+    // フォームの送信イベントを処理
+    document.getElementById("point-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const inputField = document.getElementById("point-input");
+        const maxScore = parseInt(inputField.max, 10);
+        const enteredValue = parseInt(inputField.value, 10);
+
+        if (enteredValue > maxScore) {
+            document.getElementById("form-message").style.display = "block";
+        } else {
+            document.getElementById("form-message").style.display = "none";
+            alert(`ポイントが送信されました: ${enteredValue}`);
+            // 必要に応じてサーバーへデータを送信する処理をここに追加
+        }
+    });
+</script>
 
 
-    </script>
+
 </body>
 </html>
