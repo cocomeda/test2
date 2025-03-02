@@ -48,6 +48,10 @@
             font-size: 4.5vw;
         }
 
+
+
+
+
         /* ローディング表示のためのオーバーレイ */
         #loading-overlay {
             display: none;
@@ -75,6 +79,10 @@
             font-weight: bold;
         }
 
+#resultMessage {
+            text-align: center;
+            font-size: 4vw;
+        }
 
       /* モーダルのスタイル */
 #resultModal {
@@ -204,7 +212,7 @@ function sendQRDataToGAS1(qr_data) {
         error: function (error) {
             // エラー時の処理
             console.error(error);
-            showModal('Failed to send QR data to GAS.'); // エラーメッセージをモーダルで表示
+            showModal('エラー：Failed to send QR data.'); // エラーメッセージをモーダルで表示
         }
     });
 }
