@@ -242,7 +242,9 @@ function showModal(message) {
     var resultMessage = document.getElementById("resultMessage");
     var span = document.getElementsByClassName("close")[0];
     
-  // 改行文字 \n を <br> タグに変換message = message.replace(/\n/g, "<br>");
+  // 改行文字 \n を <br> タグに変換
+    
+    message = message.replace(/\n/g, "<br>");
     
     
        resultMessage.innerHTML = message;
