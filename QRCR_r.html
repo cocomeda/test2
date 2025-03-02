@@ -241,7 +241,10 @@ function showModal(message) {
     var modal = document.getElementById("resultModal");
     var resultMessage = document.getElementById("resultMessage");
     var span = document.getElementsByClassName("close")[0];
-
+    
+  // 改行文字 \n を <br> タグに変換
+    message = message.replace(/\n/g, "<br>");
+    
        resultMessage.innerHTML = message;
     modal.style.display = "block";
 
