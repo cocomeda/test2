@@ -242,7 +242,7 @@ function showModal(message) {
     var resultMessage = document.getElementById("resultMessage");
     var span = document.getElementsByClassName("close")[0];
 
-    resultMessage.textContent = message;
+       resultMessage.innerHTML = message;
     modal.style.display = "block";
 
     // モーダルを閉じる処理
