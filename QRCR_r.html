@@ -104,14 +104,17 @@
     border: 1px solid #888;
     width: 85%;
     max-width: 85vw;
-  text-align: center;
+
+            text-align: center;
+            font-size: 4vw;
 }
 
 /* モーダル内のメッセージの文字サイズを大きくする */
 #resultMessage {
-    font-size: 6vw;  /* ここでさらに文字サイズを大きく設定 */
-    font-weight: bold;  /* 文字を太くする */
-    color: #333;  /* 文字の色を変更（必要なら） */
+    position: absolute;
+    top: 50%; /* 画面の縦中央に配置 */
+    left: 50%; /* 画面の横中央に配置 */
+    transform: translate(-50%, -50%); /* 中央に完全に配置するための調整 */
 }
 
         
