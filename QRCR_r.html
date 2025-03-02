@@ -6,10 +6,11 @@
     <title>Code Reader for CoCo medaka5c</title>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
     <style>
-        /* 既存のスタイル */
+     /* 既存のスタイル */
         #overlay {
             display: none;
             position: fixed;
@@ -76,7 +77,7 @@
 
         /* モーダルのスタイル */
         #resultModal {
-            display: none;
+            display: none; /* モーダルをデフォルトで非表示にする */
             position: fixed;
             z-index: 1;
             left: 0;
@@ -84,8 +85,8 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgb(0,0,0);
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
         }
         .modal-content {
             background-color: #fefefe;
@@ -110,130 +111,114 @@
 </head>
 <body>
 
-    <div id="overlay" onclick="closePopup()"></div>
-    <div id="popup">
-        <span id="close-btn" onclick="closePopup()">×</span>
-        <div id="popup-message"></div>
+    <!-- モーダルの表示 -->
+    <div id="resultModal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="resultMessage"></div>
+        </div>
     </div>
-   
+
     <!-- ローディング表示のためのオーバーレイ -->
     <div id="loading-overlay">
         <div id="loading-message">読み込み中…</div>
     </div>
 
-    <script>
-        // LIFFの初期化
-        liff.init({ liffId: '1657196041-ALeOLrEa' }).then(() => {
-            if (!liff.isLoggedIn()) {
-                // ログインが必要な場合、ログインページを表示
-                liff.login();
+<script>
+// LIFFの初期化
+liff.init({ liffId: '1657196041-ALeOLrEa' }).then(() => {
+    if (!liff.isLoggedIn()) {
+        // ログインが必要な場合、ログインページを表示
+        liff.login();
+    } else {
+        // ユーザーがログインしている場合、直ちにQRコードリーダーを開く
+        openQRCodeReader1();
+    }
+}).catch((err) => {
+    console.error('LIFFの初期化に失敗しました', err);
+});
+
+// QRコードリーダーを開く関数
+function openQRCodeReader1() {
+    liff.scanCode()
+        .then(result => {
+            if (result.value) {
+                // QRコードのスキャンが成功した場合
+                console.log("QRコードスキャン結果:", result.value);
+                let qr_data = result.value; // QRコードのデータ
+                sendQRDataToGAS1(qr_data); // Google Apps ScriptにQRコードデータを送信する
             } else {
-                // ユーザーがログインしている場合、直ちにQRコードリーダーを開く
-                openQRCodeReader1();
+                console.error('No QR code is detected');
             }
-        }).catch((err) => {
-            console.error('LIFFの初期化に失敗しました', err);
+        })
+        .catch(err => {
+            console.error('Error scanning QR code:', err);
+        })
+        .finally(() => {
+            // QRコードリーダーを閉じる
+           // liff.closeWindow();
         });
+}
 
-        // QRコードリーダーを開く関数
-        function openQRCodeReader1() {
-            liff.scanCode()
-                .then(result => {
-                    if (result.value) {
-                        // QRコードのスキャンが成功した場合
-                        console.log("QRコードスキャン結果:", result.value);
-                        let qr_data = result.value; // QRコードのデータ
-                        sendQRDataToGAS1(qr_data); // Google Apps ScriptにQRコードデータを送信する
-                    } else {
-                        console.error('No QR code is detected');
-                    }
-                })
-                .catch(err => {
-                    console.error('Error scanning QR code:', err);
-                })
-                .finally(() => {
-                    // QRコードリーダーを閉じる
-                   // liff.closeWindow();
-                });
-        }
+// QRコードデータをGoogle Apps Scriptに送信する関数
+function sendQRDataToGAS1(qr_data) {
 
-        // QRコードデータをGoogle Apps Scriptに送信する関数
-        function sendQRDataToGAS1(qr_data) {
+    showLoading(); // ローディング表示
+    
+    const idToken = liff.getIDToken();
 
-            showLoading(); // ローディング表示
-            
-            const idToken = liff.getIDToken();
-
-            // QRコードデータとIDトークンをGASに送信
-            $.ajax({
-                url: 'https://script.google.com/macros/s/AKfycbxXroSJ8bGOuHFiDfYlIScabyB0spwyrkfMVriAW66DhOFxkXSYOswRsX1c_R9HnDlt/exec',    
-                type: 'POST',
-                data: { idToken: idToken, qr_data: qr_data },
-                success: function (response) {
-                    try {
-                        // レスポンスオブジェクトからメッセージを抽出
-                       var message = response.message;
-                        hideLoading();
-                        // モーダルで表示
-                        showModal(message);
-                    } catch (error) {
-                        console.error('Response parsing error:', error);
-                        showModal('An error occurred while parsing the response.');
-                    }
-                },
-                error: function (error) {
-                    // エラー時の処理
-                    console.error(error);
-                    showModal('Failed to send QR data to GAS.');
-                }
-            });
-        }
-
-        // モーダルを表示する関数
-        function showModal(message) {
-            var modal = document.getElementById("resultModal");
-            var resultMessage = document.getElementById("resultMessage");
-            var span = document.getElementsByClassName("close")[0];
-
-            resultMessage.textContent = message;
-            modal.style.display = "block";
-
-            // モーダルを閉じる処理
-            span.onclick = function() {
-                modal.style.display = "none";
-                window.close(); // ウィンドウを閉じる
+    // QRコードデータとIDトークンをGASに送信
+    $.ajax({
+        url: 'https://script.google.com/macros/s/AKfycbxXroSJ8bGOuHFiDfYlIScabyB0spwyrkfMVriAW66DhOFxkXSYOswRsX1c_R9HnDlt/exec',    
+        type: 'POST',
+        data: { idToken: idToken, qr_data: qr_data },
+        success: function (response) {
+            try {
+                // レスポンスオブジェクトからメッセージを抽出
+               var message = response.message;
+                hideLoading();
+                // モーダルで表示
+                showModal(message);
+            } catch (error) {
+                console.error('Response parsing error:', error);
+                showModal('An error occurred while parsing the response.');
             }
-
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                    window.close(); // ウィンドウを閉じる
-                }
-            }
+        },
+        error: function (error) {
+            // エラー時の処理
+            console.error(error);
+            showModal('Failed to send QR data to GAS.'); // エラーメッセージをモーダルで表示
         }
+    });
+}
 
-        function showPopup(message) {
-            document.getElementById('popup-message').innerText = message;
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('popup').style.display = 'block';
-        }
+// モーダルを表示する関数
+function showModal(message) {
+    var modal = document.getElementById("resultModal");
+    var resultMessage = document.getElementById("resultMessage");
+    var span = document.getElementsByClassName("close")[0];
 
-        function closePopup() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('popup').style.display = 'none';
-            
-            setTimeout(closePopup, 500); // 0.5秒後にポップアップを閉じる          
-            window.close(); // ウィンドウを閉じる
-        }
+    resultMessage.textContent = message;
+    modal.style.display = "block";
 
-        function showLoading() {
-            document.getElementById('loading-overlay').style.display = 'flex';
+    // モーダルを閉じる処理
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
         }
+    }
+}
 
-        function hideLoading() {
-            document.getElementById('loading-overlay').style.display = 'none';
-        }
-    </script>
+function showLoading() {
+    document.getElementById('loading-overlay').style.display = 'flex';
+}
+
+function hideLoading() {
+    document.getElementById('loading-overlay').style.display = 'none';
+}
+</script>
 </body>
 </html>
-
