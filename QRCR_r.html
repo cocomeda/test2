@@ -155,13 +155,7 @@
 </head>
 <body>
 
-<!-- ネットワークエラーモーダル -->
-<div id="networkErrorModal">
-    <div class="modal-content">
-        <span class="close-network">&times;</span>
-        <div id="networkErrorMessage">ネットワーク接続がありません。</div>
-    </div>
-</div>
+
 
     
     <!-- モーダルの表示 -->
@@ -179,44 +173,7 @@
 
 <script>
 
-document.addEventListener("DOMContentLoaded", function() {
-    // ネットワーク接続がない場合はモーダルを表示
-    if (!navigator.onLine) {
-        showNetworkErrorModal();
-    }
 
-    // オフラインになったらモーダルを表示
-    window.addEventListener("offline", function() {
-        showNetworkErrorModal();
-    });
-
-    // オンラインに戻ったらモーダルを非表示
-    window.addEventListener("online", function() {
-        hideNetworkErrorModal();
-    });
-});
-
-function showNetworkErrorModal() {
-    var modal = document.getElementById("networkErrorModal");
-    var closeBtn = document.getElementsByClassName("close-network")[0];
-
-    modal.style.display = "block";
-
-    closeBtn.onclick = function() {
-        modal.style.display = "none";
-    };
-
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    };
-}
-
-function hideNetworkErrorModal() {
-    var modal = document.getElementById("networkErrorModal");
-    modal.style.display = "none";
-}    
 
 
 
