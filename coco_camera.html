@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>無人販売所 売り場の様子</title>
+  <style>
+    body {
+      font-family: "Yu Gothic", sans-serif;
+      background-color: #f5f5f0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      background-color: #88c999;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    #container {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    #loading {
+      font-size: 1.2rem;
+      color: #555;
+      margin-top: 20px;
+    }
+
+    #latestImg {
+      display: none;
+      width: 90vw;
+      max-width: 600px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      margin-top: 20px;
+    }
+
+    footer {
+      margin-top: 50px;
+      font-size: 0.9rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌿 無人販売所の今の様子 🐟</h1>
+  </header>
+
+  <div id="container">
+    <div id="loading">画像を読み込み中です…</div>
+    <img id="latestImg" alt="現在の売り場の様子">
+  </div>
+
+  <footer>
+    ※ 画像は１時間に数回自動更新される設定ですが、更新が失敗することもあるのでご了承ください。
+  </footer>
+
+  <script>
+    fetch('https://script.google.com/macros/s/AKfycbxv35po_N2YFzg6hAg3yXhh-0SACJj7SB0emYRk0pQyrRmbfYbQtjE0F1Q3lreTJxfR-g/exec')
+      .then(res => res.json())
+      .then(data => {
+        const img = document.getElementById("latestImg");
+        img.src = data.url;
+
+        img.onload = () => {
+          document.getElementById("loading").style.display = "none";
+          img.style.display = "block";
+        };
+
+        img.onerror = () => {
+          document.getElementById("loading").textContent = "画像の読み込みに失敗しました。";
+        };
+      })
+      .catch(err => {
+        document.getElementById("loading").textContent = "画像の取得に失敗しました。";
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
