@@ -58,38 +58,46 @@
 </head>
 <body>
   <header>
-    <h1>🌿 無人販売所の様子 🐟</h1>
+    <h1>🌿 無人販売所の今の様子 🐟</h1>
   </header>
 
-  <div id="container">
-    <div id="loading">画像を読み込み中です…</div>
-    <img id="latestImg" alt="現在の売り場の様子">
-  </div>
+<div id="container">
+  <div id="loading">画像を読み込み中です…</div>
+  <img id="latestImg" alt="現在の売り場の様子">
+ <p id="filename" style="margin-top: 20px; font-weight: bold;"></p>  <!-- ファイル名と更新日時 -->
+
+</div>
 
   <footer>
-    ※ 画像は１時間に数回自動更新される設定ですが、更新が失敗することもあるのでご了承ください。
+    ※ 通信や電源などの問題で更新が失敗することもあるのでご了承ください。
   </footer>
 
   <script>
-    fetch('https://script.google.com/macros/s/AKfycbxv35po_N2YFzg6hAg3yXhh-0SACJj7SB0emYRk0pQyrRmbfYbQtjE0F1Q3lreTJxfR-g/exec')
-      .then(res => res.json())
-      .then(data => {
-        const img = document.getElementById("latestImg");
-        img.src = data.url;
+    fetch('https://script.google.com/macros/s/AKfycbwyC7ipg9UH3CesTS758ISwE0Q2tuLLIzq_PKneq2CLGm4IO5rbzFCQje3oITtam0A66g/exec')
+  .then(res => res.json())
+  .then(data => {
+    const img = document.getElementById("latestImg");
+    img.src = data.url;
 
-        img.onload = () => {
-          document.getElementById("loading").style.display = "none";
-          img.style.display = "block";
-        };
+    // ファイル名と日付を表示
+    const filenameDisplay = document.getElementById("filename");
+    filenameDisplay.textContent = `(更新日時: ${data.formattedDate})`;
 
-        img.onerror = () => {
-          document.getElementById("loading").textContent = "画像の読み込みに失敗しました。";
-        };
-      })
-      .catch(err => {
-        document.getElementById("loading").textContent = "画像の取得に失敗しました。";
-        console.error(err);
-      });
+    img.onload = () => {
+      document.getElementById("loading").style.display = "none";
+      img.style.display = "block";
+    };
+
+    img.onerror = () => {
+      document.getElementById("loading").textContent = "画像の読み込みに失敗しました。";
+    };
+  })
+  .catch(err => {
+    document.getElementById("loading").textContent = "画像の取得に失敗しました。";
+    console.error(err);
+  });
   </script>
 </body>
 </html>
+
+
