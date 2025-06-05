@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LIFF フォーム</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h2>ご意見フォーム</h2>
+  <textarea id="userInput" placeholder="5文字以上で入力してください" rows="5" cols="40"></textarea><br>
+  <button id="submitBtn">送信</button>
+
+  <p id="message"></p>
+
+  <script>
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx6YCl4FzWLr6w51VIoqXp8HnBGxgiiLCH_a84YJr-PO9CfjvxgSVHGn8q83DL63hT4/exec';
+
+    async function main() {
+      await liff.init({ liffId: '1657196041-ALeOLrEa' });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      }
+
+      document.getElementById("submitBtn").addEventListener("click", async () => {
+        const content = document.getElementById("userInput").value.trim();
+        const messageEl = document.getElementById("message");
+        
+        if (content.length < 5) {
+          messageEl.textContent = "5文字以上で入力してください。";
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        const username = profile.displayName;
+
+        fetch(GAS_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            content: content
+          }),
+        })
+        .then(res => res.text())
+        .then(result => {
+          messageEl.textContent = "送信しました。ありがとうございました！";
+          document.getElementById("userInput").value = "";
+        })
+        .catch(err => {
+          messageEl.textContent = "送信に失敗しました。";
+          console.error(err);
+        });
+      });
+    }
+
+    main();
+  </script>
+</body>
+</html>
