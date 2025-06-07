@@ -1,60 +1,176 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>LIFF フォーム</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
-<body>
-  <h2>ご意見フォーム</h2>
-  <textarea id="userInput" placeholder="5文字以上で入力してください" rows="5" cols="40"></textarea><br>
-  <button id="submitBtn">送信</button>
-
-  <p id="message"></p>
-
-  <script>
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycby_wqAVmxVBEVNvZqbTqr1KvYnX-A_SfzoeZ_ZCwXTfeZE8TwEMlIzfigAWEYVPNlAz/exec';
-
-    async function main() {
-      await liff.init({ liffId: '1657196041-ALeOLrEa' });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-      }
-
-      document.getElementById("submitBtn").addEventListener("click", async () => {
-        const content = document.getElementById("userInput").value.trim();
-        const messageEl = document.getElementById("message");
-        
-        if (content.length < 5) {
-          messageEl.textContent = "5文字以上で入力してください。";
-          return;
+    <meta charset="UTF-8">
+    <title>ポイント表示</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
         }
 
-        const profile = await liff.getProfile();
-        const username = profile.displayName;
+        #loading {
+            display: none;
+        }
 
-        fetch(GAS_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: username,
-            content: content
-          }),
-        })
-        .then(res => res.text())
-        .then(result => {
-          messageEl.textContent = "送信しました。ありがとうございました！";
-          document.getElementById("userInput").value = "";
-        })
-        .catch(err => {
-          messageEl.textContent = "送信に失敗しました。";
-          console.error(err);
+        #content {
+            display: none;
+        }
+
+        .progress-container {
+            height: 50vw;
+            width: 10vw;
+            border: 1vw double gray;
+            margin: auto;
+            margin-top: 3vw;
+            position: relative;
+            background-color: #f5f5f5;
+        }
+
+        .vertical-progress-bar {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: #4caf50;
+            transition: height 0.5s ease;
+            border: 0.2vw solid gray;
+        }
+
+        #data-container2,
+        #data-container3 {
+            margin-top: 3vw;
+            font-size: 5vw;
+        }
+
+        form {
+            margin-top: 5vw;
+        }
+
+        input[type="text"] {
+            padding: 1vw;
+            font-size: 4vw;
+            width: 60vw;
+        }
+
+        input[type="submit"] {
+            font-size: 4vw;
+            padding: 1vw 2vw;
+        }
+
+        pa {
+            display: block;
+            margin: 2vw auto;
+            padding: 2vw;
+            width: 60vw;
+            font-size: 4vw;
+            border-radius: 1vw;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading">読み込み中...</div>
+
+    <div id="content">
+        <div class="progress-container">
+            <div id="progressBar_vertical" class="vertical-progress-bar"></div>
+        </div>
+
+        <pa id="rankMessage">現在のランク:</pa>
+        <div id="data-container2"></div> <!-- スコア表示 -->
+        <div id="data-container3"></div> <!-- ランク表示 -->
+
+        <form id="form1">
+            <input type="text" name="serialcode" placeholder="シリアルコードを入力">
+            <input type="submit" value="送信">
+        </form>
+    </div>
+
+    <script>
+        // LIFFの初期化
+        liff.init({ liffId: '1657196041-ALeOLrEa' }, () => {
+            if (liff.isLoggedIn()) {
+                sendIdTokenToGAS();
+            } else {
+                liff.login();
+            }
         });
-      });
-    }
 
-    main();
-  </script>
+        // IDトークンをGASに送信する関数
+        function sendIdTokenToGAS() {
+            const idToken = liff.getIDToken();
+            $('#loading').show();
+
+            $.ajax({
+                url: 'https://script.google.com/macros/s/AKfycbz4I7jwbEU7UFqtoFQnCzVqKtG5xA9dBUw0s-jR8aBxbZ5LzIF8ISLXU7czUhVPYTBnjQ/exec',
+                type: 'POST',
+                data: { idToken: idToken },
+                success: function (response) {
+                    console.log(response);
+                    displayData(response);
+                },
+                error: function (error) {
+                    console.error(error);
+                    alert('Failed to send ID Token to GAS.');
+                },
+                complete: function () {
+                    $('#loading').hide();
+                    $('#content').show();
+                }
+            });
+        }
+
+        // データ表示関数
+        function displayData(data) {
+            const jsonData = JSON.parse(data);
+
+            const progressBar = document.getElementById('progressBar_vertical');
+            progressBar.style.height = `${jsonData.progress_rate * 100}%`;
+
+            const container2 = document.getElementById("data-container2");
+            const container3 = document.getElementById("data-container3");
+
+            container2.textContent = `${jsonData.score} ℗`;
+            container3.textContent = `${jsonData.rank}`;
+
+            const rankMessage = document.getElementById("rankMessage");
+
+            // ランクに応じた背景色
+            const rankColors = {
+                "レギュラー": "#f5deb3",
+                "シルバー": "#f5f5f5",
+                "ゴールド": "#f0e68c",
+                "プラチナ": "#add8e6",
+                "ダイヤモンド": "#1e90ff"
+            };
+
+            rankMessage.style.backgroundColor = rankColors[jsonData.rank] || "#f5f5dc";
+        }
+
+        // フォーム送信時の処理
+        $(function () {
+            $('#form1').submit(function () {
+                const s_code = $('input[name="serialcode"]').val();
+                const msg = ["code:" + s_code];
+                sendText(String(msg));
+                return false;
+            });
+        });
+
+        // LINEメッセージ送信
+        function sendText(text) {
+            liff.sendMessages([{
+                'type': 'text',
+                'text': text
+            }]).then(function () {
+                liff.closeWindow();
+            }).catch(function (error) {
+                alert('Failed to send message: ' + error);
+            });
+        }
+    </script>
 </body>
 </html>
+
