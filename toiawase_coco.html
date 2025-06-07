@@ -61,7 +61,7 @@
       $('#loading').show();
       $('#form-container').hide();
 
-      const serialCode = $('input[name="serialcode"]').val();
+      const serialCode = $('input[name="content"]').val();
 
       const idToken = liff.getIDToken();
 
@@ -70,7 +70,7 @@
         type: 'POST',
         data: {
           idToken: idToken,
-          serialcode: serialCode
+          content: content
         },
         success: function (response) {
           alert('送信が完了しました');
