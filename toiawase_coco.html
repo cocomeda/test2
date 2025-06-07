@@ -41,7 +41,7 @@
 
   <div id="form-container">
     <form id="form1">
-      <input type="text" name="content" placeholder="問い合わせ内容を入力" required>
+      <input type="text" name="content1" placeholder="問い合わせ内容を入力" required>
       <br>
       <input type="submit" value="送信">
     </form>
@@ -61,7 +61,7 @@
       $('#loading').show();
       $('#form-container').hide();
 
-      const serialCode = $('input[name="content"]').val();
+      const serialCode = $('input[name="content1"]').val();
 
       const idToken = liff.getIDToken();
 
@@ -70,7 +70,7 @@
         type: 'POST',
         data: {
           idToken: idToken,
-          content: content
+          content: content1
         },
         success: function (response) {
           alert('送信が完了しました');
