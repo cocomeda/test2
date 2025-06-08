@@ -3,7 +3,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>シリアルコード送信</title>
+  <title>問い合わせフォーム</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
@@ -12,22 +12,18 @@
       text-align: center;
       padding-top: 20vw;
     }
-
     #loading {
       display: none;
       font-size: 5vw;
     }
-
     form {
       font-size: 4vw;
     }
-
     input[type="text"] {
       padding: 1vw;
       font-size: 4vw;
       width: 60vw;
     }
-
     input[type="submit"] {
       font-size: 4vw;
       padding: 1vw 3vw;
@@ -40,70 +36,58 @@
   <div id="loading">送信中...</div>
 
   <div id="form-container">
-<form id="form1">
-  <input type="text" id="inputText" placeholder="内容を入力">
-  <button type="submit">送信</button>
-</form>
+    <form id="form1">
+      <input type="text" id="inputText" placeholder="問い合わせ内容を入力" required>
+      <br>
+      <input type="submit" value="送信">
+    </form>
   </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
   <script>
-liff.init({ liffId: '1657196041-ALeOLrEa' }).then(() => { 
-    if (!liff.isLoggedIn()) {
+    liff.init({ liffId: '1657196041-ALeOLrEa' }).then(() => {
+      if (!liff.isLoggedIn()) {
         liff.login();
-    }
-}).catch((err) => {
-    console.error('LIFF初期化失敗:', err);
-});
+      }
+    }).catch((err) => {
+      console.error('LIFF初期化失敗:', err);
+      alert('LIFFの初期化に失敗しました');
+    });
 
-// フォーム送信時の処理
-document.getElementById('form1').addEventListener('submit', async function (e) {
-    e.preventDefault();
+    document.getElementById('form1').addEventListener('submit', async function (e) {
+      e.preventDefault();
 
-    const content = document.getElementById('inputText').value;
-    const idToken = liff.getIDToken();
+      $('#loading').show();
+      $('#form-container').hide();
 
-    if (!idToken) {
-        alert('IDトークン取得失敗');
+      const content = document.getElementById('inputText').value;
+      const idToken = liff.getIDToken();
+
+      if (!idToken) {
+        alert('IDトークンの取得に失敗しました');
+        $('#loading').hide();
+        $('#form-container').show();
         return;
-    }
+      }
 
-    // データ送信
-    $.ajax({
+      $.ajax({
         url: 'https://script.google.com/macros/s/AKfycbzhMau5pYzsKxKgLlbgV-MiaJy45AYG5SNTR3gNa48Kge4ySJcQsGejFlFcOPPSRaVU/exec',
         type: 'POST',
         data: {
-            idToken: idToken,
-            content: content
+          idToken: idToken,
+          content: content
         },
         success: function (response) {
-            console.log('送信成功:', response);
-            alert('送信が完了しました');
-            liff.closeWindow();
+          alert('送信が完了しました');
+          liff.closeWindow();
         },
         error: function (err) {
-            console.error('送信失敗:', err);
-            alert('送信に失敗しました');
+          console.error('送信エラー:', err);
+          alert('送信に失敗しました');
+          $('#loading').hide();
+          $('#form-container').show();
         }
+      });
     });
-});
   </script>
 
 </body>
