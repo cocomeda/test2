@@ -40,48 +40,69 @@
   <div id="loading">送信中...</div>
 
   <div id="form-container">
-    <form id="form1">
-      <input type="text" name="content1" placeholder="問い合わせ内容を入力" required>
-      <br>
-      <input type="submit" value="送信">
-    </form>
+<form id="form1">
+  <input type="text" id="inputText" placeholder="内容を入力">
+  <button type="submit">送信</button>
+</form>
   </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
   <script>
-// LIFF初期化
-liff.init({ liffId: '1657196041-ALeOLrEa' }, () => {
-  if (!liff.isLoggedIn()) {
-    liff.login();
-  }
+liff.init({ liffId: '1657196041-ALeOLrEa' }).then(() => { 
+    if (!liff.isLoggedIn()) {
+        liff.login();
+    }
+}).catch((err) => {
+    console.error('LIFF初期化失敗:', err);
 });
 
-// フォーム送信時にIDトークンとシリアルコードをGASに送信
-$('#form1').submit(async function (e) {
-  e.preventDefault();
-  $('#loading').show();
-  $('#form-container').hide();
+// フォーム送信時の処理
+document.getElementById('form1').addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-  const content = $('input[name="content1"]').val();
-  const idToken = liff.getIDToken();
+    const content = document.getElementById('inputText').value;
+    const idToken = liff.getIDToken();
 
-  $.ajax({
-    url: 'https://script.google.com/macros/s/AKfycbw1HP0ZAThaiqEfAyq8DBnl5QiE14cOOvZTagylXPyRkwI6LyP7ppIoLsdqLBNJKsmh/exec',
-    type: 'POST',
-    data: JSON.stringify({
-      idToken: idToken,
-      content: content
-    }),
-    contentType: 'application/json',
-    success: function (response) {
-      alert('送信が完了しました');
-      liff.closeWindow();
-    },
-    error: function (error) {
-      alert('送信に失敗しました・: ' + JSON.stringify(error));
-      $('#form-container').show();
-      $('#loading').hide();
+    if (!idToken) {
+        alert('IDトークン取得失敗');
+        return;
     }
-  });
+
+    // データ送信
+    $.ajax({
+        url: 'https://script.google.com/macros/s/AKfycbyXjh3qP-7LaGnEW4zYNnch2hpZngIZ_5Pcv8smhBFeeTfcfUfsFe8Bc6YQIxPOQSu5/exec',
+        type: 'POST',
+        data: {
+            idToken: idToken,
+            content: content
+        },
+        success: function (response) {
+            console.log('送信成功:', response);
+            alert('送信が完了しました');
+            liff.closeWindow();
+        },
+        error: function (err) {
+            console.error('送信失敗:', err);
+            alert('送信に失敗しました');
+        }
+    });
 });
   </script>
 
