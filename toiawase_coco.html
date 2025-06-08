@@ -48,41 +48,41 @@
   </div>
 
   <script>
-    // LIFF初期化
-    liff.init({ liffId: '1657196041-ALeOLrEa' }, () => {
-      if (!liff.isLoggedIn()) {
-        liff.login();
-      }
-    });
+// LIFF初期化
+liff.init({ liffId: '1657196041-ALeOLrEa' }, () => {
+  if (!liff.isLoggedIn()) {
+    liff.login();
+  }
+});
 
-    // フォーム送信時にIDトークンとシリアルコードをGASに送信
-    $('#form1').submit(function (e) {
-      e.preventDefault();
-      $('#loading').show();
-      $('#form-container').hide();
+// フォーム送信時にIDトークンとシリアルコードをGASに送信
+$('#form1').submit(async function (e) {
+  e.preventDefault();
+  $('#loading').show();
+  $('#form-container').hide();
 
-      const content = $('input[name="content1"]').val();
+  const content = $('input[name="content1"]').val();
+  const idToken = liff.getIDToken();
 
-      const idToken = liff.getIDToken();
-
-      $.ajax({
-        url: 'https://script.google.com/macros/s/AKfycbyRwc1Mmx6MQzzsAK76WzjeiTO2tykuardW57jQPrKLOTsTaV6zXqBDXhNu7rT7LoJr/exec',
-        type: 'POST',
-        data: {
-          idToken: idToken,
-          content: content
-        },
-        success: function (response) {
-          alert('送信が完了しました');
-          liff.closeWindow();
-        },
-        error: function (error) {
-          alert('送信に失敗しました: ' + error);
-          $('#form-container').show();
-          $('#loading').hide();
-        }
-      });
-    });
+  $.ajax({
+    url: 'https://script.google.com/macros/s/AKfycbyRwc1Mmx6MQzzsAK76WzjeiTO2tykuardW57jQPrKLOTsTaV6zXqBDXhNu7rT7LoJr/exec',
+    type: 'POST',
+    data: JSON.stringify({
+      idToken: idToken,
+      content: content
+    }),
+    contentType: 'application/json',
+    success: function (response) {
+      alert('送信が完了しました');
+      liff.closeWindow();
+    },
+    error: function (error) {
+      alert('送信に失敗しました: ' + JSON.stringify(error));
+      $('#form-container').show();
+      $('#loading').hide();
+    }
+  });
+});
   </script>
 
 </body>
