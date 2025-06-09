@@ -428,6 +428,26 @@ margin-left: 1vw;
 
 	
 
+
+<div class="slider-container" id="slider">
+  <div class="arrow left" onclick="prevSlide()" id="leftArrow">←</div>
+  <div class="arrow right" onclick="nextSlide()" id="rightArrow">→</div>
+  <div class="slides" id="slideTrack">
+    <div class="slide">これは1番目の文章です。</div>
+    <div class="slide">これは2番目の文章です。</div>
+    <div class="slide">これは3番目の文章です。</div>
+    <div class="slide">これは4番目の文章です。</div>
+    <div class="slide">これは5番目の文章です。</div>
+  </div>
+</div>
+
+<div class="counter" id="counterDisplay">1/5</div>
+
+
+
+
+
+	
 <br>
 
 	
@@ -608,6 +628,54 @@ honbun"></h1>
     }
 
 
+
+
+
+
+
+  const slideTrack = document.getElementById("slideTrack");
+  const slider = document.getElementById("slider");
+  const leftArrow = document.getElementById("leftArrow");
+  const rightArrow = document.getElementById("rightArrow");
+  const counterDisplay = document.getElementById("counterDisplay");
+
+  let currentIndex = 0;
+  const totalSlides = slideTrack.children.length;
+
+  function updateSlide() {
+    const slideWidth = slider.offsetWidth;
+    slideTrack.style.transform = `translateX(-${slideWidth * currentIndex}px)`;
+
+    // 矢印の無効化
+    leftArrow.classList.toggle("disabled", currentIndex === 0);
+    rightArrow.classList.toggle("disabled", currentIndex === totalSlides - 1);
+
+    // カウンターの表示更新
+    counterDisplay.textContent = `${currentIndex + 1}/${totalSlides}`;
+  }
+
+  function nextSlide() {
+    if (currentIndex < totalSlides - 1) {
+      currentIndex++;
+      updateSlide();
+    }
+  }
+
+  function prevSlide() {
+    if (currentIndex > 0) {
+      currentIndex--;
+      updateSlide();
+    }
+  }
+
+  window.addEventListener('resize', updateSlide);
+  updateSlide(); // 初期表示
+
+
+
+
+
+	    
     </script>
 </body>
 </html>
