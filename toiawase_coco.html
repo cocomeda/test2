@@ -8,6 +8,7 @@
     input[type="submit"] { padding: 10px 20px; }
     #response { margin-top: 20px; }
   </style>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script> <!-- LIFF SDK -->
 </head>
 <body>
   <h2>文字を送信</h2>
@@ -17,49 +18,62 @@
   </form>
   <div id="response"></div>
 
-
-  
 <script>
-let userId = "";
-let displayName = "";
-
-// LIFF 初期化とプロフィール取得
-liff.init({ liffId: "1657196041-ALeOLrEa" }).then(() => {
-  return liff.getProfile();
-}).then(profile => {
-  displayName = profile.displayName;
-  userId = profile.userId;
-}).catch(err => {
-  document.getElementById('response').innerText = "LIFFログインに失敗しました";
-});
-
-// フォーム送信処理
-document.getElementById('myForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-
-  const inputText = document.getElementById('inputText').value;
   const gasUrl = "https://script.google.com/macros/s/AKfycbyUzD_HReOlxBtfuSMmbQZz7MNp9UlUxjc8EdleM9QQR4OYPL6qZ6FFPLVbEEpZij1sig/exec";
 
-  const formData = new URLSearchParams();
-  formData.append('inputText', inputText);
-  formData.append('userId', userId);
-  formData.append('displayName', displayName);
+  let userId = "";
+  let displayName = "";
 
-  fetch(gasUrl, {
-    method: 'POST',
-    body: formData,
-  })
-  .then(response => response.json())
-  .then(data => {
-    document.getElementById('response').innerText = data.message;
-    document.getElementById('myForm').reset();
-  })
-  .catch(error => {
-    document.getElementById('response').innerText = 'エラーが発生しました: ' + error.message;
+  // LIFF初期化とプロフィール取得をasync関数でまとめる
+  async function initLiffAndProfile() {
+    try {
+      await liff.init({ liffId: "1657196041-ALeOLrEa" });
+      const profile = await liff.getProfile();
+      userId = profile.userId;
+      displayName = profile.displayName;
+      console.log("LIFF初期化成功:", displayName, userId);
+    } catch (err) {
+      document.getElementById('response').innerText = "LIFFログインに失敗しました: " + err.message;
+    }
+  }
+
+  initLiffAndProfile();
+
+  document.getElementById('myForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    if (!userId || !displayName) {
+      document.getElementById('response').innerText = "ユーザー情報の取得中または失敗しています。時間を置いて再度試してください。";
+      return;
+    }
+
+    const inputText = document.getElementById('inputText').value;
+
+    // URLSearchParamsで送る例
+    const formData = new URLSearchParams();
+    formData.append('inputText', inputText);
+    formData.append('userId', userId);
+    formData.append('displayName', displayName);
+
+    try {
+      const response = await fetch(gasUrl, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      document.getElementById('response').innerText = data.message || "送信完了";
+      document.getElementById('myForm').reset();
+    } catch (error) {
+      document.getElementById('response').innerText = "エラーが発生しました: " + error.message;
+    }
   });
-});
 </script>
 </body>
 </html>
+
+
+
+
+
 
 
