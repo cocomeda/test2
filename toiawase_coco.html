@@ -51,56 +51,58 @@
 
   <div id="response"></div>
 
-  <script>
-    let userId = "";
-    let displayName = "";
+<script>
+  const gasUrl = "https://script.google.com/macros/s/AKfycbyUzD_HReOlxBtfuSMmbQZz7MNp9UlUxjc8EdleM9QQR4OYPL6qZ6FFPLVbEEpZij1sig/exec";
 
-    // LIFF 初期化とプロフィール取得
-    liff.init({ liffId: "1657196041-ALeOLrEa" }).then(() => {
-      return liff.getProfile();
-    }).then(profile => {
-      displayName = profile.displayName;
+  let userId = "";
+  let displayName = "";
+
+  // LIFF初期化とプロフィール取得をasync関数でまとめる
+  async function initLiffAndProfile() {
+    try {
+      await liff.init({ liffId: "1657196041-ALeOLrEa" });
+      const profile = await liff.getProfile();
       userId = profile.userId;
-    }).catch(err => {
-      document.getElementById('response').innerText = "LIFFログインに失敗しました";
-    });
+      displayName = profile.displayName;
+      console.log("LIFF初期化成功:", displayName, userId);
+    } catch (err) {
+      document.getElementById('response').innerText = "LIFFログインに失敗しました: " + err.message;
+    }
+  }
 
-    // フォーム送信処理
-    document.getElementById('myForm').addEventListener('submit', function(e) {
-      e.preventDefault();
+  initLiffAndProfile();
 
-      const inputText = document.getElementById('inputText').value.trim();
-      if (!inputText) return;
+  document.getElementById('myForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-      const gasUrl = "https://script.google.com/macros/s/AKfycbyUzD_HReOlxBtfuSMmbQZz7MNp9UlUxjc8EdleM9QQR4OYPL6qZ6FFPLVbEEpZij1sig/exec";
+    if (!userId || !displayName) {
+      document.getElementById('response').innerText = "ユーザー情報の取得中または失敗しています。時間を置いて再度試してください。";
+      return;
+    }
 
-      const formData = new URLSearchParams();
-      formData.append('inputText', inputText);
-      formData.append('userId', userId);
-      formData.append('displayName', displayName);
+    const inputText = document.getElementById('inputText').value;
 
-      fetch(gasUrl, {
+    // URLSearchParamsで送る例
+    const formData = new URLSearchParams();
+    formData.append('inputText', inputText);
+    formData.append('userId', userId);
+    formData.append('displayName', displayName);
+
+    try {
+      const response = await fetch(gasUrl, {
         method: 'POST',
         body: formData,
-      })
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById('myForm').style.display = "none";
-        const responseEl = document.getElementById('response');
-        responseEl.innerText = "お問い合わせありがとうございました。";
-        setTimeout(() => {
-          liff.closeWindow();
-        }, 2000);
-      })
-      .catch(error => {
-        document.getElementById('response').innerText = 'エラーが発生しました: ' + error.message;
       });
-    });
-  </script>
+      const data = await response.json();
+      document.getElementById('response').innerText = data.message || "送信完了";
+      document.getElementById('myForm').reset();
+    } catch (error) {
+      document.getElementById('response').innerText = "エラーが発生しました: " + error.message;
+    }
+  });
+</script>
 </body>
 </html>
-
-
 
 
 
