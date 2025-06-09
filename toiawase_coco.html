@@ -17,45 +17,48 @@
   </form>
   <div id="response"></div>
 
-  <script>
 
+  
+<script>
 let userId = "";
 let displayName = "";
 
+// LIFF 初期化とプロフィール取得
 liff.init({ liffId: "1657196041-ALeOLrEa" }).then(() => {
   return liff.getProfile();
 }).then(profile => {
   displayName = profile.displayName;
   userId = profile.userId;
+}).catch(err => {
+  document.getElementById('response').innerText = "LIFFログインに失敗しました";
 });
 
+// フォーム送信処理
+document.getElementById('myForm').addEventListener('submit', function(e) {
+  e.preventDefault();
 
+  const inputText = document.getElementById('inputText').value;
+  const gasUrl = "https://script.google.com/macros/s/AKfycbzKwkP50EiUW8ZmeC9Hmfi0oH-vgOFyvXbQGSx_PPJObjYSZmgpSgN7LUqRD_LlP-KNhw/exec";
 
+  const formData = new URLSearchParams();
+  formData.append('inputText', inputText);
+  formData.append('userId', userId);
+  formData.append('displayName', displayName);
 
-    
-    document.getElementById('myForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const inputText = document.getElementById('inputText').value;
-      const gasUrl = "https://script.google.com/macros/s/AKfycbwVxCB0F7agsa2pfJVPw_OPjVi-6hw2bIHIMtwWiAjGujL_Q9UbZFESKKihxcgoetQRUg/exec"; // ← ここに実際のURLを入れてください
-
-      const formData = new URLSearchParams();
-      formData.append('inputText', inputText);
-
-      fetch(gasUrl, {
-        method: 'POST',
-        body: formData,
-      })
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById('response').innerText = data.message;
-        document.getElementById('myForm').reset();
-      })
-      .catch(error => {
-        document.getElementById('response').innerText = 'エラーが発生しました: ' + error.message;
-      });
-    });
-  </script>
+  fetch(gasUrl, {
+    method: 'POST',
+    body: formData,
+  })
+  .then(response => response.json())
+  .then(data => {
+    document.getElementById('response').innerText = data.message;
+    document.getElementById('myForm').reset();
+  })
+  .catch(error => {
+    document.getElementById('response').innerText = 'エラーが発生しました: ' + error.message;
+  });
+});
+</script>
 </body>
 </html>
 
