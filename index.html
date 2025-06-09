@@ -366,6 +366,63 @@ margin-left: 1vw;
 
 
 	
+
+    .slider-container {
+      width: 80%;
+      max-width: 500px;
+      margin: auto;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .slides {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+
+    .slide {
+      min-width: 100%;
+      box-sizing: border-box;
+      padding: 20px;
+      background: #f0f0f0;
+      text-align: center;
+    }
+
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      cursor: pointer;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 5px 10px;
+      user-select: none;
+      z-index: 10;
+    }
+
+    .arrow.left {
+      left: 10px;
+    }
+
+    .arrow.right {
+      right: 10px;
+    }
+
+    .arrow.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .counter {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+	
+
+	
 </style>
 
 
