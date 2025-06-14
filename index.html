@@ -367,7 +367,7 @@ margin-left: 1vw;
 
 	
 
-     .slider-container {
+    .slider-container {
       width: 95%;
       max-width: 95vw;
       margin: auto;
@@ -485,31 +485,14 @@ margin-left: 1vw;
 
 
 <div class="slider-container" id="slider">
-  <div class="arrow left" onclick="prevSlide()">←</div>
-  <div class="arrow right" onclick="nextSlide()">→</div>
+  <div class="arrow left" onclick="prevSlide()" id="leftArrow">←</div>
+  <div class="arrow right" onclick="nextSlide()" id="rightArrow">→</div>
   <div class="slides" id="slideTrack">
-    <!-- クローン: 最後のスライド -->
-    <div class="slide">これは5番目の文章です。</div>
-
-    <!-- 本物スライド -->
-    <div class="slide">
-	  <h1 class="htu3_a">「CoCoポイント」は貯めると色んな</h1>
-<h1 class="htu3_a">イイコトがあるかもしれない</h1>
-<h1 class="htu3_a">CoCoめだか独自のポイントです。</h1>  
-    </div>
-
-	  
+    <div class="slide">これは1番目の文章です。</div>
     <div class="slide">これは2番目の文章です。</div>
     <div class="slide">これは3番目の文章です。</div>
     <div class="slide">これは4番目の文章です。</div>
     <div class="slide">これは5番目の文章です。</div>
-
-    <!-- クローン: 最初のスライド -->
-    <div class="slide">
-	    <h1 class="htu3_a">「CoCoポイント」は貯めると色んな</h1>
-<h1 class="htu3_a">イイコトがあるかもしれない</h1>
-<h1 class="htu3_a">CoCoめだか独自のポイントです。</h1>
-    </div>
   </div>
 </div>
 
@@ -707,33 +690,29 @@ honbun"></h1>
 
   const slideTrack = document.getElementById("slideTrack");
   const slider = document.getElementById("slider");
+  const leftArrow = document.getElementById("leftArrow");
+  const rightArrow = document.getElementById("rightArrow");
   const counterDisplay = document.getElementById("counterDisplay");
 
-  const totalSlides = 5; // 本物のスライド数
-  let currentIndex = 1;  // 実際のスライド位置（1～5）
+  let currentIndex = 0;
+  const totalSlides = slideTrack.children.length;
 
-  function updateSlide(animate = true) {
+  function updateSlide() {
     const slideWidth = slider.offsetWidth;
-    if (!animate) {
-      slideTrack.style.transition = "none";
-    } else {
-      slideTrack.style.transition = "transform 0.5s ease";
-    }
-    slideTrack.style.transform = translateX(-${slideWidth * currentIndex}px);
-    const displayIndex = ((currentIndex - 1 + totalSlides) % totalSlides) + 1;
-    counterDisplay.textContent = ${displayIndex}/${totalSlides};
+    slideTrack.style.transform = `translateX(-${slideWidth * currentIndex}px)`;
+
+    // 矢印の無効化
+    leftArrow.classList.toggle("disabled", currentIndex === 0);
+    rightArrow.classList.toggle("disabled", currentIndex === totalSlides - 1);
+
+    // カウンターの表示更新
+    counterDisplay.textContent = `${currentIndex + 1}/${totalSlides}`;
   }
 
   function nextSlide() {
-    if (currentIndex < totalSlides + 1) {
+    if (currentIndex < totalSlides - 1) {
       currentIndex++;
       updateSlide();
-      if (currentIndex === totalSlides + 1) {
-        setTimeout(() => {
-          currentIndex = 1;
-          updateSlide(false);
-        }, 500);
-      }
     }
   }
 
@@ -741,37 +720,11 @@ honbun"></h1>
     if (currentIndex > 0) {
       currentIndex--;
       updateSlide();
-      if (currentIndex === 0) {
-        setTimeout(() => {
-          currentIndex = totalSlides;
-          updateSlide(false);
-        }, 500);
-      }
     }
   }
 
-  // スワイプ処理
-  let startX = 0;
-  let isSwiping = false;
-
-  slider.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-    isSwiping = true;
-  });
-
-  slider.addEventListener("touchend", (e) => {
-    if (!isSwiping) return;
-    const endX = e.changedTouches[0].clientX;
-    const diffX = endX - startX;
-    if (Math.abs(diffX) > 50) {
-      if (diffX < 0) nextSlide();
-      else prevSlide();
-    }
-    isSwiping = false;
-  });
-
-  window.addEventListener("resize", () => updateSlide(false));
-  updateSlide(false); // 初期表示
+  window.addEventListener('resize', updateSlide);
+  updateSlide(); // 初期表示
 
 
 
@@ -781,9 +734,6 @@ honbun"></h1>
     </script>
 </body>
 </html>
-
-
-
 
 
 
