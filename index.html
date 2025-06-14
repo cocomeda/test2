@@ -689,34 +689,35 @@ honbun"></h1>
 
 
 
-
-
-
-  const slideTrack = document.getElementById("slideTrack");
+ const slideTrack = document.getElementById("slideTrack");
   const slider = document.getElementById("slider");
-  const leftArrow = document.getElementById("leftArrow");
-  const rightArrow = document.getElementById("rightArrow");
   const counterDisplay = document.getElementById("counterDisplay");
 
-  let currentIndex = 0;
-  const totalSlides = slideTrack.children.length;
+  const totalSlides = 5; // 本物のスライド数
+  let currentIndex = 1;  // 実際のスライド位置（1～5）
 
-  function updateSlide() {
+  function updateSlide(animate = true) {
     const slideWidth = slider.offsetWidth;
-    slideTrack.style.transform = `translateX(-${slideWidth * currentIndex}px)`;
-
-    // 矢印の無効化
-    leftArrow.classList.toggle("disabled", currentIndex === 0);
-    rightArrow.classList.toggle("disabled", currentIndex === totalSlides - 1);
-
-    // カウンターの表示更新
-    counterDisplay.textContent = `${currentIndex + 1}/${totalSlides}`;
+    if (!animate) {
+      slideTrack.style.transition = "none";
+    } else {
+      slideTrack.style.transition = "transform 0.5s ease";
+    }
+    slideTrack.style.transform = translateX(-${slideWidth * currentIndex}px);
+    const displayIndex = ((currentIndex - 1 + totalSlides) % totalSlides) + 1;
+    counterDisplay.textContent = ${displayIndex}/${totalSlides};
   }
 
-  function nextSlide() {
-    if (currentIndex < totalSlides - 1) {
+	 function nextSlide() {
+    if (currentIndex < totalSlides + 1) {
       currentIndex++;
       updateSlide();
+      if (currentIndex === totalSlides + 1) {
+        setTimeout(() => {
+          currentIndex = 1;
+          updateSlide(false);
+        }, 500);
+      }
     }
   }
 
@@ -724,13 +725,43 @@ honbun"></h1>
     if (currentIndex > 0) {
       currentIndex--;
       updateSlide();
+      if (currentIndex === 0) {
+        setTimeout(() => {
+          currentIndex = totalSlides;
+          updateSlide(false);
+        }, 500);
+      }
     }
-  }
-
-  window.addEventListener('resize', updateSlide);
-  updateSlide(); // 初期表示
+  }    
 
 
+  // スワイプ処理
+  let startX = 0;
+  let isSwiping = false;
+
+  slider.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+    isSwiping = true;
+  });
+
+  slider.addEventListener("touchend", (e) => {
+    if (!isSwiping) return;
+    const endX = e.changedTouches[0].clientX;
+    const diffX = endX - startX;
+    if (Math.abs(diffX) > 50) {
+      if (diffX < 0) nextSlide();
+      else prevSlide();
+    }
+    isSwiping = false;
+  });
+
+  window.addEventListener("resize", () => updateSlide(false));
+  updateSlide(false); // 初期表示
+
+
+
+
+	   
 
 
 
