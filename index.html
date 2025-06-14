@@ -501,8 +501,8 @@ font-size: 4vw;
     <!-- 本物スライド -->
     <div class="slide">
 	    
-「CoCoポイント」は貯めると色んな
-イイコトがあるかもしれない
+「CoCoポイント」は貯めると色んな<br>
+イイコトがあるかもしれない<br>
 CoCoめだか独自のポイントです。
     
     </div>
@@ -514,7 +514,11 @@ CoCoめだか独自のポイントです。
     <div class="slide">これは5番目の文章です。</div>
 
     <!-- クローン: 最初のスライド -->
-    <div class="slide">これは1番目たはまらあはたはらたまはまはあるたはたはたらたりたらたらたの文章です。</div>
+    <div class="slide">	    
+「CoCoポイント」は貯めると色んな<br>
+イイコトがあるかもしれない<br>
+CoCoめだか独自のポイントです。
+    </div>
   </div>
 </div>
 
@@ -587,14 +591,14 @@ honbun"></h1>
 
     <script>
 
-    $(window).on("load", function() {
-            setTimeout(function() {
-                $("#loading").fadeOut(500, function() {
-                    $("#main").fadeIn(500);
-                });
-            }, 1000); // 1秒後にフェードアウト
+$(window).on("load", function() {
+    setTimeout(function() {
+        $("#loading").fadeOut(500, function() {
+            $("#main").fadeIn(500);
+            updateSlide(false); // ← ここを追加
         });
-
+    }, 1000);
+});
 
 	    
 	    
