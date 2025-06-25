@@ -32,8 +32,34 @@
             z-index: 260;
         }
 
+
+
+
+#popup {
+    font-size: 5vw;
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vw;
+    height: 55vw;
+    border: 0.5vw solid #ccc;
+    background-color: #fff;
+    box-shadow: 0px 0px 1vw rgba(0, 0, 0, 0.2);
+    z-index: 250;
+    display: flex; /* flexに変更して中央寄せを維持 */
+    align-items: center;
+    flex-direction: column;
+    justify-content: center; /* Change this from space-between to center */
+    padding: 2vw; /* 内側に余白を追加 */
+    box-sizing: border-box; /* paddingがwidth/heightに含まれるようにする */
+}
+
+
         
-        #popup {
+        
+        #popup0 {
             font-size: 5vw;
             display: none;
             position: fixed;
