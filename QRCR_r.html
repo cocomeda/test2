@@ -64,27 +64,6 @@
             background-color: #0056b3;
         }
 
-        /* ローディングオーバーレイ */
-        #loading-overlay {
-            display: none; /* デフォルトで非表示 */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(100, 100, 95, 0.99);
-            z-index: 200; /* ポップアップより手前 */
-            justify-content: center; /* 中央寄せ */
-            align-items: center; /* 中央寄せ */
-        }
-
-        /* ローディングメッセージ */
-        #loading-message {
-            color: white;
-            font-size: 4vw;
-            font-weight: bold;
-        }
-
         /* モーダルのスタイル（今回は使用しませんが残します） */
         #resultModal {
             display: none;
@@ -127,17 +106,12 @@
         <button id="popup-close-btn">閉じる</button>
     </div>
     
-    <div id="loading-overlay">
-        <div id="loading-message">読み込み中…</div>
-    </div>
-    
-<script>
+    <script>
 // jQueryのDOM Readyで全体をラップ
 $(document).ready(function() {
     // LIFFの初期化
     liff.init({ liffId: '1657196041-ALeOLrEa' }).then(() => {
         if (!liff.isLoggedIn()) {
-            // ログインが必要な場合、ログインページを表示
             liff.login();
         } else {
             // ユーザーがログインしている場合、直ちにQRコードリーダーを開く
@@ -145,36 +119,28 @@ $(document).ready(function() {
         }
     }).catch((err) => {
         console.error('LIFFの初期化に失敗しました', err);
-        // LIFF初期化エラー時もポップアップを表示
-        showPopup('LIFFの初期化に失敗しました。');
+        // LIFF初期化エラー時のみポップアップを表示
+        showPopup('LIFFの初期化に失敗しました。'); 
     });
 
     // QRコードリーダーを開く関数
     function openQRCodeReader() {
-        // ここでローディングメッセージを表示するように変更
-        showLoading('QRコードリーダー起動中…'); 
-        
+        // QRコードリーダー起動前のローディング表示は削除
         liff.scanCode()
             .then(result => {
-                // スキャンが成功した場合、ローディングメッセージを変更
-                showLoading('データを送信中…');
                 if (result.value) {
                     // QRコードのスキャンが成功した場合
                     console.log("QRコードスキャン結果:", result.value);
-                    let qr_data = result.value; // QRコードのデータ
-                    sendQRDataToGAS(qr_data); // Google Apps ScriptにQRコードデータを送信する
+                    let qr_data = result.value;
+                    sendQRDataToGAS(qr_data);
                 } else {
-                    // QRコードを読み込まずにリーダーを閉じた場合（result.valueがnull）
+                    // QRコードを読み込まずにリーダーを閉じた場合
                     console.log('QRコードが検出されずにリーダーが閉じられました。');
-                    // ★QRコードを読み取らなかった場合もローディングを非表示にする
-                    hideLoading(); 
                     showPopup('QRコードを読み取らずに閉じました。'); // ポップアップ表示
                 }
             })
             .catch(err => {
                 console.error('Error scanning QR code:', err);
-                // ★エラー発生時もローディングを非表示にする
-                hideLoading(); 
                 showPopup('QRコードスキャン中にエラーが発生しました。'); // ポップアップ表示
             });
     }
@@ -183,7 +149,6 @@ $(document).ready(function() {
     function sendQRDataToGAS(qr_data) {
         const idToken = liff.getIDToken();
 
-        // QRコードデータとIDトークンをGASに送信
         $.ajax({
             url: 'https://script.google.com/macros/s/AKfycbzeGgWljzalqzgFHSWqzd7napJIsXN7zukNj-MSKMJ3AdpjQ9oSIScQJK2uQtcN8zsr/exec',    
             type: 'POST',
@@ -191,17 +156,14 @@ $(document).ready(function() {
             success: function (response) {
                 try {
                     var message = response.message;
-                    hideLoading(); // GAS通信成功時
                     showPopup(message); // ポップアップ表示
                 } catch (error) {
                     console.error('Response parsing error:', error);
-                    hideLoading(); // エラー時
                     showPopup('レスポンスの解析中にエラーが発生しました。');
                 }
             },
             error: function (error) {
                 console.error('Failed to send QR data to GAS:', error);
-                hideLoading(); // エラー時
                 showPopup('GASへのデータ送信に失敗しました。'); // エラーメッセージをポップアップで表示
             }
         });
@@ -214,7 +176,7 @@ $(document).ready(function() {
         document.getElementById('popup').style.display = 'flex'; // flexにして中央寄せを維持
     }
 
-    // ポップアップを閉じる関数
+    // ポップアップを閉じる関数（ボタンクリックで呼び出される）
     function closePopup() {
         document.getElementById('overlay').style.display = 'none';
         document.getElementById('popup').style.display = 'none';
@@ -232,16 +194,11 @@ $(document).ready(function() {
         closePopup();
     });
 
-    // ローディング表示関数
-    function showLoading(message = '読み込み中…') {
-        document.getElementById('loading-message').innerText = message; // メッセージを設定
-        document.getElementById('loading-overlay').style.display = 'flex'; // flexで中央寄せを適用
-    }
+    // ローディング表示関数 (完全に削除)
+    // function showLoading(message = '読み込み中…') { ... }
 
-    // ローディング非表示関数
-    function hideLoading() {
-        document.getElementById('loading-overlay').style.display = 'none';
-    }
+    // ローディング非表示関数 (完全に削除)
+    // function hideLoading() { ... }
 
     // モーダル関連関数（今回は使用しません）
     // function showModal(message) { /* ... */ }
@@ -249,6 +206,9 @@ $(document).ready(function() {
 </script>
 </body>
 </html>
+
+
+
 
 
 
