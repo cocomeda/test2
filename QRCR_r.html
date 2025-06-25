@@ -36,7 +36,8 @@
             display: flex; /* flexに変更して中央寄せを維持 */
             align-items: center;
             flex-direction: column;
-            justify-content: center;
+           /*justify-content: center;*/
+            justify-content: space-between; /* メッセージとボタンの間にスペースを最大化 */
             padding: 2vw; /* 内側に余白を追加 */
             box-sizing: border-box; /* paddingがwidth/heightに含まれるようにする */
         }
@@ -58,6 +59,10 @@
             border-radius: 1vw;
             outline: none;
             transition: background-color 0.3s ease;
+             /* 必要であれば、ボタンに上部のマージンを追加してメッセージとの間隔を調整 */
+    margin-top: auto; /* これにより、ボタンが利用可能なスペースの最下部に押しやられます */
+
+            
         }
 
         #popup-close-btn:hover {
