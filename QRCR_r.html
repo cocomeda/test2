@@ -161,14 +161,16 @@ $(document).ready(function() {
         showPopupAndClose('LIFFの初期化に失敗しました。');
     });
 
+    let autoCloseTimeoutId; // setTimeoutのIDを保持する変数
+
     // QRコードリーダーを開く関数
     function openQRCodeReader() {
         showLoading('QRコードリーダー起動中…'); // ローディング表示をQRリーダー起動前に
-        
+
         liff.scanCode()
             .then(result => {
                 // スキャンが成功した場合、ローディングメッセージを変更
-                showLoading('データを送信中…'); 
+                showLoading('データを送信中…');
                 if (result.value) {
                     // QRコードのスキャンが成功した場合
                     console.log("QRコードスキャン結果:", result.value);
@@ -193,7 +195,7 @@ $(document).ready(function() {
 
         // QRコードデータとIDトークンをGASに送信
         $.ajax({
-            url: 'https://script.google.com/macros/s/AKfycbzeGgWljzalqzgFHSWqzd7napJIsXN7zukNj-MSKMJ3AdpjQ9oSIScQJK2uQtcN8zsr/exec',    
+            url: 'https://script.google.com/macros/s/AKfycbzeGgWljzalqzgFHSWqzd7napJIsXN7zukNj-MSKMJ3AdpjQ9oSIScQJK2uQtcN8zsr/exec',
             type: 'POST',
             data: { idToken: idToken, qr_data: qr_data },
             success: function (response) {
@@ -221,21 +223,31 @@ $(document).ready(function() {
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('popup').style.display = 'flex'; // flexにして中央寄せを維持
 
+        // 既存のタイマーがあればクリアする
+        if (autoCloseTimeoutId) {
+            clearTimeout(autoCloseTimeoutId);
+        }
+
         // 30秒後にポップアップを閉じ、LIFFウィンドウも閉じる
-        setTimeout(() => {
+        autoCloseTimeoutId = setTimeout(() => { // IDを保持する
             document.getElementById('overlay').style.display = 'none';
             document.getElementById('popup').style.display = 'none';
             if (liff.isInClient()) { // LINEアプリ内で開いている場合のみ閉じる
                 liff.closeWindow();
             } else {
                 // LINEアプリ外（ブラウザなど）で開いている場合は、トップページへリダイレクト
-                window.location.href = 'index.html'; 
+                window.location.href = 'index.html';
             }
         }, 30000); // 30秒
     }
 
-    // ポップアップを閉じる関数（今回は使われませんが定義は残します）
+    // ポップアップを閉じる関数
     function closePopup() {
+        // 自動クローズのタイマーをクリアする
+        if (autoCloseTimeoutId) {
+            clearTimeout(autoCloseTimeoutId);
+        }
+
         document.getElementById('overlay').style.display = 'none';
         document.getElementById('popup').style.display = 'none';
         // LIFFアプリを閉じる
