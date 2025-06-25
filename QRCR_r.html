@@ -102,6 +102,25 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* 閉じるボタンのスタイル */
+        #close-btn {
+            padding: 2vw 4vw;
+            font-size: 4vw;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 1vw;
+            outline: none;
+            transition: background-color 0.3s ease;
+        }
+
+        #close-btn:hover {
+            background-color: #0056b3;
+        }
+
+        
     </style>
 </head>
 <body>
@@ -196,7 +215,7 @@ $(document).ready(function() {
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('popup').style.display = 'flex'; // flexにして中央寄せを維持
 
-        // 2秒後にポップアップを閉じ、LIFFウィンドウも閉じる
+        // 30秒後にポップアップを閉じ、LIFFウィンドウも閉じる
         setTimeout(() => {
             document.getElementById('overlay').style.display = 'none';
             document.getElementById('popup').style.display = 'none';
@@ -206,7 +225,7 @@ $(document).ready(function() {
                 // LINEアプリ外（ブラウザなど）で開いている場合は、トップページへリダイレクト
                 window.location.href = 'index.html'; 
             }
-        }, 2000); // 2秒
+        }, 30000); // 30秒
     }
 
     // ポップアップを閉じる関数（今回は使われませんが定義は残します）
