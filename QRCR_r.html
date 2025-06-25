@@ -1,503 +1,280 @@
+
 <!DOCTYPE html>
-
 <html>
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Reader for CoCo medaka5c</title>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Code Reader for CoCo medaka5c</title>
-
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
-
-
-<style>
-
-/* 既存のスタイル */
-
-#overlay {
-
-display: none;
-
-position: fixed;
-
-top: 0;
-
-left: 0;
-
-width: 100%;
-
-height: 100%;
-
-background-color: rgba(100, 100, 100, 0.99);
-
-z-index: 220;
-
-}
-
-#popup {
-
-font-size: 5vw;
-
-display: none;
-
-position: fixed;
-
-top: 50%;
-
-left: 50%;
-
-transform: translate(-50%, -50%);
-
-width: 80vw;
-
-height: 55vw;/* 上からの距離 */
-
-border: 0.5vw solid #ccc;
-
-background-color: #fff;
-
-box-shadow: 0px 0px 1vw rgba(0, 0, 0, 0.2);
-
-z-index: 250;
-
-align-items: center;
-
-flex-direction: column;
-
-
+    <style>
+        /* 既存のスタイル */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(100, 100, 100, 0.99);
+            z-index: 220;
+        }
+        #popup {
+            font-size: 5vw;
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw; 
+            height: 55vw;/* 上からの距離 */
+            border: 0.5vw solid #ccc;
+            background-color: #fff;
+            box-shadow: 0px 0px 1vw rgba(0, 0, 0, 0.2);
+            z-index: 250;
+            align-items: center;
+            flex-direction: column;
+            
 /*justify-content: center;*/
-
-justify-content: space-between; /* メッセージとボタンの間にスペースを最大化 */
-
-}
-
-
-
-#popup-message {
-
-position: fixed;
-
-left: 50%;
-
-top: 40%;
-
-transform: translateX(-50%) translateY(-50%);
-
-text-align: center;
-
-font-size: 4.5vw;
-
-}
-
-
-
-/* ローディングオーバーレイ */
-
-#loading-overlay {
-
-display: none; /* デフォルトで非表示 */
-
-position: fixed;
-
-top: 0;
-
-left: 0;
-
-width: 100%;
-
-height: 100%;
-
-background-color: rgba(100, 100, 95, 0.99);
-
-z-index: 200; /* ポップアップより手前 */
-
-justify-content: center; /* 中央寄せ */
-
-align-items: center; /* 中央寄せ */
-
-}
-
-
-
-/* ローディングメッセージ */
-
-#loading-message {
-
-color: white;
-
-font-size: 4vw;
-
-font-weight: bold;
-
-}
-
-
-
-/* モーダルのスタイル（今回は使用しませんが残します） */
-
-#resultModal {
-
-display: none;
-
-position: fixed;
-
-z-index: 1;
-
-left: 0;
-
-top: 0;
-
-width: 100%;
-
-height: 100%;
-
-overflow: auto;
-
-background-color: rgb(0,0,0);
-
-background-color: rgba(0,0,0,0.4);
-
-}
-
-.modal-content {
-
-background-color: #fefefe;
-
-margin: 15% auto;
-
-padding: 20px;
-
-border: 1px solid #888;
-
-width: 80%;
-
-}
-
-.close {
-
-color: #aaa;
-
-float: right;
-
-font-size: 28px;
-
-font-weight: bold;
-
-}
-
-.close:hover,
-
-.close:focus {
-
-color: black;
-
-text-decoration: none;
-
-cursor: pointer;
-
-}
-
-
-
-/* 閉じるボタンのスタイル */
-
-#close-btn {
-
-padding: 2vw 4vw;
-
-font-size: 4vw;
-
-cursor: pointer;
-
-background-color: #007bff;
-
-color: white;
-
-border: none;
-
-border-radius: 1vw;
-
-outline: none;
-
-transition: background-color 0.3s ease;
-
-
-
-
-
-/* 必要であれば、ボタンに上部のマージンを追加してメッセージとの間隔を調整 */
-
-margin-top: auto; /* これにより、ボタンが利用可能なスペースの最下部に押しやられます */
-
-}
-
-
-
-#close-btn:hover {
-
-background-color: #0056b3;
-
-}
-
-
-
-
-</style>
-
+            justify-content: space-between; /* メッセージとボタンの間にスペースを最大化 */
+        }
+
+        #popup-message {
+            position: fixed;
+            left: 50%;
+            top: 40%;
+            transform: translateX(-50%) translateY(-50%);
+            text-align: center;
+            font-size: 4.5vw;
+        }
+
+        /* ローディングオーバーレイ */
+        #loading-overlay {
+            display: none; /* デフォルトで非表示 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(100, 100, 95, 0.99);
+            z-index: 200; /* ポップアップより手前 */
+            justify-content: center; /* 中央寄せ */
+            align-items: center; /* 中央寄せ */
+        }
+
+        /* ローディングメッセージ */
+        #loading-message {
+            color: white;
+            font-size: 4vw;
+            font-weight: bold;
+        }
+
+        /* モーダルのスタイル（今回は使用しませんが残します） */
+        #resultModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* 閉じるボタンのスタイル */
+        #close-btn {
+            padding: 2vw 4vw;
+            font-size: 4vw;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 1vw;
+            outline: none;
+            transition: background-color 0.3s ease;
+
+
+             /* 必要であれば、ボタンに上部のマージンを追加してメッセージとの間隔を調整 */
+    margin-top: auto; /* これにより、ボタンが利用可能なスペースの最下部に押しやられます */
+        }
+
+        #close-btn:hover {
+            background-color: #0056b3;
+        }
+
+        
+    </style>
 </head>
-
 <body>
 
+    <div id="overlay" onclick="closePopup()"></div>
+    <div id="popup">
+         <button id="close-btn" onclick="closePopup()">閉じる</button>
 
-
-<div id="overlay" onclick="closePopup()"></div>
-
-<div id="popup">
-
-<button id="close-btn" onclick="closePopup()">閉じる</button>
-
-
-
-
-<div id="popup-message"></div>
-
-</div>
-
-
-<div id="loading-overlay">
-
-<div id="loading-message">読み込み中…</div>
-
-</div>
-
-
+        
+        <div id="popup-message"></div>
+    </div>
+   
+    <div id="loading-overlay">
+        <div id="loading-message">読み込み中…</div>
+    </div>
+    
 <script>
-
 // jQueryのDOM Readyで全体をラップ
-
 $(document).ready(function() {
-
-// LIFFの初期化
-
-liff.init({ liffId: '1657196041-ALeOLrEa' }).then(() => {
-
-if (!liff.isLoggedIn()) {
-
-// ログインが必要な場合、ログインページを表示
-
-liff.login();
-
-} else {
-
-// ユーザーがログインしている場合、直ちにQRコードリーダーを開く
-
-openQRCodeReader(); // 関数名を変更
-
-}
-
-}).catch((err) => {
-
-console.error('LIFFの初期化に失敗しました', err);
-
-// LIFF初期化エラー時もページを閉じる
-
-showPopupAndClose('LIFFの初期化に失敗しました。');
-
-});
-
-
-
-// QRコードリーダーを開く関数
-
-function openQRCodeReader() {
-
-showLoading('QRコードリーダー起動中…'); // ローディング表示をQRリーダー起動前に
-
-
-liff.scanCode()
-
-.then(result => {
-
-// スキャンが成功した場合、ローディングメッセージを変更
-
-showLoading('データを送信中…');
-
-if (result.value) {
-
-// QRコードのスキャンが成功した場合
-
-console.log("QRコードスキャン結果:", result.value);
-
-let qr_data = result.value; // QRコードのデータ
-
-sendQRDataToGAS(qr_data); // Google Apps ScriptにQRコードデータを送信する
-
-} else {
-
-// QRコードを読み込まずにリーダーを閉じた場合（result.valueがnull）
-
-console.log('QRコードが検出されずにリーダーが閉じられました。');
-
-closePopup(); //ページを閉じる
-
-}
-
-})
-
-.catch(err => {
-
-console.error('Error scanning QR code:', err);
-
-// エラー発生時もページを閉じる
-
-showPopupAndClose('QRコードスキャン中にエラーが発生しました。');
-
-});
-
-}
-
-
-
-// QRコードデータをGoogle Apps Scriptに送信する関数
-
-function sendQRDataToGAS(qr_data) {
-
-const idToken = liff.getIDToken();
-
-
-
-// QRコードデータとIDトークンをGASに送信
-
-$.ajax({
-
-url: 'https://script.google.com/macros/s/AKfycbzeGgWljzalqzgFHSWqzd7napJIsXN7zukNj-MSKMJ3AdpjQ9oSIScQJK2uQtcN8zsr/exec',
-
-type: 'POST',
-
-data: { idToken: idToken, qr_data: qr_data },
-
-success: function (response) {
-
-try {
-
-var message = response.message;
-
-hideLoading(); // GAS通信成功時
-
-showPopupAndClose(message); // ポップアップ表示後、ページを閉じる
-
-} catch (error) {
-
-console.error('Response parsing error:', error);
-
-hideLoading(); // エラー時
-
-showPopupAndClose('レスポンスの解析中にエラーが発生しました。');
-
-}
-
-},
-
-error: function (error) {
-
-console.error('Failed to send QR data to GAS:', error);
-
-hideLoading(); // エラー時
-
-showPopupAndClose('GASへのデータ送信に失敗しました。'); // エラーメッセージをポップアップで表示後、ページを閉じる
-
-}
-
-});
-
-}
-
-
-
-// ポップアップを表示し、指定時間後にLIFFウィンドウを閉じる関数
-
-function showPopupAndClose(message) {
-
-document.getElementById('popup-message').innerText = message;
-
-document.getElementById('overlay').style.display = 'block';
-
-document.getElementById('popup').style.display = 'flex'; // flexにして中央寄せを維持
-
-
-
-
-
-
-
-}
-
-
-
-// ポップアップを閉じる関数（今回は使われませんが定義は残します）
-
-function closePopup() {
-
-document.getElementById('overlay').style.display = 'none';
-
-document.getElementById('popup').style.display = 'none';
-
-// LIFFアプリを閉じる
-
-if (liff.isInClient()) {
-
-liff.closeWindow();
-
-} else {
-
-// LINEアプリ外（ブラウザなど）で開いている場合は、トップページへリダイレクト
-
-window.location.href = 'index.html';
-
-}
-
-}
-
-
-
-// ローディング表示関数
-
-function showLoading(message = '読み込み中…') {
-
-document.getElementById('loading-message').innerText = message; // メッセージを設定
-
-document.getElementById('loading-overlay').style.display = 'flex'; // flexで中央寄せを適用
-
-}
-
-
-
-// ローディング非表示関数
-
-function hideLoading() {
-
-document.getElementById('loading-overlay').style.display = 'none';
-
-}
-
-
-
-// モーダル関連関数（今回は使用しません）
-
-function showModal(message) { /* ... */ }
-
+    // LIFFの初期化
+    liff.init({ liffId: '1657196041-ALeOLrEa' }).then(() => {
+        if (!liff.isLoggedIn()) {
+            // ログインが必要な場合、ログインページを表示
+            liff.login();
+        } else {
+            // ユーザーがログインしている場合、直ちにQRコードリーダーを開く
+            openQRCodeReader(); // 関数名を変更
+        }
+    }).catch((err) => {
+        console.error('LIFFの初期化に失敗しました', err);
+        // LIFF初期化エラー時もページを閉じる
+        showPopupAndClose('LIFFの初期化に失敗しました。');
+    });
+
+    let autoCloseTimeoutId; // setTimeoutのIDを保持する変数
+
+    // QRコードリーダーを開く関数
+    function openQRCodeReader() {
+        showLoading('QRコードリーダー起動中…'); // ローディング表示をQRリーダー起動前に
+
+        liff.scanCode()
+            .then(result => {
+                // スキャンが成功した場合、ローディングメッセージを変更
+                showLoading('データを送信中…');
+                if (result.value) {
+                    // QRコードのスキャンが成功した場合
+                    console.log("QRコードスキャン結果:", result.value);
+                    let qr_data = result.value; // QRコードのデータ
+                    sendQRDataToGAS(qr_data); // Google Apps ScriptにQRコードデータを送信する
+                } else {
+                    // QRコードを読み込まずにリーダーを閉じた場合（result.valueがnull）
+                    console.log('QRコードが検出されずにリーダーが閉じられました。');
+                    showPopupAndClose('QRコードを読み取らずに閉じました。'); // ポップアップ表示後、ページを閉じる
+                }
+            })
+            .catch(err => {
+                console.error('Error scanning QR code:', err);
+                // エラー発生時もページを閉じる
+                showPopupAndClose('QRコードスキャン中にエラーが発生しました。');
+            });
+    }
+
+    // QRコードデータをGoogle Apps Scriptに送信する関数
+    function sendQRDataToGAS(qr_data) {
+        const idToken = liff.getIDToken();
+
+        // QRコードデータとIDトークンをGASに送信
+        $.ajax({
+            url: 'https://script.google.com/macros/s/AKfycbzeGgWljzalqzgFHSWqzd7napJIsXN7zukNj-MSKMJ3AdpjQ9oSIScQJK2uQtcN8zsr/exec',
+            type: 'POST',
+            data: { idToken: idToken, qr_data: qr_data },
+            success: function (response) {
+                try {
+                    var message = response.message;
+                    hideLoading(); // GAS通信成功時
+                    showPopupAndClose(message); // ポップアップ表示後、ページを閉じる
+                } catch (error) {
+                    console.error('Response parsing error:', error);
+                    hideLoading(); // エラー時
+                    showPopupAndClose('レスポンスの解析中にエラーが発生しました。');
+                }
+            },
+            error: function (error) {
+                console.error('Failed to send QR data to GAS:', error);
+                hideLoading(); // エラー時
+                showPopupAndClose('GASへのデータ送信に失敗しました。'); // エラーメッセージをポップアップで表示後、ページを閉じる
+            }
+        });
+    }
+
+    // ポップアップを表示し、指定時間後にLIFFウィンドウを閉じる関数
+    function showPopupAndClose(message) {
+        document.getElementById('popup-message').innerText = message;
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('popup').style.display = 'flex'; // flexにして中央寄せを維持
+
+        // 既存のタイマーがあればクリアする
+        if (autoCloseTimeoutId) {
+            clearTimeout(autoCloseTimeoutId);
+        }
+
+        // 30秒後にポップアップを閉じ、LIFFウィンドウも閉じる
+        autoCloseTimeoutId = setTimeout(() => { // IDを保持する
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('popup').style.display = 'none';
+            if (liff.isInClient()) { // LINEアプリ内で開いている場合のみ閉じる
+                liff.closeWindow();
+            } else {
+                // LINEアプリ外（ブラウザなど）で開いている場合は、トップページへリダイレクト
+                window.location.href = 'index.html';
+            }
+        }, 30000); // 30秒
+    }
+
+    // ポップアップを閉じる関数
+    function closePopup() {
+        // 自動クローズのタイマーをクリアする
+        if (autoCloseTimeoutId) {
+            clearTimeout(autoCloseTimeoutId);
+        }
+
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('popup').style.display = 'none';
+        // LIFFアプリを閉じる
+        if (liff.isInClient()) {
+            liff.closeWindow();
+        } else {
+            // LINEアプリ外（ブラウザなど）で開いている場合は、トップページへリダイレクト
+            window.location.href = 'index.html';
+        }
+    }
+
+    // ローディング表示関数
+    function showLoading(message = '読み込み中…') {
+        document.getElementById('loading-message').innerText = message; // メッセージを設定
+        document.getElementById('loading-overlay').style.display = 'flex'; // flexで中央寄せを適用
+    }
+
+    // ローディング非表示関数
+    function hideLoading() {
+        document.getElementById('loading-overlay').style.display = 'none';
+    }
+
+    // モーダル関連関数（今回は使用しません）
+    function showModal(message) { /* ... */ }
 }); // $(document).ready() の終わり
-
 </script>
-
 </body>
+
 
 </html>　
 
