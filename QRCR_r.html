@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -152,7 +151,8 @@ $(document).ready(function() {
 
     // QRコードリーダーを開く関数
     function openQRCodeReader() {
-        showLoading('QRコードリーダー起動中…'); // ローディング表示をQRリーダー起動前に
+        // ここでローディングメッセージを表示するように変更
+        showLoading('QRコードリーダー起動中…'); 
         
         liff.scanCode()
             .then(result => {
@@ -166,13 +166,16 @@ $(document).ready(function() {
                 } else {
                     // QRコードを読み込まずにリーダーを閉じた場合（result.valueがnull）
                     console.log('QRコードが検出されずにリーダーが閉じられました。');
+                    // ★QRコードを読み取らなかった場合もローディングを非表示にする
+                    hideLoading(); 
                     showPopup('QRコードを読み取らずに閉じました。'); // ポップアップ表示
                 }
             })
             .catch(err => {
                 console.error('Error scanning QR code:', err);
-                // エラー発生時もポップアップを表示
-                showPopup('QRコードスキャン中にエラーが発生しました。');
+                // ★エラー発生時もローディングを非表示にする
+                hideLoading(); 
+                showPopup('QRコードスキャン中にエラーが発生しました。'); // ポップアップ表示
             });
     }
 
@@ -246,4 +249,9 @@ $(document).ready(function() {
 </script>
 </body>
 </html>
+
+
+
+
+
 
