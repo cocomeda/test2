@@ -37,7 +37,9 @@
             z-index: 250;
             align-items: center;
             flex-direction: column;
-            justify-content: center;
+            
+/*justify-content: center;*/
+            justify-content: space-between; /* メッセージとボタンの間にスペースを最大化 */
         }
 
         #popup-message {
@@ -114,6 +116,10 @@
             border-radius: 1vw;
             outline: none;
             transition: background-color 0.3s ease;
+
+
+             /* 必要であれば、ボタンに上部のマージンを追加してメッセージとの間隔を調整 */
+    margin-top: auto; /* これにより、ボタンが利用可能なスペースの最下部に押しやられます */
         }
 
         #close-btn:hover {
