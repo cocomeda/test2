@@ -433,21 +433,7 @@ document.getElementById('popup').style.display = 'flex'; // flexにして中央�
 
 
 
-document.getElementById('overlay').style.display = 'none';
 
-document.getElementById('popup').style.display = 'none';
-
-if (liff.isInClient()) { // LINEアプリ内で開いている場合のみ閉じる
-
-liff.closeWindow();
-
-} else {
-
-// LINEアプリ外（ブラウザなど）で開いている場合は、トップページへリダイレクト
-
-window.location.href = 'index.html';
-
-}
 
 
 
