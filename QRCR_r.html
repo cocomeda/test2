@@ -28,24 +28,57 @@
             left: 50%;
             transform: translate(-50%, -50%);
             width: 80vw; 
-            height: 55vw;/* 上からの距離 */
+            height: 55vw; /* 上からの距離 */
             border: 0.5vw solid #ccc;
             background-color: #fff;
             box-shadow: 0px 0px 1vw rgba(0, 0, 0, 0.2);
             z-index: 250;
-            align-items: center;
-            flex-direction: column;
-            justify-content: center;
+            display: flex; /* flexbox を使用して中央寄せと要素配置を制御 */
+            flex-direction: column; /* 縦方向に要素を並べる */
+            justify-content: space-between; /* 要素を上下に均等配置 */
+            align-items: center; /* 水平方向の中央寄せ */
+            padding: 2vw; /* 内側の余白 */
+            box-sizing: border-box; /* パディングを幅に含める */
         }
 
         #popup-message {
-            position: fixed;
-            left: 50%;
-            top: 40%;
-            transform: translateX(-50%) translateY(-50%);
             text-align: center;
             font-size: 4.5vw;
+            flex-grow: 1; /* メッセージ部分が利用可能なスペースを占める */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1vw; /* メッセージの余白 */
         }
+
+        #close-btn {
+            position: absolute; /* 親要素 #popup に対して絶対配置 */
+            top: 1vw; /* 上からの位置 */
+            right: 2vw; /* 右からの位置 */
+            font-size: 7vw; /* 大きめのサイズ */
+            cursor: pointer;
+            color: #aaa;
+        }
+        #close-btn:hover {
+            color: black;
+        }
+
+        #popup-close-button {
+            background-color: #4CAF50; /* 緑色の背景 */
+            color: white; /* 白い文字 */
+            padding: 3vw 6vw; /* パディング */
+            border: none; /* ボーダーなし */
+            border-radius: 1vw; /* 角丸 */
+            cursor: pointer;
+            font-size: 4vw; /* 文字サイズ */
+            margin-top: 2vw; /* メッセージとの間隔 */
+            width: 60%; /* ボタンの幅 */
+            box-sizing: border-box;
+        }
+        #popup-close-button:hover {
+            background-color: #45a049;
+        }
+
 
         /* ローディングオーバーレイ */
         #loading-overlay {
@@ -108,7 +141,7 @@
     <div id="popup">
         <span id="close-btn" onclick="closePopup()">×</span>
         <div id="popup-message"></div>
-    </div>
+        <button id="popup-close-button" onclick="closePopup()">閉じる</button> </div>
    
     <div id="loading-overlay">
         <div id="loading-message">読み込み中…</div>
@@ -225,6 +258,7 @@ $(document).ready(function() {
 </script>
 </body>
 </html>
+
 
 
 
