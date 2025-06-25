@@ -169,8 +169,9 @@ $(document).ready(function() {
                     sendQRDataToGAS(qr_data); // Google Apps ScriptにQRコードデータを送信する
                 } else {
                     // QRコードを読み込まずにリーダーを閉じた場合（result.valueがnull）
-                    console.log('QRコードが検出されずにリーダーが閉じられました。');
-                    showPopup('QRコードを読み取らずに閉じました。'); // ポップアップ表示
+                   // console.log('QRコードが検出されずにリーダーが閉じられました。');
+                   // showPopup('QRコードを読み取らずに閉じました。'); // ポップアップ表示
+                    closePopup();
                 }
             })
             .catch(err => {
