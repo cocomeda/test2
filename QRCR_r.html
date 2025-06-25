@@ -124,12 +124,12 @@ $(document).ready(function() {
             liff.login();
         } else {
             // ユーザーがログインしている場合、直ちにQRコードリーダーを開く
-            openQRCodeReader(); // 関数名を変更
+            openQRCodeReader();
         }
     }).catch((err) => {
         console.error('LIFFの初期化に失敗しました', err);
-        // LIFF初期化エラー時もページを閉じる
-        showPopupAndClose('LIFFの初期化に失敗しました。');
+        // LIFF初期化エラー時もポップアップ表示
+        showPopup('LIFFの初期化に失敗しました。');
     });
 
     // QRコードリーダーを開く関数
@@ -148,13 +148,14 @@ $(document).ready(function() {
                 } else {
                     // QRコードを読み込まずにリーダーを閉じた場合（result.valueがnull）
                     console.log('QRコードが検出されずにリーダーが閉じられました。');
-                    showPopupAndClose('QRコードを読み取らずに閉じました。'); // ポップアップ表示後、ページを閉じる
+                    hideLoading(); // ローディングを非表示
+                    showPopup('QRコードを読み取らずに閉じました。'); // ポップアップ表示
                 }
             })
             .catch(err => {
                 console.error('Error scanning QR code:', err);
-                // エラー発生時もページを閉じる
-                showPopupAndClose('QRコードスキャン中にエラーが発生しました。');
+                hideLoading(); // エラー発生時もローディングを非表示
+                showPopup('QRコードスキャン中にエラーが発生しました。'); // ポップアップ表示
             });
     }
 
@@ -171,44 +172,40 @@ $(document).ready(function() {
                 try {
                     var message = response.message;
                     hideLoading(); // GAS通信成功時
-                    showPopupAndClose(message); // ポップアップ表示後、ページを閉じる
+                    showPopup(message); // ポップアップ表示
                 } catch (error) {
                     console.error('Response parsing error:', error);
                     hideLoading(); // エラー時
-                    showPopupAndClose('レスポンスの解析中にエラーが発生しました。');
+                    showPopup('レスポンスの解析中にエラーが発生しました。');
                 }
             },
             error: function (error) {
                 console.error('Failed to send QR data to GAS:', error);
                 hideLoading(); // エラー時
-                showPopupAndClose('GASへのデータ送信に失敗しました。'); // エラーメッセージをポップアップで表示後、ページを閉じる
+                showPopup('GASへのデータ送信に失敗しました。'); // エラーメッセージをポップアップで表示
             }
         });
     }
 
-    // ポップアップを表示し、指定時間後にLIFFウィンドウを閉じる関数
-    function showPopupAndClose(message) {
+    // ポップアップを表示する関数（自動で閉じない）
+    function showPopup(message) {
         document.getElementById('popup-message').innerText = message;
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('popup').style.display = 'flex'; // flexにして中央寄せを維持
-
-        // 2秒後にポップアップを閉じ、LIFFウィンドウも閉じる
-        setTimeout(() => {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('popup').style.display = 'none';
-            if (liff.isInClient()) { // LINEアプリ内で開いている場合のみ閉じる
-                liff.closeWindow();
-            } else {
-                // LINEアプリ外（ブラウザなど）で開いている場合は、トップページへリダイレクト
-                window.location.href = 'index.html'; 
-            }
-        }, 2000); // 2秒
     }
 
-    // ポップアップを閉じる関数（今回は使われませんが定義は残します）
+    // ポップアップを閉じ、LIFFウィンドウも閉じる関数
     function closePopup() {
         document.getElementById('overlay').style.display = 'none';
         document.getElementById('popup').style.display = 'none';
+        
+        // LIFFウィンドウを閉じる
+        if (liff.isInClient()) { // LINEアプリ内で開いている場合のみ閉じる
+            liff.closeWindow();
+        } else {
+            // LINEアプリ外（ブラウザなど）で開いている場合は、トップページへリダイレクト
+            window.location.href = 'index.html'; 
+        }
     }
 
     // ローディング表示関数
@@ -228,6 +225,7 @@ $(document).ready(function() {
 </script>
 </body>
 </html>
+
 
 
 
