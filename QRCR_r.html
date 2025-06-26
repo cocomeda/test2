@@ -197,7 +197,7 @@ $(document).ready(function() {
 
     // QRコードリーダーを開く関数
     function openQRCodeReader() {
-        showLoading('QRコードリーダー起動中…'); // ローディング表示をQRリーダー起動前に
+        showLoading('起動中…'); // ローディング表示をQRリーダー起動前に
         
         liff.scanCode()
             .then(result => {
