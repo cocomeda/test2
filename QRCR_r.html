@@ -199,7 +199,7 @@ $(document).ready(function() {
     function openQRCodeReader() {
         showLoading('起動中…'); // ローディング表示をQRリーダー起動前に
         
-        liff.scanCode()
+        liff.scanCodeV2()
             .then(result => {
                 // スキャンが成功した場合、ローディングメッセージを変更
                 hideLoading0(); //手前のカバーを取る
