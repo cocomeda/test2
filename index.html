@@ -428,6 +428,24 @@ font-size: 4vw;
       font-weight: bold;
     }
 
+
+
+.notification-bar {
+  width: 100%; /* 幅を画面いっぱいに */
+  background-color: rgba(255, 255, 255, 0.8); /* 白の半透明 */
+  padding: 10px 20px; /* 内側の余白 */
+  text-align: center; /* テキストを中央寄せ */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 軽い影で立体感を出す */
+  /* position: relative; をつけることも可能ですが、今回の場合は省略しても大丈夫です */
+  box-sizing: border-box;
+}
+
+/* この場合は、既存のコンテンツの調整は基本的に不要です。 */
+/* 必要であれば、コンテンツの上部にさらに余白を追加することも可能です。 */
+/* body {
+  padding-top: 50px;
+} */
+	
 	
 </style>
 
@@ -439,7 +457,12 @@ font-size: 4vw;
 
 	
 <div id="main">
+	
+ <div class="notification-bar">
+    <p>一部端末で専用QRコードリーダーが立ちあがらない不具合を修正しました。</p>
+ </div>
 
+	
 <section>
 	
 <div class="con">
