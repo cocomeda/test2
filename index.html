@@ -430,21 +430,41 @@ font-size: 4vw;
 
 
 
+/* notification-bar の修正 */
 .notification-bar {
+  position: fixed; /* 画面に固定 */
+  top: 0; /* 画面上部に配置 */
+  left: 0; /* 画面左端に配置 */
   width: 100%; /* 幅を画面いっぱいに */
   background-color: rgba(255, 255, 255, 0.8); /* 白の半透明 */
   padding: 10px 20px; /* 内側の余白 */
   text-align: center; /* テキストを中央寄せ */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 軽い影で立体感を出す */
-  /* position: relative; をつけることも可能ですが、今回の場合は省略しても大丈夫です */
-  box-sizing: border-box;
+  z-index: 1000; /* 他のコンテンツの上に表示。他の要素より高い値に設定。 */
+  box-sizing: border-box; /* paddingとborderをwidthに含める */
+  /* 高さを自動調整しつつ、必要なら最小高さを設定 */
+  height: auto;
+  min-height: 40px; /* 例えば、内容に合わせて調整 */
 }
 
-/* この場合は、既存のコンテンツの調整は基本的に不要です。 */
-/* 必要であれば、コンテンツの上部にさらに余白を追加することも可能です。 */
-/* body {
-  padding-top: 50px;
-} */
+/* #main コンテンツの調整 */
+/* notification-bar の高さ分だけ #main を下にずらす */
+/* notification-bar の padding も考慮して、適切な値を設定してください。 */
+/* 例えば、padding 10px + 上下の余白（テキストの行高など）を合わせて40px程度になることもあります。 */
+#main {
+  /* display: none; はJavaScriptで制御するため、ここには記載しません */
+  margin-top: 50px; /* お知らせ帯の高さに合わせて調整。実測して決めるのが確実です。 */
+}
+
+/* bodyのmargin-topを0にする（任意、もし上部に余白がある場合は） */
+body {
+    margin-top: 0; /* 既存のbodyのmargin-topをリセット */
+}
+
+	
+
+
+
 	
 	
 </style>
