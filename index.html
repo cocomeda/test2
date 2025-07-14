@@ -253,12 +253,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     
-    
-     if (!bidAmount || bidAmount < data.maxBid ) {
-      showMessage(`${data.maxBid}円以上で入札出来ます。`, 'error');
-      return;
-    }    
-       
+   
 
     if (bidAmount < 100 || bidAmount % 100 !== 0) {
       showMessage('100円単位で正しい入札金額を入力してください。', 'error');
