@@ -335,22 +335,33 @@ async function loadAuctionStatus(idToken) {
     const data = await res.json();
 
     if (data.status === 'success') {
-      updateAuctionUI(data);
-      showMessage(data.message, 'success');
+      try {
+        updateAuctionUI(data);
+        showMessage(data.message || '現在の入札状況を取得しました。', 'success');
+      } catch (err) {
+        console.error('UI更新エラー:', err);
+        showMessage('表示処理中にエラーが発生しました。', 'error');
+      }
     } else {
-      showMessage(data.message, 'error');
+      showMessage(data.message || 'ステータスが失敗でした。', 'error');
     }
 
     document.getElementById('bid-button').disabled = false;
 
-    // ★★★ ここでローディング終了、main表示
+    // ★ ローディング終了処理は catch の外に移動
     $('#loading').fadeOut(500, function () {
       $('#main').fadeIn(500);
-      updateSlide?.(false); // 定義されていれば呼び出す
+      updateSlide?.(false);
     });
 
   } catch (e) {
+    console.error('通信エラー:', e); // ← ログを確認しやすく
     showMessage('通信エラーが発生しました。', 'error');
+
+    // ローディングを終わらせないとフリーズする
+    $('#loading').fadeOut(500, function () {
+      $('#main').fadeIn(500);
+    });
   }
 }
 
