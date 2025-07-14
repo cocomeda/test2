@@ -182,6 +182,30 @@ button:disabled {
     display: inline-block;
 }
 
+/* 金額入力欄の右寄せと円表示用スタイル */
+.currency-input .input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.currency-input input[type="number"] {
+    width: 100%;
+    padding: 12px 35px 12px 10px; /* 右に余白を追加して円ラベル分を確保 */
+    text-align: right; /* 右寄せ */
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.currency-input .yen-label {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #555;
+    font-size: 1em;
+}
+
+
 </style>
 </head>
 <body>
@@ -208,9 +232,21 @@ button:disabled {
         <div class="bid-section">
             <h2>入札フォーム</h2>
             <div class="input-group">
-                <label for="bid-amount">あなたの入札金額 (円):</label>
-                <input type="number" id="bid-amount" min="100" step="100" placeholder="例: 1500" required>
-            </div>
+             
+            
+            
+            <div class="input-group currency-input">
+  <label for="bid-amount">あなたの入札金額 (円):</label>
+  <div class="input-wrapper">
+    <input type="number" id="bid-amount" min="100" step="100" placeholder="例: 1500" required>
+    <span class="yen-label">円</span>
+  </div>
+</div>
+            
+            
+            
+            
+            
             <div class="input-group horizontal">
                 <input type="checkbox" id="agree-checkbox" required>
                 <label for="agree-checkbox">オークション規約に同意する</label>
