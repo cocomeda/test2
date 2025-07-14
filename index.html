@@ -339,10 +339,7 @@ async function loadAuctionStatus(idToken) {
         updateAuctionUI(data);
         showMessage(data.message || '現在の入札状況を取得しました。', 'success');
 
-    // ローディングを終わらせないとフリーズする
-    $('#loading').fadeOut(500, function () {
-      $('#main').fadeIn(500);
-    });
+ 
           
       } catch (err) {
         console.error('UI更新エラー:', err);
@@ -351,11 +348,7 @@ async function loadAuctionStatus(idToken) {
     } else {
       showMessage(data.message || 'ステータスが失敗でした。', 'error');
    
-        
-　　　// ローディングを終わらせないとフリーズする
-    $('#loading').fadeOut(500, function () {
-      $('#main').fadeIn(500);
-    });
+  
 
 
         
