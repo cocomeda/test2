@@ -62,7 +62,7 @@ hr {
     text-align: center;
     font-size: 1.5em;
     font-weight: bold;
-    color:black; /* 緑色で目立たせる */
+    color:black;
 }
 
 .auction-info2 {
@@ -75,7 +75,7 @@ hr {
 .bid-section {
     padding: 15px 20px 20px 20px; /* 上パディングを少し減らす */
     margin-top: 10px;             /* 必要ならここも減らす */
-    background-color: #f9f9f9;
+    background-color:lightblue;    /* #f9f9f9;*/
     border-radius: 8px;
     border: 1px solid #eee;
 }
@@ -229,6 +229,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbyXcWOKUsBXyeUjpga9offA
 window.addEventListener('DOMContentLoaded', async () => {
   await liff.init({ liffId: "1657196041-ALeOLrEa"});
 
+  
   if (!liff.isLoggedIn()) {
     liff.login();
     return;
@@ -251,11 +252,20 @@ window.addEventListener('DOMContentLoaded', async () => {
       showMessage('規約に同意してください。', 'error');
       return;
     }
+    
+    
+     if (!bidAmount || bidAmount < data.maxBid ) {
+      showMessage(`${data.maxBid}円以上で入札出来ます。`, 'error');
+      return;
+    }    
+       
 
-    if (!bidAmount || bidAmount < 100 || bidAmount % 100 !== 0) {
+    if (bidAmount < 100 || bidAmount % 100 !== 0) {
       showMessage('100円単位で正しい入札金額を入力してください。', 'error');
       return;
     }
+      
+  
 
     document.getElementById('bid-button').disabled = true;
     showMessage('入札処理中...', 'info');
