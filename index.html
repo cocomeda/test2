@@ -1,841 +1,321 @@
 <!DOCTYPE html>
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width">
-    <title>coco medaka 35</title>
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/style_spinner.css">
-	
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-  
-    <script src="index.js"></script>
-   
-</head>
-<body>
-	
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メダカ無人オークション</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@line/liff/dist/liff.js"></script>
 <style>
 
- body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 2vw 2.5vw;
-            padding:  0;
-	    background-color: #f3f3f3;
-        }
-        .button-container {
-            display: flex;
-            justify-content: space-between; /*  ボタンを横に均等に並べる */
-	　　
-            padding: 1vw; /* コンテナ内の余白 */
-            box-sizing: border-box; /* パディングを幅に含める */
-        }
-        .img-button {
-            width: 30vw; /* ビューポート幅の30% */
-            height: 30vw; /* 高さは自動調整 */
-            border: none;
-            border-radius: 2vw;
-            cursor: pointer;
-            transition: opacity 0.3s ease;
-		
-        }
-        .img-button:hover {
-            opacity: 0.8;
-        }
-        a {
-            display: block;
-            text-decoration: none;
-        }
-
-
-
-
-	
-.pie22{
-  width: 4.5vw;
-  height: 4.5vw;
-  border-radius: 50%;
-  background-image: conic-gradient(white 0deg 0deg, #faf9f1 0deg 360deg);
-  border: 0.2vw double solid #faf9f1;
-}
-
-  .vertical-progress-bar {
-    height: 4.2vw; /* 縦の長さ */
-    width: 1vw; /* 横の幅 */
-    /* background-color: #faf9f1;　#f3f3f3 */
-    position: relative;
-    /* border: 0.2vw solid #faf9f1; */
-    border-radius: 0.2vw; /* 上端の左側を丸める */
-transform: translate(-15%,0%);
-
-  }
-
-  .vertical-progress-bar-inner {
-    position: absolute;
-    bottom: 0; /* 下からの高さを調整 */
-    width: 100%;
-    background-color: black;
-  }
-
-
-
-h1.topo{ 
- color: black;
-font-size: 5vw;
-/*text-align: center;*/	
- text-align: left;
-margin-bottom: 0vw;
-margin-left: 7vw;
-}
-
-h1.topo2{ 
- color: black;
-font-size: 5vw;
- text-align: left;
-margin-bottom: 1vw;
-margin-left: 7vw;
-}
-
-h1.honbun{ 
- color: black;
-font-size: 3.5vw;
- text-align: left;
-margin-bottom: 0vw;
-margin-left: 4vw;
-}
-
-h1.honbun0{ 
- color: black;
-font-size: 3vw;
- text-align: left;
-margin-bottom: 0vw;
-margin-left: 4vw;
-}	
-
-p_pt {
- color: black;
-
-font-size: 10vw;
-/* font-weight: bold; */
- line-height: 1.5;
-}
-
-p_rank {
- color: black;
-font-size: 3vw;
-font-weight: bold;
-}
-
-p_pie {
- color: gray;
-
-font-size: 1vw;
-font-weight: bold;
- line-height: 1.2;
-border: 0.2vw solid black;
-
-}
-
-
-.con{
-    width:100%;
-    position: relative;
-
-text-align: center;
-
-
-}
-.con img{
-    width:100%;
-    height:auto;
-
-}
-
-
-pa_dddd{
-position: absolute;
-text-align: center;
-top:14%;
-right:8%;
-left:65%;
-transform: translate(0%,0%);
-
-color: #faf9f1;
-font-size: 2vw;
-line-height: 1;
-background: #faf9f1;
-border: 1vw double #faf9f1;
-padding: 1vw 3vw 0.1vw 3vw;
-
-margin-left: 0vw;
-margin-right: 0vw;
-border-radius:1vw
-
-}
-
-pa{
-position: absolute;
-text-align: center;
-top:14%;
-right:8%;
-left:65%;
-transform: translate(0%,0%);
-
-color: white;
-font-size: 2vw;
-line-height: 1;
-
-
-padding: 1vw 3vw 0.1vw 3vw;
-
-margin-left: 0vw;
-margin-right: 0vw;
-border-radius:1vw
-
-}
-
-pb{
-position: absolute;
-top:41%;
-left:62%;
-right:3%;
-transform: translate(0%,0%);
-
-text-align: center;
-
-color: gray;
-font-size: 4vw;
-line-height: 1.5;
-
-margin-left: 1vw;
-margin-right: 0vw;
-
-}
-
-
-pa1{
-position: absolute;
-top:16%;
-left:94%;
-right:0%;
-transform: translate(0%,0%);
-
-font-weight: bold;
-
-color: gray;
-font-size: 2vw;
-
-
-margin-left: 0vw;
-margin-right: 0vw;
-
-}
-
-
-
-
-
-
-
-
-
-
-/* 文字を枠で囲む */
-.box-simple1{
-  margin: 1em;
-  padding: 1em;
-  border: 1px solid #ffaacc;
-  border-radius: 15px;  
-}
-.box-simple1 p {
-  margin: 0;
-  padding: 0;
-}
-.box-simple2{
-  margin: 1em;
-  padding: 1em;
-  border: 2px dashed #ffcc99; 
-}
-.box-simple2 p {
-  margin: 0;
-  padding: 0;
-}
-.box-simple3 {
-  margin: 1em;
-  padding: 1em;
-  border: 5px dotted #aaffcc; 
-}
-.box-simple3 p {
-  margin: 0;
-  padding: 0;
-}
-.box-simple4 {
-  margin: 1em;
-  padding: 1em;
-  border: 0.2vw solid black;
-  border-radius: 0.2vw;  
-  background: white;
-}
-.box-simple4 p {
-  margin: 0;
-  padding: 0;
-text-align: center;
-	
-}
-
-
-.box-simple5a {
-  margin: 1em;
-  padding: 1em;
-  background: #C7C7A8;
- border: 1vw double #292A0A;
-border-radius: 3px;	/*角丸のサイズ*/
-}
-.box-simple5 p {
-  margin: 0;
-  padding: 0;
-}
-
-.box-simple5 {
-  margin: 1em;
-  padding: 1em;
-  background: #f5f2dc;
- border: 1vw double #292A0A;
-border-radius: 3px;	/*角丸のサイズ*/
-}
-.box-simple5 p {
-  margin: 0;
-  padding: 0;
-}
-
-
-h1.htu3_a{ 
- color: black;
-font-weight: bold;
-font-size: 4.1vw;
-/*text-align: center;*/	
- text-align: center;
-margin-bottom: 0vw;
-margin-left: 1vw;
-}	
-
-
-h1.m12{ 
- color: black;
-
-font-size: 5vw;
-/*text-align: center;font-weight: bold;*/	
- text-align: center;
-margin-bottom: 0vw;
-margin-left: 1vw;
-}	
-
-
-
-
-     /* ローディングスピナー */
-        #loading {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(0, 0, 0, 0.1);
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        #main {
-            display: none;
-        }
-
-
-
-
-
-   .slider-container {
-color: black;
-font-weight: bold;
-font-size: 4vw;
-	   
-  border: 0.2vw solid black;
-  border-radius: 0.2vw;  
-  background: white;
-
-	   
-      width: 98%;
-      max-width: 98vw;
-      margin: auto;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .slides {
-      display: flex;
-      transition: transform 0.5s ease;
-    }
-
-.slide {
-  display: flex;
-  justify-content: center;
-  align-items: center; /* ←これで縦方向中央寄せ */
-  height: 50vw;       /* 必要に応じて調整可 */
-  min-width: 100%;
-  box-sizing: border-box;
-  padding: 10vw 13vw;
-  background: #f0f0f0;
-  text-align: center;
-}
-
-    .arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 4vw;
-      cursor: pointer;
-      background: white;
-      border: 1px solid #ccc;
-      padding: 5px 10px;
-      user-select: none;
-      z-index: 10;
-    }
-
-    .arrow.left {
-      left: 10px;
-    }
-
-    .arrow.right {
-      right: 10px;
-    }
-
-    .counter {
-      text-align: center;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-
-
-
-
-	
-
-/* notification-bar の修正 */
-.notification-bar {
-font-size: 3.2vw;
-  position: fixed; /* 画面に固定 */
-  top: 0; /* 画面上部に配置 */
-  left: 0; /* 画面左端に配置 */
-  width: 100%; /* 幅を画面いっぱいに */
-  background-color: rgba(255, 255, 255, 0.7); /* 白の半透明 */
-  padding: 2vw 3vw; /* 内側の余白 */
-  text-align: center; /* テキストを中央寄せ */
-  box-shadow: 0 0.3vw 0.7vw rgba(0, 0, 0, 0.1); /* 軽い影で立体感を出す */
-  z-index: 1000; /* 他のコンテンツの上に表示。他の要素より高い値に設定。 */
-  box-sizing: border-box; /* paddingとborderをwidthに含める */
-  /* 高さを自動調整しつつ、必要なら最小高さを設定 */
-  height: auto;
-  min-height: 5vw; /* 例えば、内容に合わせて調整 */
-}
-
-/* #main コンテンツの調整 */
-#main {
-  /* display: none; はJavaScriptで制御するため、ここには記載しません */
-  margin-top: 15vw; /* お知らせ帯の高さに合わせて調整。実測して決めるのが確実です。 */
-}
-
-/* bodyのmargin-topを0にする（任意、もし上部に余白がある場合は） */
 body {
-    margin-top: 0; /* 既存のbodyのmargin-topをリセット */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+    line-height: 1.6;
 }
 
+.container {
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
 
-	
-	
+h1, h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 4vw;
+}
 
+hr {
+    border: none;
+    border-top: 1px dashed #e0e0e0;
+    margin: 1vw 0;
+}
 
+.product-section {
+    text-align: center;
+}
 
-	
-	
+.product-media img {
+    max-width: 100%; /* 親要素の幅を超えないようにする */
+    height: auto; /* 画像の比率を維持する */
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 300px; /* ここで画像の横幅を300pxに指定 */
+}
+
+.product-description {
+    font-size: 0.95em;
+    color: #555;
+    text-align: left;
+}
+
+.auction-info {
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #4CAF50; /* 緑色で目立たせる */
+}
+
+.bid-section {
+    padding: 15px 20px 20px 20px; /* 上パディングを少し減らす */
+    margin-top: 10px;             /* 必要ならここも減らす */
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.bid-section h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.input-group input[type="number"] {
+    width: calc(100% - 20px); /* パディング分を考慮して幅を調整 */
+    padding: 12px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box; /* パディングを含めて幅を計算 */
+}
+
+.input-group input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 1vw;
+    background-color: #007bff; /* 青色ボタン */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.message {
+    text-align: center;
+    margin-top: 20px;
+    font-weight: bold;
+    color: #d35400; /* エラーや警告はオレンジ */
+}
+
+.status-message {
+    font-size: 1em;
+    font-weight: normal;
+    color: #27ae60; /* 自分の状態は緑色 */
+    margin-top: 5px;
+}
+
+/* モバイル対応のメディアクエリ */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    .container {
+        padding: 20px;
+        margin: 10px auto;
+    }
+    .product-media img {
+        width: 100%; /* 小さい画面では横幅いっぱいに表示 */
+    }
+}
+
+.input-group.horizontal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* チェックボックスのサイズと位置調整 */
+.input-group.horizontal input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #007bff;
+    margin: 0;
+    display: inline-block;
+}
+
+/* ラベルの位置調整（高さを合わせる） */
+.input-group.horizontal label {
+    margin: 0;
+    line-height: 1;
+    display: inline-block;
+}
+
 </style>
+</head>
+<body>
+    <div class="container">
+        <h1>メダカ無人オークション</h1>
+        <hr>
 
- 
-	
-    <!-- ローディングスピナー -->
-    <div id="loading">
-        <div class="spinner"></div>
+        <div class="product-section">
+            <h2>✨ 本日のメダカ ✨</h2>
+            <div class="product-media">
+                <img id="medaka-image" src="image_auction.jpg" alt="メダカの画像">
+                </div>
+            <p class="product-description">
+                この美しく希少なメダカは、優雅な泳ぎと鮮やかな色彩が特徴です。健康状態も良好で、あなたの癒やしとなること間違いなし！ぜひこの機会に手に入れてください。
+            </p>
+        </div>
+
+        <hr>
+
+        <div class="auction-info">
+            <p>現在の最高入札額: <span id="current-bid">--円</span></p>
+            <p id="your-status" class="status-message"></p>
+        </div>
+
+        <hr>
+
+        <div class="bid-section">
+            <h2>入札フォーム</h2>
+            <div class="input-group">
+                <label for="bid-amount">あなたの入札金額 (円):</label>
+                <input type="number" id="bid-amount" min="100" step="100" placeholder="例: 1500" required>
+            </div>
+            <div class="input-group horizontal">
+                <input type="checkbox" id="agree-checkbox" required>
+                <label for="agree-checkbox">オークション規約に同意する</label>
+            </div>
+            <button id="bid-button">入札する</button>
+            <p id="message" class="message"></p>
+        </div>
     </div>
 
+    <script src="script.js"></script>
 
 
-	
-<div id="main">
-	
+<script>
 
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzfXCzGQ5GYD8TzHaI-eozCbV5OGkEhVufPS_S9V5j9GUVtL9n0HSlcLdoQW2jjzbMTFQ/exec';
 
-	
-<section>
-	
-<div class="con">
+window.addEventListener('DOMContentLoaded', async () => {
+  await liff.init({ liffId: "1657196041-ALeOLrEa" });
 
-<div class="notification-bar">
-    <p>一部端末で専用QRコードリーダーが立ちあがらない不具合を修正しました。</p>
- </div>
+  if (!liff.isLoggedIn()) {
+    liff.login();
+    return;
+  }
 
-	
-<h1 class="topo">C o C o め だ か</h1>
-<h1 class="topo2">無 人 販 売 所</h1>
-	
-<pa><div id="data-container3">-</div></pa>
-<pb><div id="data-container2">now loading...</div></pb>
-<pa1><div class="vertical-progress-bar">
-  <div id="progressBar_vertical" class="vertical-progress-bar-inner" style="height:0%;"></div>
-</div></pa1>	
-</div>
+  const idToken = liff.getIDToken();
+  document.getElementById('bid-button').disabled = true;
+  document.getElementById('message').textContent = '情報を取得中...';
 
-	
-  <div style="width: 100%; border: 0.2vw solid #ccc;">
-    <div id="progressBar" style="width: 0%; height: 0.3vw; background-color: #7cfc00;"></div>
-  </div>
-	
-<h1>
-	
-</h1>
+  // 状態読み込み
+  loadAuctionStatus(idToken);
 
+  // 入札ボタンイベント
+  document.getElementById('bid-button').addEventListener('click', async () => {
+    const bidAmount = Number(document.getElementById('bid-amount').value);
+    const agreed = document.getElementById('agree-checkbox').checked;
 
-        
-      <div class="button-container">
-<a href="QRCR_r.html"><img src="QRCR_r1.jpg" class="img-button" alt="QRコードリーダー"></a> 
-<a href="numberForm.html"><img src="4kfm1.jpg" class="img-button" alt="コード入力フォーム"></a>
-<a href="QRCR_r2.html"><img src="RSVT1.jpg" class="img-button" alt="予約注文"></a>
-	      </div>  
+    if (!agreed) {
+      showMessage('規約に同意してください。', 'error');
+      return;
+    }
 
- <div class="button-container">	
-<a href="quiz2"><img src="rou.jpg" class="img-button" alt="quiz2"></a>
-<a href="coco_camera.html"><img src="cam_coco.jpg" class="img-button" alt="cam"></a>
-<a href="toiawase_coco.html"><img src="rou.jpg" class="img-button" alt="u_c"></a>
- 
-</div> 
+    if (!bidAmount || bidAmount < 100 || bidAmount % 100 !== 0) {
+      showMessage('100円単位で正しい入札金額を入力してください。', 'error');
+      return;
+    }
 
-        
-      
+    document.getElementById('bid-button').disabled = true;
+    showMessage('入札処理中...', 'info');
 
-<br>
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: new URLSearchParams({
+        idToken,
+        bidAmount
+      })
+    });
 
-	
+    const data = await res.json();
+    if (data.status === 'success') {
+      updateAuctionUI(data);
+      showMessage(data.message, 'success');
+    } else {
+      showMessage(data.message, 'error');
+    }
 
-<div class="slider-container" id="slider">
-  <div class="arrow left" onclick="prevSlide()">←</div>
-  <div class="arrow right" onclick="nextSlide()">→</div>
-  <div class="slides" id="slideTrack">
-    <!-- クローン: 最後のスライド -->
-    <div class="slide">これは5番目の文章です。</div>
-
-    <!-- 本物スライド -->
-    <div class="slide">
-	    
-「CoCoポイント」は貯めると色んな<br>
-イイコトがあるかもしれない<br>
-CoCoめだか独自のポイントです。
-    
-    </div>
-  
-      <div class="slide">
-無人販売所では<br>
-PayPay決済が利用いただけます。    
-    </div>
-
-      <div class="slide">
-ゴールドランク以上の皆様は<br>
-専用ボックスで景品をGETできます。    
-    </div>
-	  
-      <div class="slide">
-【ポイントの取得方法】<br>
-１．商品記載の4桁の数字を登録する。(上段中央のアイコン)<br>
-２．無人販売所に設置されたQRコード(デイリーポイント、1日1回可)を読み取る。(上段左のアイコン)<br>
-　※QRコードを読み取る際は、必ず”CoCoめだか専用QRコードリーダー”で読み取ってください。<br>
-3．その他、サイト内でクイズに正解するなど。 
-    </div>
-	  
-    <div class="slide">これは5番目の文章です。</div>
-
-    <!-- クローン: 最初のスライド -->
-    <div class="slide">	    
-「CoCoポイント」は貯めると色んな<br>
-イイコトがあるかもしれない<br>
-CoCoめだか独自のポイントです。
-    </div>
-  </div>
-</div>
-
-<div class="counter" id="counterDisplay">1/5</div>
-
-
-	
-<br>
-
-	
-<h1 class="htu3">【ポイントの取得方法】</h1>
-<h1 class="
-honbun">１．商品記載の4桁の数字を登録する。(上段中央のアイコン)</h1>
-<h1 class="
-honbun">２．無人販売所に設置されたQRコード(デイリーポイント、1日1回可)を読み取る。(上段左のアイコン)</h1>
-<h1 class="
-honbun0">　　※QRコードを読み取る際は、必ず”CoCoめだか専用QRコードリーダー”で読み取ってください。</h1>
-<h1 class="
-honbun">3．その他、サイト内でクイズに正解するなど。</h1>
-	
-<br>
-<h1 class="htu3">【ランク(ステータス)について】</h1>
-<h1 class="
-honbun">ポイント数に応じてランクが決まります。ポイント数とランクの対応は以下の通りです。</h1>
-<h1 class="
-honbun">　　レギュラー：1 - 19ポイント</h1>
-<h1 class="
-honbun">　　シルバー：20 - 69ポイント</h1>	
-<h1 class="
-honbun">　　ゴールド：70 - 149ポイント</h1>
-<h1 class="
-honbun">　　プラチナ：150 - 349ポイント</h1>
-
-	
-<h1 class="hks2" style = "text-indent: -1em">
-
-	
-<h1 class="htu3">【特典など】</h1>
-<h1 class="honbun" style = "text-indent: -1em">１．シルバーランク以上で予約注文が利用できます。</h1>
-<h1 class="honbun" style = "text-indent: -1em">２．ゴールドランク以上で素敵な景品プレゼント？！</h1>
-<h1 class="honbun" style = "text-indent: -1em">３．その他。</h1>
-	
-<br>									 
-<h1 class="htu3">【注意事項など】</h1>
-<h1 class="
-honbun" style = "text-indent: -1em">１．システムの不具合などにより意図しないポイントが付与された場合は取り消し、修正されることがあります。</h1>
-<h1 class="
-honbun" style = "text-indent: -1em">２．QRコードの複製、改ざん、その他の不正行為が発覚した場合、ポイントの取り消しすることがあります。</h1>
-<h1 class="
-honbun" style = "text-indent: -1em">３．ポイントは換金、譲渡などはできません。</h1>
-
-<h1 class="
-honbun" style = "text-indent: -1em">４．サービスの提供に関して、技術的、運用上の問題、自然災害、またはその他の予見できない理由により、サービスの提供が一時的または永久に中断される場合があります。</h1>	
-<h1 class="
-honbun" style = "text-indent: -1em">５．サービスの中断または停止に関連して発生した直接的または間接的な損害について、「CoCoめだか」は補償の責任を負わないものとします。</h1>
-
-
-													       
-<br>
-<br>
-<h1 class="
-honbun"></h1>
-<h1 class="
-honbun"></h1>
-
-	
-<h1 class="m12">© Coco Medaka35</h1>
-
-
-
-    <script>
-
-$(window).on("load", function() {
-    setTimeout(function() {
-        $("#loading").fadeOut(500, function() {
-            $("#main").fadeIn(500);
-            updateSlide(false); // ← ここを追加
-        });
-    }, 1000);
+    document.getElementById('bid-button').disabled = false;
+  });
 });
 
-	    
-	    
-	    
-        // LIFFの初期化
-        liff.init({ liffId: '1657196041-ALeOLrEa' }, () => {
-            if (liff.isLoggedIn()) {
-                // ユーザーがログインしている場合
-                sendIdTokenToGAS();
-            } else {
-                // ログインが必要な場合、ログインページを表示
-                liff.login();
-            }
-        });
+async function loadAuctionStatus(idToken) {
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: new URLSearchParams({ idToken })
+    });
+    const data = await res.json();
 
-        // IDトークンをGASに送信する関数
-        function sendIdTokenToGAS() {
-            const idToken = liff.getIDToken();
-
-            // ローディング画像表示
-            $('#loading').show();
-
-            // IDトークンをGASに送信
-            $.ajax({
-                url: 'https://script.google.com/macros/s/AKfycbwU-jlTWnEyMNN7WHoD-tQjFyV_7opWSvNSB6n4nDqub7Hr7TDLmwHW3FBgmkfZ2VEfFw/exec',
-                type: 'POST',
-                data: { idToken: idToken },
-                success: function (response) {
-                    // 成功時
-                    console.log(response);
-                    displayData(response);
-                },
-                error: function (error) {
-                    // エラー時
-                   // console.error(error);
-                    //alert('Failed to send ID Token to GAS.');
-                },
-                complete: function () {
-                    // 通信完了時の処理（ローディング画像を非表示にし、コンテンツを表示）
-                    $('#loading').hide();
-                    $('#content').show();
-                }
-            });
-        }
-  
- // メッセージを表示する関数
-    function displayMessage(message) {
-        const messageElement = document.createElement('p');
-        messageElement.textContent = message;
-        document.body.appendChild(messageElement);
-    }
-
-    // 取得したデータをHTMLに表示する関数
-    function displayData(data) {
-        const jsonData = JSON.parse(data);
-
-
-   const progressBar0 = document.getElementById('progressBar_vertical');
-   // progressBar0.textContent = `あと${jsonData.nextRank} pt `; 
-  progressBar0.style.height = `${jsonData.progress_rate*100}`+'%';
- //progressBar0.style.height = "10"+"vw";
-
-
-
-  // const progressBar = document.getElementById('progressBar');
-   // progressBar.textCont//ent = `${jsonData.score} `; 
- // progressBar.style.width = `${jsonData.progress_rate*100}`+'vw';
- //progressBar.style.height = "10"+"vw";
-
-
-
-        const container2 = document.getElementById("data-container2");
-        const container3 = document.getElementById("data-container3");
-        const container4 = document.getElementById("data-container4");
-
-        const paragraph2 = document.createElement("p_pt");
-        paragraph2.textContent =`${jsonData.score}℗ `;　// pt
-　　　　container2.textContent = ""; // 既存のコンテンツをクリア
-        container2.appendChild(paragraph2);
-
-        const paragraph3 = document.createElement("p_rank");
-        paragraph3.textContent = `${jsonData.rank} `;　//rank
-　　　　container3.textContent = ""; // 既存のコンテンツをクリア
-        container3.appendChild(paragraph3);
-        document.querySelector("pa").style.border = "1vw double gray";
-	    
-  document.querySelector(".vertical-progress-bar").style.border = "0.2vw solid gray";
-
-
-
-  if (jsonData.rank === "レギュラー") {
-      document.querySelector("pa").style.backgroundColor = "#f5deb3";
-    } else if (jsonData.rank === "シルバー") {
-      document.querySelector("pa").style.backgroundColor = "#f5f5f5";
-    } else if (jsonData.rank === "ゴールド") {
-      document.querySelector("pa").style.backgroundColor = "#f0e68c";
-    } else if (jsonData.rank === "プラチナ") {
-      document.querySelector("pa").style.backgroundColor = "#add8e6";
-    } else if (jsonData.rank === "ダイヤモンド") {
-      document.querySelector("pa").style.backgroundColor = "#1e90ff";
+    if (data.status === 'success') {
+      updateAuctionUI(data);
+      showMessage(data.message, 'success');
     } else {
-      // その他の場合のデフォルトの背景色を設定
-      document.querySelector("pa").style.backgroundColor = "#f5f5dc";
+      showMessage(data.message, 'error');
     }
 
-    }
-
-
- const slideTrack = document.getElementById("slideTrack");
-  const slider = document.getElementById("slider");
-  const counterDisplay = document.getElementById("counterDisplay");
-
-  const totalSlides = 5; // 本物のスライド数
-  let currentIndex = 1;  // 実際のスライド位置（1～5）
-
-  function updateSlide(animate = true) {
-    const slideWidth = slider.offsetWidth;
-    if (!animate) {
-      slideTrack.style.transition = "none";
-    } else {
-      slideTrack.style.transition = "transform 0.5s ease";
-    }
-    slideTrack.style.transform = `translateX(-${slideWidth * currentIndex}px)`;
-    const displayIndex = ((currentIndex - 1 + totalSlides) % totalSlides) + 1;
-    counterDisplay.textContent = `${displayIndex}/${totalSlides}`;
+    document.getElementById('bid-button').disabled = false;
+  } catch (e) {
+    showMessage('通信エラーが発生しました。', 'error');
   }
+}
 
-  function nextSlide() {
-    if (currentIndex < totalSlides + 1) {
-      currentIndex++;
-      updateSlide();
-      if (currentIndex === totalSlides + 1) {
-        setTimeout(() => {
-          currentIndex = 1;
-          updateSlide(false);
-        }, 500);
-      }
-    }
-  }
+function updateAuctionUI(data) {
+  document.getElementById('current-bid').textContent = `${data.maxBid}円`;
+  document.getElementById('your-status').textContent = data.isHighest
+    ? 'あなたが現在の最高入札者です！'
+    : `あなたの入札額: ${data.yourBid || '---'}円`;
+}
 
-  function prevSlide() {
-    if (currentIndex > 0) {
-      currentIndex--;
-      updateSlide();
-      if (currentIndex === 0) {
-        setTimeout(() => {
-          currentIndex = totalSlides;
-          updateSlide(false);
-        }, 500);
-      }
-    }
-  }
+function showMessage(text, type = 'info') {
+  const msgEl = document.getElementById('message');
+  msgEl.textContent = text;
+  msgEl.style.color = {
+    success: '#27ae60',
+    error: '#e74c3c',
+    info: '#2980b9'
+  }[type] || '#333';
+}
 
-  // スワイプ処理
-  let startX = 0;
-  let isSwiping = false;
 
-  slider.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-    isSwiping = true;
-  });
+</script>
 
-  slider.addEventListener("touchend", (e) => {
-    if (!isSwiping) return;
-    const endX = e.changedTouches[0].clientX;
-    const diffX = endX - startX;
-    if (Math.abs(diffX) > 50) {
-      if (diffX < 0) nextSlide();
-      else prevSlide();
-    }
-    isSwiping = false;
-  });
-
-  window.addEventListener("resize", () => updateSlide(false));
-  updateSlide(false); // 初期表示
-	    
-    </script>
 </body>
 </html>
 
