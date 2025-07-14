@@ -175,11 +175,57 @@ button:disabled {
     display: inline-block;
 }
 
+
+
+
+
+    
+     /* ローディングスピナー */
+        #loading {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #main {
+            display: none;
+        }
+
+
+    
 </style>
 </head>
 <body>
+
+    
+    <!-- ローディングスピナー -->
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
+
+
+    
     <div class="container">
-        <h1>メダカ無人オークション</h1>
+        <h1>CoCoオークション</h1>
         <hr>
 
         <div class="product-section">
@@ -230,11 +276,15 @@ window.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+    
   const idToken = liff.getIDToken();
   document.getElementById('bid-button').disabled = true;
   document.getElementById('message').textContent = '情報を取得中...';
 
 
+
+
+    
   // 状態読み込み
   loadAuctionStatus(idToken);
 
@@ -292,6 +342,13 @@ async function loadAuctionStatus(idToken) {
     }
 
     document.getElementById('bid-button').disabled = false;
+
+    // ★★★ ここでローディング終了、main表示
+    $('#loading').fadeOut(500, function () {
+      $('#main').fadeIn(500);
+      updateSlide?.(false); // 定義されていれば呼び出す
+    });
+
   } catch (e) {
     showMessage('通信エラーが発生しました。', 'error');
   }
