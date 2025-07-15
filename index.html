@@ -86,6 +86,22 @@ hr {
     font-size: 1.2em;
 }
 
+.bid-section_current {
+    padding: 15px 20px 20px 20px; /* 上パディングを少し減らす */
+    margin-top: 10px;             /* 必要ならここも減らす */
+    background-color:lightblue;    /* #f9f9f9;*/
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.bid-section_current h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+    
+
 .input-group {
     margin-bottom: 15px;
 }
@@ -221,12 +237,12 @@ button:disabled {
         </div>
 
         <hr>
-
+      <div class="bid-section_current">
         <div class="auction-info">
             <p>現在の最高入札額: <span id="current-bid">--円</span></p>
             <p id="your-status" class="status-message"></p>
         </div>
-
+      </div>
         <hr>
 
         <div class="bid-section">
