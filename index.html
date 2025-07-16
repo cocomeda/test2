@@ -447,21 +447,3 @@ function showMessage(text, type = 'info') {
 
 
 
-
-<script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyXcWOKUsBXyeUjpga9offA9X_tZB1rOCpBkejifOsEKR9rFt7tE4DTH9IbUl0lSd80Ww/exec';
-
-window.addEventListener('DOMContentLoaded', async () => {
-  await liff.init({ liffId: "1657196041-ALeOLrEa"});
-
-  
-  if (!liff.isLoggedIn()) {
-    liff.login();
-    return;
-  }
-
-  const idToken = liff.getIDToken();
-  document.getElementById('bid-button').disabled = true;
-  document.getElementById('message').textContent = '情報を取得中...';
-
-
