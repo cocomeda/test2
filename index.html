@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>メダカオークション</title>
-    <link rel="stylesheet" href="style.css">
   <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     <script src="https://unpkg.com/@line/liff/dist/liff.js"></script>
 <style>
@@ -244,6 +243,8 @@ button:disabled {
         <div class="auction-info">
             <p>現在の最高入札額: <span id="current-bid">--円</span></p>
             <p id="your-status" class="status-message"></p>
+            <p>オークション終了時刻: <span id="auction-end-time">--:--</span></p>
+            <p>残り時間: <span id="countdown-timer">--日 --時間 --分 --秒</span></p>
         </div>
       </div>
         <hr>
@@ -275,13 +276,20 @@ button:disabled {
         </div>
     </div>
 
-    <script src="script.js"></script>
+   
 
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyXcWOKUsBXyeUjpga9offA9X_tZB1rOCpBkejifOsEKR9rFt7tE4DTH9IbUl0lSd80Ww/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzLCTaqquIdEk2cJkhPskeeqhF5VyJr58SbyhwFpoUjv8TWViS9_Uc3Hgx6gl43jjoU/exec';
+
+
+let auction_id = "1"
+  
+
+let countdownInterval; // カウントダウンのインターバルIDを保持するための変数
 
 window.addEventListener('DOMContentLoaded', async () => {
+
   await liff.init({ liffId: "1657196041-ALeOLrEa"});
 
   
@@ -291,6 +299,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   const idToken = liff.getIDToken();
+    
   document.getElementById('bid-button').disabled = true;
   document.getElementById('message').textContent = '情報を取得中...';
 
@@ -324,7 +333,8 @@ window.addEventListener('DOMContentLoaded', async () => {
       method: 'POST',
       body: new URLSearchParams({
         idToken,
-        bidAmount
+        bidAmount,
+        auction_id
       })
     });
 
@@ -350,6 +360,8 @@ async function loadAuctionStatus(idToken) {
 
     if (data.status === 'success') {
       updateAuctionUI(data);
+      // カウントダウン開始
+      startCountdown(data.a_end_Date, data.a_end_Time);
       showMessage(data.message, 'success');
     } else {
       showMessage(data.message, 'error');
@@ -366,7 +378,52 @@ function updateAuctionUI(data) {
   document.getElementById('your-status').textContent = data.isHighest
     ? 'あなたが現在の最高入札者です！'
     : `あなたの入札額: ${data.yourBid || '---'}円`;
+
+  // オークション終了時刻の表示
+  // a_end_Dateは "Mon Jul 16 2025 00:00:00 GMT+0900" 形式
+  // a_end_Timeは 13 (24時間表記の数値)
+  const endDate = new Date(data.a_end_Date);
+  endDate.setHours(data.a_end_Time, 0, 0, 0); // 時刻を設定
+
+  const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+  document.getElementById('auction-end-time').textContent = endDate.toLocaleString('ja-JP', options);
 }
+
+function startCountdown(endDateStr, endTimeNum) {
+  // 既存のインターバルがあればクリアする
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+  }
+
+  const endDate = new Date(endDateStr);
+  endDate.setHours(endTimeNum, 0, 0, 0); // 時刻を設定
+
+  const countdownTimerElement = document.getElementById('countdown-timer');
+
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = endDate.getTime() - now;
+
+    if (distance < 0) {
+      clearInterval(countdownInterval);
+      countdownTimerElement.textContent = 'オークションは終了しました';
+      document.getElementById('bid-button').disabled = true; // オークション終了後は入札不可に
+      showMessage('オークションは終了しました。', 'error');
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    countdownTimerElement.textContent = `${days}日 ${hours}時間 ${minutes}分 ${seconds}秒`;
+  }
+
+  updateCountdown(); // 初回呼び出しで即時表示
+  countdownInterval = setInterval(updateCountdown, 1000); // 1秒ごとに更新
+}
+
 
 function showMessage(text, type = 'info') {
   const msgEl = document.getElementById('message');
@@ -383,3 +440,28 @@ function showMessage(text, type = 'info') {
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyXcWOKUsBXyeUjpga9offA9X_tZB1rOCpBkejifOsEKR9rFt7tE4DTH9IbUl0lSd80Ww/exec';
+
+window.addEventListener('DOMContentLoaded', async () => {
+  await liff.init({ liffId: "1657196041-ALeOLrEa"});
+
+  
+  if (!liff.isLoggedIn()) {
+    liff.login();
+    return;
+  }
+
+  const idToken = liff.getIDToken();
+  document.getElementById('bid-button').disabled = true;
+  document.getElementById('message').textContent = '情報を取得中...';
+
+
