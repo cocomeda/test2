@@ -803,26 +803,20 @@ button:disabled {
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbz4xW-dJlwPqRP7CWG4NyCljvYWNNQvecrqGc5krToj7ziSbywnRCCTnV7HMs5Q7T20DQ/exec';
   
 
-  
+ 
+let auctionEndTime;
 
-  
+// ページ読み込み時に実行
+window.addEventListener('DOMContentLoaded', async () => {
   await liff.init({ liffId: "1657196041-ALeOLrEa" });
-  
 
-  
   if (!liff.isLoggedIn()) {
-  
     liff.login();
-  
     return;
-  
   }
-  
 
-  
   const idToken = liff.getIDToken();
-  
-
+ 
   
 
   
