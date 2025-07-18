@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoCoメダカオークション</title>
+  <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <script src="https://unpkg.com/@line/liff/dist/liff.js"></script>
+<style>
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+
+}
+
+.container {
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+h1, h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 4vw;
+}
+
+hr {
+    border: none;
+    border-top: 1px dashed #e0e0e0;
+    margin: 1vw 0;
+}
+
+.product-section {
+    text-align: center;
+}
+
+.product-media img {
+    max-width: 100%; /* 親要素の幅を超えないようにする */
+    height: auto; /* 画像の比率を維持する */
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 80vw; /* ここで画像の横幅を300pxに指定 */
+}
+
+.product-description {
+    font-size: 0.95em;
+    color: #555;
+    text-align: left;
+}
+
+.auction-info0 {
+    text-align: center;
+    font-size: 8vw;
+    font-weight: bold;
+    color:black;
+}
+
+.auction-info {
+    text-align: center;
+    font-size: 5vw;
+    font-weight: bold;
+    color:black;
+}
+
+
+.auction-info2 {
+    text-align: center;
+    font-size: 4vw;
+    font-weight: bold;
+    color:#27ae60; /* 緑色で目立たせる */
+}    
+
+.bid-section {
+    padding: 15px 20px 20px 20px; /* 上パディングを少し減らす */
+    margin-top: 10px;             /* 必要ならここも減らす */
+    background-color:lightblue;    /* #f9f9f9;*/
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.bid-section h2 {
+    margin-top: 0;
+    margin-bottom: 1px;
+    font-size: 1.2em;
+}
+
+
+    
+.bid-section_current {
+    padding: 15px 20px 20px 20px; /* 上パディングを少し減らす */
+    margin-top: 10px;             /* 必要ならここも減らす */
+    background-color:;    /* #f9f9f9;*/
+    border-radius: 0.2vw;
+    border: 1px solid black;
+    box-shadow: 3px 2px 2px gray;
+}
+
+.bid-section_current h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+    
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.input-group input[type="number"] {
+    width: calc(100% - 20px); /* パディング分を考慮して幅を調整 */
+    padding: 12px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box; /* パディングを含めて幅を計算 */
+}
+
+.input-group input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 1vw;
+    background-color: #007bff; /* 青色ボタン */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.message {
+    text-align: center;
+    margin-top: 20px;
+    font-weight: bold;
+    color: #d35400; /* エラーや警告はオレンジ */
+}
+
+.status-message {
+    font-size: 1em;
+    font-weight: normal;
+    color: #27ae60; /* 自分の状態は緑色 */
+    margin-top: 5px;
+}
+
+/* モバイル対応のメディアクエリ */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    .container {
+        padding: 20px;
+        margin: 10px auto;
+    }
+    .product-media img {
+        width: 100%; /* 小さい画面では横幅いっぱいに表示 */
+    }
+}
+
+.input-group.horizontal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* チェックボックスのサイズと位置調整 */
+.input-group.horizontal input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #007bff;
+    margin: 0;
+    display: inline-block;
+}
+
+/* ラベルの位置調整（高さを合わせる） */
+.input-group.horizontal label {
+    margin: 0;
+    line-height: 1;
+    display: inline-block;
+}
+
+/* 金額入力欄の右寄せと円表示用スタイル */
+.currency-input .input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.currency-input input[type="number"] {
+    width: 100%;
+    padding: 12px 35px 12px 10px; /* 右に余白を追加して円ラベル分を確保 */
+    text-align: right; /* 右寄せ */
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.currency-input .yen-label {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #555;
+    font-size: 1em;
+}
+
+/* 追加スタイル */
+.time-info {
+    text-align: center;
+    font-size: 1em;
+    color: #555;
+    margin-top: 10px;
+}
+.countdown {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #e74c3c; /* カウントダウンは赤色で目立たせる */
+    margin-top: 5px;
+    text-align: center;
+}
+
+
+
+
+
+
+
+
+#bid-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+#modal-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+#modal-content {
+    position: relative;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 1000;
+    width: 90vw;
+    max-width: 400px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+/* ローディング用のくるくる */
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #007bff;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.title-box {
+  background-color: #f9f9f9;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 1.5em;
+  text-align: center;
+  margin: 20px 0;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+}
+
+
+</style>
+</head>
+<body>
+
+<!-- ローディング画面 -->
+<div id="loading-screen" style="
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+">
+  <div class="loader"></div>
+</div>
+
+
+
+    <div class="container">
+        <div class="product-section">
+       <h2>CoCoめだか無人オークション</h2>
+<h2 id="auction-title" class="title-box">品種名</h2>
+            <div class="product-media">
+                <img id="medaka-image" src="" alt="メダカの画像">
+                </div>
+            <p id="item-overview" class="product-description">
+                ----
+            </p>
+        </div>
+
+        <hr>
+      <div class="bid-section_current">
+        <div class="auction-info">
+            <p>現在の価格: <span id="current-bid">--円</span></p>
+     </div>
+<div class="auction-info2">
+            <p id="your-status" class="status-message"></p>
+        
+            </div>
+      </div>
+
+    <p class="time-info">現在時刻: <span id="current-time">--:--:--</span></p>
+            <p class="countdown"><span id="time-remaining">--日--時間--分--秒</span></p>
+
+        <hr>
+
+<!-- モーダル -->
+<div id="bid-modal" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;">
+  <div style="
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 80vw;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+    
+    <h2 style="margin-top: 0;">入札内容を入力</h2>
+    
+    <div class="input-group currency-input">
+      <label for="modal-bid-amount">入札金額 (100円単位):</label>
+      <div class="input-wrapper" style="position: relative;">
+        <input type="number" id="modal-bid-amount" min="100" step="100" placeholder="例: 1500" required>
+        <span class="yen-label" style="
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #555;">円</span>
+      </div>
+    </div>
+
+    <div class="input-group horizontal" style="margin-top: 15px;">
+      <input type="checkbox" id="modal-agree-checkbox" required>
+      <label for="modal-agree-checkbox">オークション規約に同意する</label>
+    </div>
+
+    <!-- モーダル内エラーメッセージ -->
+    <p id="modal-message" class="message" style="margin-top: 10px;"></p>
+
+    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+      <button id="modal-cancel-button" style="width: 45%; background: #ccc;">キャンセル</button>
+      <button id="modal-submit-button" style="width: 45%;">入札する</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- 通常の「入札する」ボタン -->
+<div style="text-align:center; margin-top:20px;">
+  <button id="bid-button">入札する</button>
+  <p id="message" class="message"></p>
+</div>
+
+
+<script>
+
+
+
+// URLからパラメータを取得する関数
+function getQueryParam(name) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
+
+// 例：auction_id を取得
+
+const auctionId = getQueryParam("id") || "auc1"; // パラメータがなければ "auc1"
+
+
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxAxMEcXQlUbNj7uaurP-juDvl_xGJTVG1WGI_YXR4RjkL8-nSSQLjeWGptYuET3bLuiQ/exec'; //オークションE_A2
+
+const idToken = "eyJraWQiOiJjY2Q1OGMyZjI2NDZmNDVmZTBiNGJiYjAyMzdkNjJmMGRkN2JiMTY2OWQ0MGMxMjFiODQ4OGYxMGJmMzYzOTAwIiwidHlwIjoiSldUIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL2FjY2Vzcy5saW5lLm1lIiwic3ViIjoiVTIxNWI5ZDRjY2ZhNTUxNjQ4NzVjZTZhMmU2NzdjMGIzIiwiYXVkIjoiMTY1NzE5NjA0MSIsImV4cCI6MTcyMzAyMzI0MywiaWF0IjoxNzIzMDE5NjQzLCJuYW1lIjoibi50YWt1bWEiLCJwaWN0dXJlIjoiaHR0cHM6Ly9wcm9maWxlLmxpbmUtc2Nkbi5uZXQvMGhLMkVFQUJUVkZCMTRQQUktXzV0clNrUjVHbkFQRWhKVkFGeFplUWhwU1NoWEJWdENSMU5ZTHdvNlNTb0hERkVmUmdvSkxnbHZHU1ZYIn0.9Li1LEQeylau5NVHq2kH8iUyK-gwyY_pc8iAGEfZWLxNfINuRCvzg3pE6LpuUIZWtVxyemSg5tspzYN2IVXzBA"
+
+
+let auctionEndTime;
+
+
+// ローディング制御
+function showLoading() {
+  document.getElementById('loading-screen').style.display = 'flex';
+}
+function hideLoading() {
+  document.getElementById('loading-screen').style.display = 'none';
+}
+
+// メッセージ表示（モーダル内）
+function showModalMessage(text, type = 'info') {
+  const msgEl = document.getElementById('modal-message');
+  msgEl.textContent = text;
+  msgEl.style.color = {
+    success: '#27ae60',
+    error: '#e74c3c',
+    info: '#2980b9'
+  }[type] || '#333';
+}
+
+// 状態メッセージ（画面下）
+function showStatusMessage(text, type = 'info') {
+  const msgEl = document.getElementById('message');
+  msgEl.textContent = text;
+  msgEl.style.color = {
+    success: '#27ae60',
+    error: '#e74c3c',
+    info: '#2980b9'
+  }[type] || '#333';
+}
+
+// 現在の入札・時間表示
+function updateCurrentTime() {
+  const now = new Date();
+  document.getElementById('current-time').textContent = now.toLocaleTimeString();
+}
+
+function updateCountdown() {
+  if (!auctionEndTime) return;
+
+  const now = new Date().getTime();
+  const distance = auctionEndTime.getTime() - now;
+
+  if (distance < 0) {
+    document.getElementById('time-remaining').textContent = 'オークションは終了しました';
+    document.getElementById('bid-button').disabled = true;
+    return;
+  }
+
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+  document.getElementById('time-remaining').textContent =
+    `終了まで：${days}日${hours}時間${minutes}分${seconds}秒`;
+}
+
+// UI反映
+function updateAuctionUI(data) {  //******************************************************************
+ 
+//let auctionId = data.checkedRows[0][0]
+
+  document.getElementById('auction-title').textContent = `${data.checkedRows[0][2]}`;
+
+  document.getElementById("medaka-image").src = data.checkedRows[0][7];
+
+  document.getElementById('item-overview').textContent = `${data.checkedRows[0][3]}`;
+
+  document.getElementById('current-bid').textContent = `${data.maxBid}円`;
+
+  document.getElementById('your-status').textContent = data.isHighest
+    ? `あなたが最高額！`
+    : `あなたの入札額: ${data.yourBid || '---'}円`;
+}
+
+
+
+function updateAuctionUI_2(data) {  //******************************************************************
+ 
+  document.getElementById('current-bid').textContent = `${data.maxBid}円`;
+
+  document.getElementById('your-status').textContent = data.isHighest
+    ? `あなたが最高額！`
+    : `あなたの入札額: ${data.yourBid || '---'}円`;
+}
+
+
+
+// 入札データ取得
+async function loadAuctionStatus(idToken) {
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: new URLSearchParams({
+        idToken,
+        bidAmount: '',
+        auction_id: auctionId
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.status === 'success') {
+      updateAuctionUI(data);
+      if (data.auctionEndTime) {
+        auctionEndTime = new Date(data.auctionEndTime);
+      }
+      showStatusMessage(data.message, 'success');
+    } else {
+      showStatusMessage(data.message, 'error');
+    }
+
+    document.getElementById('bid-button').disabled = false;
+  } catch (e) {
+    showStatusMessage('通信エラーが発生しました。', 'error');
+  }
+}
+
+// DOM初期化
+window.addEventListener('DOMContentLoaded', async () => {
+  showLoading(); // ローディング表示
+  document.getElementById('bid-button').disabled = true;
+
+  await loadAuctionStatus(idToken);
+
+  updateCurrentTime();
+  setInterval(updateCurrentTime, 1000);
+  if (auctionEndTime) {
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  }
+
+  hideLoading(); // ローディング終了
+
+  // 入札モーダル表示
+  document.getElementById('bid-button').addEventListener('click', () => {
+    document.getElementById('modal-bid-amount').value = '';
+    document.getElementById('modal-agree-checkbox').checked = false;
+    showModalMessage('');
+    document.getElementById('bid-modal').style.display = 'flex';
+  });
+
+  // モーダルキャンセル
+  document.getElementById('modal-cancel-button').addEventListener('click', () => {
+    document.getElementById('bid-modal').style.display = 'none';
+  });
+
+  // モーダル内送信処理
+  document.getElementById('modal-submit-button').addEventListener('click', async () => {
+    const bidAmount = Number(document.getElementById('modal-bid-amount').value);
+    const agreed = document.getElementById('modal-agree-checkbox').checked;
+
+    if (!agreed) {
+      showModalMessage('規約に同意してください。', 'error');
+      return;
+    }
+
+    if (bidAmount < 100 || bidAmount % 100 !== 0) {
+      showModalMessage('100円単位で正しい入札金額を入力してください。', 'error');
+      return;
+    }
+
+    document.getElementById('modal-submit-button').disabled = true;
+    showModalMessage('入札中...', 'info');
+
+    try {
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        body: new URLSearchParams({
+          idToken,
+          bidAmount,
+          auction_id: auctionId
+        })
+      });
+      const data = await res.json();
+
+      if (data.status === 'success') {
+
+        updateAuctionUI_2(data);
+        document.getElementById('bid-modal').style.display = 'none'; // 成功時のみ閉じる
+
+        showStatusMessage(data.message, 'success');
+      } else {
+        showModalMessage(data.message, 'error'); // モーダル内にエラー表示
+      }
+    } catch (e) {
+      showModalMessage('通信エラーが発生しました9。', 'error');
+    }
+
+    document.getElementById('modal-submit-button').disabled = false;
+  });
+});
+
+
+// ローディング画面を表示
+function showLoading() {
+  document.getElementById('loading-screen').style.display = 'flex';
+}
+
+// ローディング画面を非表示
+function hideLoading() {
+  document.getElementById('loading-screen').style.display = 'none';
+}
+
+</script>
+
+
+
+</body>
+</html>

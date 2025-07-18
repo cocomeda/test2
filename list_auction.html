@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CoCo無人オークション</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .auction-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .auction-card {
+      display: flex;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .auction-card:hover {
+      transform: scale(1.02);
+    }
+
+    .auction-card img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .auction-info {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .auction-title {
+      font-size: 1.2em;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .auction-detail {
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .warning-box {
+      background: #fffbe0;
+      border: 1px solid #999;
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 600px;
+      margin: 50px auto;
+      text-align: center;
+    }
+
+    .warning-box button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 注意事項表示 -->
+<div class="warning-box" id="warning-box">
+  <h2>ご利用にあたっての注意事項</h2>
+  <p>無人販売所まで取りに来られる方のみ入札してください。<br>
+  実物をご覧になりたい場合は、CoCo無人販売所までお越しください。<br>
+  同意いただける方のみ、下の「同意する」ボタンを押してオークションを表示してください。</p>
+  <button onclick="agreeAndShow()">同意する</button>
+  <button onclick="history.back()">戻る</button>
+</div>
+
+<!-- オークション一覧（非表示で開始） -->
+<div id="main-content" class="hidden">
+  <h1>開催中のCoCoオークション</h1>
+  <div class="auction-list" id="auction-list">読み込み中...</div>
+</div>
+
+
+
+
+
+
+<script>
+  function agreeAndShow() {
+    document.getElementById("warning-box").style.display = "none";
+    document.getElementById("main-content").classList.remove("hidden");
+    loadAuctions();
+  }
+
+  function loadAuctions() {
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx5x17puaRJwEPEaTz9CgiNLs5H5_K8ZZFHo0qpL61asOWNeA1_zlC8cFk_KUurgAIEEg/exec';
+
+    fetch(GAS_URL)
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('auction-list');
+        container.innerHTML = '';
+
+        data.forEach(item => {
+          const link = document.createElement('a');
+          link.className = 'auction-card';
+          link.href = `auction.html?id=${item.id}`;
+
+          // 日付処理
+          const offset = new Date().getTimezoneOffset() * 60000;
+          const localTime = new Date(Date.now() - offset);
+          const dateStr = localTime.toISOString().slice(0, 10);
+          const hourStr = String(item.endHour).padStart(2, '0');
+          const endTime = new Date(`${dateStr}T${hourStr}:00:00`);
+          const endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:00 終了`;
+
+          link.innerHTML = `
+            <img src="images/${item.image}" alt="${item.title}">
+            <div class="auction-info">
+              <div class="auction-title">${item.title}</div>
+              <div class="auction-detail">
+                開始価格: ¥${item.price}<br>
+                ${endText}
+              </div>
+            </div>
+          `;
+          container.appendChild(link);
+        });
+      })
+      .catch(err => {
+        document.getElementById('auction-list').textContent = 'データの取得に失敗しました';
+        console.error(err);
+      });
+  }
+
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('cocoAuctionAgreed') === 'true') {
+    document.getElementById("warning-box").style.display = "none";
+    document.getElementById("main-content").classList.remove("hidden");
+    loadAuctions();
+  }
+});
+
+function agreeAndShow() {
+  localStorage.setItem('cocoAuctionAgreed', 'true');
+  document.getElementById("warning-box").style.display = "none";
+  document.getElementById("main-content").classList.remove("hidden");
+  loadAuctions();
+}
+
+
+
+
+</script>
+
+</body>
+</html>
