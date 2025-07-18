@@ -32,6 +32,7 @@
       color: inherit;
       box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
       transition: transform 0.2s;
+
     }
 
     .auction-card:hover {
@@ -56,11 +57,14 @@
       font-size: 1.2em;
       margin-bottom: 8px;
       font-weight: bold;
+
+padding-left: 5vw
     }
 
     .auction-detail {
       font-size: 0.9em;
       color: #555;
+padding-left: 6vw
     }
 
     .warning-box {
@@ -106,6 +110,11 @@
 
 <script>
 
+
+window.addEventListener('load', () => {
+  initializeLiff();
+});
+
 const LIFF_ID = '1657196041-ALeOLrEa'; // ← ここに実際のLIFF IDを入れてください
 
 async function initializeLiff() {
@@ -137,7 +146,7 @@ async function initializeLiff() {
   }
 
   function loadAuctions() {
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx5x17puaRJwEPEaTz9CgiNLs5H5_K8ZZFHo0qpL61asOWNeA1_zlC8cFk_KUurgAIEEg/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyaz1nF6i18Od5bDDE2WaN8G_2Bx9D-tcs94l45qHVwPl-UHN-KacyHagBhrBXpf8Lq/exec';
 
     fetch(GAS_URL)
       .then(res => res.json())
@@ -148,7 +157,7 @@ async function initializeLiff() {
         data.forEach(item => {
           const link = document.createElement('a');
           link.className = 'auction-card';
-          link.href = `auction.html?id=${item.id}`;
+          link.href = `auction.html?id=${item.auctionid}`;
 
           // 日付処理
           const offset = new Date().getTimezoneOffset() * 60000;
@@ -157,6 +166,8 @@ async function initializeLiff() {
           const hourStr = String(item.endHour).padStart(2, '0');
           const endTime = new Date(`${dateStr}T${hourStr}:00:00`);
           const endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:00 終了`;
+    
+
 
           link.innerHTML = `
             <img src="images/${item.image}" alt="${item.title}">
@@ -164,6 +175,8 @@ async function initializeLiff() {
               <div class="auction-title">${item.title}</div>
               <div class="auction-detail">
                 開始価格: ¥${item.price}<br>
+                現在の価格: ${item.amount !== "データなし" ? `¥${item.amount}` : "データなし"}<br>
+
                 ${endText}
               </div>
             </div>
