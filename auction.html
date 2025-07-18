@@ -428,8 +428,42 @@ const auctionId = getQueryParam("id") || "auc1"; // パラメータがなけれ�
 
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxAxMEcXQlUbNj7uaurP-juDvl_xGJTVG1WGI_YXR4RjkL8-nSSQLjeWGptYuET3bLuiQ/exec'; //オークションE_A2
 
-const idToken = "eyJraWQiOiJjY2Q1OGMyZjI2NDZmNDVmZTBiNGJiYjAyMzdkNjJmMGRkN2JiMTY2OWQ0MGMxMjFiODQ4OGYxMGJmMzYzOTAwIiwidHlwIjoiSldUIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL2FjY2Vzcy5saW5lLm1lIiwic3ViIjoiVTIxNWI5ZDRjY2ZhNTUxNjQ4NzVjZTZhMmU2NzdjMGIzIiwiYXVkIjoiMTY1NzE5NjA0MSIsImV4cCI6MTcyMzAyMzI0MywiaWF0IjoxNzIzMDE5NjQzLCJuYW1lIjoibi50YWt1bWEiLCJwaWN0dXJlIjoiaHR0cHM6Ly9wcm9maWxlLmxpbmUtc2Nkbi5uZXQvMGhLMkVFQUJUVkZCMTRQQUktXzV0clNrUjVHbkFQRWhKVkFGeFplUWhwU1NoWEJWdENSMU5ZTHdvNlNTb0hERkVmUmdvSkxnbHZHU1ZYIn0.9Li1LEQeylau5NVHq2kH8iUyK-gwyY_pc8iAGEfZWLxNfINuRCvzg3pE6LpuUIZWtVxyemSg5tspzYN2IVXzBA"
 
+
+
+
+
+
+let idToken; // グローバルまたは適切なスコープで宣言
+
+// LIFFの初期化
+liff.init({ liffId: '1657196041-ALeOLrEa' }, async () => { // asyncを追加
+    if (liff.isLoggedIn()) {
+        idToken = liff.getIDToken(); // ここで取得
+        // ログイン後、初期データをロード
+        await loadAuctionStatus(idToken);
+        // その他のDOM初期化処理
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+        if (auctionEndTime) {
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+        hideLoading();
+    } else {
+        liff.login();
+    }
+});
+
+
+
+
+
+
+
+
+
+    
 
 let auctionEndTime;
 
