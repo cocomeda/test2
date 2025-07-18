@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CoCo無人オークション</title>
+<script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+
   <style>
     body {
       font-family: sans-serif;
@@ -103,6 +105,31 @@
 
 
 <script>
+
+const LIFF_ID = '1657196041-ALeOLrEa'; // ← ここに実際のLIFF IDを入れてください
+
+async function initializeLiff() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+
+    // LIFF初期化成功 → ページロジック続行
+    if (localStorage.getItem('cocoAuctionAgreed') === 'true') {
+      document.getElementById("warning-box").style.display = "none";
+      document.getElementById("main-content").classList.remove("hidden");
+      loadAuctions();
+    }
+
+  } catch (error) {
+    console.error('LIFF初期化エラー:', error);
+  }
+}
+
+
   function agreeAndShow() {
     document.getElementById("warning-box").style.display = "none";
     document.getElementById("main-content").classList.remove("hidden");
