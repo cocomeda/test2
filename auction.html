@@ -524,7 +524,7 @@ function updateCountdown() {
   const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
   document.getElementById('time-remaining').textContent =
-    `終了まで：${days}日${hours}時間${minutes}秒`;
+    `終了まで：${days}日${hours}時間${minutes}分${seconds}秒`;
 }
 
 // UI反映
