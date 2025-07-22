@@ -601,12 +601,16 @@ async function initializeLiffAndLoadAuction() {
     // ★★★ LIFF対応変更点 ★★★
     await liff.init({ liffId: LIFF_ID });
 
-console.log("successfully");
-      console.log("is logged in:",liff.isLoggedIn());
+      alert("a")
+console.log("successfully")
+console.log("is logged in:",liff.isLoggedIn());
 
       
     if (!liff.isLoggedIn()) {
       // ユーザーがLINEにログインしていない場合、ログインページへリダイレクト
+
+　　　alert("s")
+        
       liff.login();
       return; 
     }
