@@ -348,7 +348,7 @@ button:disabled {
         <hr>
       <div class="bid-section_current">
         <div class="auction-info">
-            <p>現在の価格: <span id="current-bid">--円</span></p>
+            <p id="current-price-display">現在の価格: <span id="current-bid">--円</span></p>
      </div>
 <div class="auction-info2">
             <p id="your-status" class="status-message"></p>
@@ -490,7 +490,10 @@ function updateCountdown() {
   const yourStatusElement = document.getElementById('your-status');
   const passcodeDisplay = document.getElementById('passcode-display');
   const passcodeValue = document.getElementById('passcode-value');
+const currentPriceDisplayElement = document.getElementById('current-price-display');
 
+
+    
   if (distance < 0) {
     document.getElementById('time-remaining').textContent = 'オークションは終了しました';
     bidButton.disabled = true;
@@ -498,13 +501,13 @@ function updateCountdown() {
     const currentAuctionData = window.currentAuctionData;
     if (currentAuctionData) {
         if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
-            currentBidElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice}円で落札しました🎉`;
+            currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice}円で落札しました🎉`;
             yourStatusElement.textContent = '';
             passcodeValue.textContent = `暗証番号: ${currentAuctionData.passcode || '---'}`;
             passcodeDisplay.style.display = 'block';
         } else {
-            currentBidElement.textContent = `${currentAuctionData.currentBid || currentAuctionData.startPrice}円`;
-            yourStatusElement.textContent = `残念、最高入札者ではありませんでした。`;
+            currentPriceDisplayElement.textContent = `最終価格：${currentAuctionData.currentBid || currentAuctionData.startPrice}円`;
+            yourStatusElement.textContent = `落札できませんでした。`;
             passcodeDisplay.style.display = 'none';
         }
     }
