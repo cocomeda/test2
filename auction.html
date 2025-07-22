@@ -366,12 +366,12 @@ button:disabled {
     <p class="auction-info0" id="passcode-value"></p>
           </div>
 
-       <div class="auction-status-section" id="passcode-display2" style="display: none;">
-  <p class="payment-info">代金は代金箱に入れるか、PayPayでお支払いください。</p>
-</div>
 
 
-
+    <p class="payment-info" id="payment-method-info" style="font-size: 0.8em; color: #666; margin-top: 5px;">
+      代金は代金箱に入れるか、PayPayでお支払いください。
+    </p>
+    </div>
 
         
         
@@ -509,6 +509,7 @@ function updateCountdown() {
     const passcodeDisplay2 = document.getElementById('passcode-display2');
 
 const currentPriceDisplayElement = document.getElementById('current-price-display');
+const paymentMethodInfo = document.getElementById('payment-method-info'); // 新しい要素を取得
 
 
     
@@ -523,18 +524,23 @@ const currentPriceDisplayElement = document.getElementById('current-price-displa
             yourStatusElement.textContent = '';
             passcodeValue.textContent = `暗証番号: ${currentAuctionData.passcode || '---'}`;
             passcodeDisplay.style.display = 'block';
+ paymentMethodInfo.style.display = 'block'; // ★ 支払い方法も表示
+
+            
         } else {
             currentPriceDisplayElement.textContent = `最終価格：${currentAuctionData.currentBid || currentAuctionData.startPrice}円`;
             yourStatusElement.textContent = `落札できませんでした。`;
             passcodeDisplay.style.display = 'none';
-           
-        passcodeDisplay2.style.display = 'none';
+                   paymentMethodInfo.style.display = 'none'; // ★ 支払い方法も非表示
         }
     }
-    return;
-  } else {
-    bidButton.disabled = false;
-    passcodeDisplay.style.display = 'none';
+ return; // 終了後の処理なので、これ以降のカウントダウン計算は不要
+  }
+  // オークションがまだ終了していない場合の処理
+  else {
+    bidButton.disabled = false; // 入札ボタンを有効化
+    passcodeDisplay.style.display = 'none'; // 暗証番号表示エリアを隠す
+    paymentMethodInfo.style.display = 'none'; // 支払い方法表示エリアを隠す
   }
 
   const days = Math.floor(distance / (1000 * 60 * 60 * 24));
