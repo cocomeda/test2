@@ -600,9 +600,6 @@ async function initializeLiffAndLoadAuction() {
   try {
     // ★★★ LIFF対応変更点 ★★★
     await liff.init({ liffId: LIFF_ID });
-
-      alert("a")
-
       
     if (!liff.isLoggedIn()) {
       // ユーザーがLINEにログインしていない場合、ログインページへリダイレクト
@@ -613,7 +610,7 @@ async function initializeLiffAndLoadAuction() {
       return; 
     }
 
-alert("a3")
+
 alert("ログイン状態: " + liff.isLoggedIn());
       
     // ユーザーIDと表示名の取得
