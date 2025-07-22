@@ -602,19 +602,19 @@ async function initializeLiffAndLoadAuction() {
     await liff.init({ liffId: LIFF_ID });
 
       alert("a")
-console.log("successfully")
-console.log("is logged in:",liff.isLoggedIn());
 
       
     if (!liff.isLoggedIn()) {
       // ユーザーがLINEにログインしていない場合、ログインページへリダイレクト
 
-　　　alert("s")
+　　　alert("a2")
         
       liff.login();
       return; 
     }
 
+alert("a3")
+    
     // ユーザーIDと表示名の取得
     const profile = await liff.getProfile();
     currentUserId = liff.getDecodedIDToken().sub; // IDトークンのsubクレームがユーザーID
