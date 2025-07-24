@@ -1,51 +1,646 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>coco medaka 35</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style_spinner.css">
+	
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+  
+    <script src="index.js"></script>
+   
+</head>
+<body>
+	
+<style>
+
+ body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 2vw 2.5vw;
+            padding:  0;
+	    background-color: #f3f3f3;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between; /*  ボタンを横に均等に並べる */
+	　　
+            padding: 1vw; /* コンテナ内の余白 */
+            box-sizing: border-box; /* パディングを幅に含める */
+        }
+        .img-button {
+            width: 30vw; /* ビューポート幅の30% */
+            height: 30vw; /* 高さは自動調整 */
+            border: none;
+            border-radius: 2vw;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+		
+        }
+        .img-button:hover {
+            opacity: 0.8;
+        }
+        a {
+            display: block;
+            text-decoration: none;
+        }
 
 
 
-<button id="btn">認証＆送信</button>
-<pre id="result"></pre>
 
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script>
-  const LIFF_ID = '1657196041-ALeOLrEa';
-  const VERIFY_URL = 'https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2';
+	
+.pie22{
+  width: 4.5vw;
+  height: 4.5vw;
+  border-radius: 50%;
+  background-image: conic-gradient(white 0deg 0deg, #faf9f1 0deg 360deg);
+  border: 0.2vw double solid #faf9f1;
+}
 
-  document.getElementById('btn').onclick = async () => {
-    const result = document.getElementById('result');
-    try {
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
-      const idToken = await liff.getIDToken();
-      result.textContent = 'IDトークン取得成功\n送信中...';
+  .vertical-progress-bar {
+    height: 4.2vw; /* 縦の長さ */
+    width: 1vw; /* 横の幅 */
+    /* background-color: #faf9f1;　#f3f3f3 */
+    position: relative;
+    /* border: 0.2vw solid #faf9f1; */
+    border-radius: 0.2vw; /* 上端の左側を丸める */
+transform: translate(-15%,0%);
 
-      const res = await fetch(VERIFY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken })
-      });
+  }
 
-      if (!res.ok) {
-        const text = await res.text();
-        result.textContent = `エラー: ${res.status}\n${text}`;
-        return;
-      }
+  .vertical-progress-bar-inner {
+    position: absolute;
+    bottom: 0; /* 下からの高さを調整 */
+    width: 100%;
+    background-color: black;
+  }
 
-      const json = await res.json();
-      result.textContent = `成功！\nFirebaseトークン:\n${json.firebaseToken}`;
-    } catch (e) {
-      result.textContent = `例外エラー: ${e.message}`;
+
+
+h1.topo{ 
+ color: black;
+font-size: 5vw;
+/*text-align: center;*/	
+ text-align: left;
+margin-bottom: 0vw;
+margin-left: 7vw;
+}
+
+h1.topo2{ 
+ color: black;
+font-size: 5vw;
+ text-align: left;
+margin-bottom: 1vw;
+margin-left: 7vw;
+}
+
+h1.honbun{ 
+ color: black;
+font-size: 3.5vw;
+ text-align: left;
+margin-bottom: 0vw;
+margin-left: 4vw;
+}
+
+h1.honbun0{ 
+ color: black;
+font-size: 3vw;
+ text-align: left;
+margin-bottom: 0vw;
+margin-left: 4vw;
+}	
+
+p_pt {
+ color: black;
+
+font-size: 10vw;
+/* font-weight: bold; */
+ line-height: 1.5;
+}
+
+p_rank {
+ color: black;
+font-size: 3vw;
+font-weight: bold;
+}
+
+p_pie {
+ color: gray;
+
+font-size: 1vw;
+font-weight: bold;
+ line-height: 1.2;
+border: 0.2vw solid black;
+
+}
+
+
+.con{
+    width:100%;
+    position: relative;
+
+text-align: center;
+
+
+}
+.con img{
+    width:100%;
+    height:auto;
+
+}
+
+
+pa_dddd{
+position: absolute;
+text-align: center;
+top:14%;
+right:8%;
+left:65%;
+transform: translate(0%,0%);
+
+color: #faf9f1;
+font-size: 2vw;
+line-height: 1;
+background: #faf9f1;
+border: 1vw double #faf9f1;
+padding: 1vw 3vw 0.1vw 3vw;
+
+margin-left: 0vw;
+margin-right: 0vw;
+border-radius:1vw
+
+}
+
+pa{
+position: absolute;
+text-align: center;
+top:14%;
+right:8%;
+left:65%;
+transform: translate(0%,0%);
+
+color: white;
+font-size: 2vw;
+line-height: 1;
+
+
+padding: 1vw 3vw 0.1vw 3vw;
+
+margin-left: 0vw;
+margin-right: 0vw;
+border-radius:1vw
+
+}
+
+pb{
+position: absolute;
+top:41%;
+left:62%;
+right:3%;
+transform: translate(0%,0%);
+
+text-align: center;
+
+color: gray;
+font-size: 4vw;
+line-height: 1.5;
+
+margin-left: 1vw;
+margin-right: 0vw;
+
+}
+
+
+pa1{
+position: absolute;
+top:16%;
+left:94%;
+right:0%;
+transform: translate(0%,0%);
+
+font-weight: bold;
+
+color: gray;
+font-size: 2vw;
+
+
+margin-left: 0vw;
+margin-right: 0vw;
+
+}
+
+
+
+
+
+
+
+
+
+
+/* 文字を枠で囲む */
+.box-simple1{
+  margin: 1em;
+  padding: 1em;
+  border: 1px solid #ffaacc;
+  border-radius: 15px;  
+}
+.box-simple1 p {
+  margin: 0;
+  padding: 0;
+}
+.box-simple2{
+  margin: 1em;
+  padding: 1em;
+  border: 2px dashed #ffcc99; 
+}
+.box-simple2 p {
+  margin: 0;
+  padding: 0;
+}
+.box-simple3 {
+  margin: 1em;
+  padding: 1em;
+  border: 5px dotted #aaffcc; 
+}
+.box-simple3 p {
+  margin: 0;
+  padding: 0;
+}
+.box-simple4 {
+  margin: 1em;
+  padding: 1em;
+  border: 0.2vw solid black;
+  border-radius: 0.2vw;  
+  background: white;
+}
+.box-simple4 p {
+  margin: 0;
+  padding: 0;
+text-align: center;
+	
+}
+
+
+.box-simple5a {
+  margin: 1em;
+  padding: 1em;
+  background: #C7C7A8;
+ border: 1vw double #292A0A;
+border-radius: 3px;	/*角丸のサイズ*/
+}
+.box-simple5 p {
+  margin: 0;
+  padding: 0;
+}
+
+.box-simple5 {
+  margin: 1em;
+  padding: 1em;
+  background: #f5f2dc;
+ border: 1vw double #292A0A;
+border-radius: 3px;	/*角丸のサイズ*/
+}
+.box-simple5 p {
+  margin: 0;
+  padding: 0;
+}
+
+
+h1.htu3_a{ 
+ color: black;
+font-weight: bold;
+font-size: 4.1vw;
+/*text-align: center;*/	
+ text-align: center;
+margin-bottom: 0vw;
+margin-left: 1vw;
+}	
+
+
+h1.m12{ 
+ color: black;
+
+font-size: 5vw;
+/*text-align: center;font-weight: bold;*/	
+ text-align: center;
+margin-bottom: 0vw;
+margin-left: 1vw;
+}	
+
+
+
+     /* ローディングスピナー */
+        #loading {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #main {
+            display: none;
+        }
+
+
+
+
+/* notification-bar の修正 */
+.notification-bar {
+font-size: 3vw;
+  position: fixed; /* 画面に固定 */
+  top: 0; /* 画面上部に配置 */
+  left: 0; /* 画面左端に配置 */
+  width: 100%; /* 幅を画面いっぱいに */
+  background-color: rgba(255, 255, 255, 0.7); /* 白の半透明 */
+  padding: 2vw 3vw; /* 内側の余白 */
+  text-align: center; /* テキストを中央寄せ */
+  box-shadow: 0 0.3vw 0.7vw rgba(0, 0, 0, 0.1); /* 軽い影で立体感を出す */
+  z-index: 1000; /* 他のコンテンツの上に表示。他の要素より高い値に設定。 */
+  box-sizing: border-box; /* paddingとborderをwidthに含める */
+  /* 高さを自動調整しつつ、必要なら最小高さを設定 */
+  height: auto;
+  min-height: 5vw; /* 例えば、内容に合わせて調整 */
+}
+
+/* #main コンテンツの調整 */
+#main {
+  /* display: none; はJavaScriptで制御するため、ここには記載しません */
+ /* margin-top: 15vw;  お知らせ帯の高さに合わせて調整。実測して決めるのが確実です。 */
+}
+
+/* bodyのmargin-topを0にする（任意、もし上部に余白がある場合は） */
+body {
+    margin-top: 0; /* 既存のbodyのmargin-topをリセット */
+}
+
+	
+</style>
+
+
+    <!-- ローディングスピナー -->
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
+
+	
+<div id="main">
+
+<section>
+	
+<div class="con">
+
+    <!-- <div class="notification-bar">
+<p>※QRコードリーダーが起動しない問題を修正しました。6/27</p>
+</div>ローディングスピナー -->
+
+	
+<h1 class="topo">C o C o め だ か</h1>
+<h1 class="topo2">無 人 販 売 所</h1>
+	
+<pa><div id="data-container3">-</div></pa>
+<pb><div id="data-container2">now loading...</div></pb>
+<pa1><div class="vertical-progress-bar">
+  <div id="progressBar_vertical" class="vertical-progress-bar-inner" style="height:0%;"></div>
+</div></pa1>	
+</div>
+
+	
+  <div style="width: 100%; border: 0.2vw solid #ccc;">
+    <div id="progressBar" style="width: 0%; height: 0.3vw; background-color: #7cfc00;"></div>
+  </div>
+	
+<h1>
+	
+</h1>
+
+
+        
+      <div class="button-container">
+<a href="QRCR_r.html"><img src="QRCR_r1.jpg" class="img-button" alt="QRコードリーダー"></a> 
+<a href="numberForm.html"><img src="4kfm1.jpg" class="img-button" alt="コード入力フォーム"></a>
+<img src="RSVT1a.jpg" class="img-button" alt="予約注文">
+	      </div>  
+
+ <div class="button-container">	
+<a href="quiz2.html"><img src="quiz2.jpg" class="img-button" alt="quiz2"></a>
+<a href="list_auction.html"><img src="QRCR_r1.jpg" class="img-button" alt="u_c"></a>
+<a href="rou.html"><img src="rou.jpg" class="img-button" alt="u_c"></a>
+ 
+</div> 
+
+        
+      
+
+<div class="box-simple4">
+<h1 class="htu3_a">「CoCoポイント」は貯めると色んな</h1>
+<h1 class="htu3_a">イイコトがあるかもしれない</h1>
+<h1 class="htu3_a">CoCoめだか独自のポイントです。</h1>
+
+
+</div>
+
+	
+
+<br>
+
+	
+<h1 class="htu3">【ポイントの取得方法】</h1>
+<h1 class="
+honbun">１．商品記載の4桁の数字を登録する。(上段中央のアイコン)</h1>
+<h1 class="
+honbun">２．無人販売所に設置されたQRコード(デイリーポイント、1日1回可)を読み取る。(上段左のアイコン)</h1>
+<h1 class="
+honbun0">　　※QRコードを読み取る際は、必ず”CoCoめだか専用QRコードリーダー”で読み取ってください。</h1>
+<h1 class="
+honbun">3．その他、サイト内でクイズに正解するなど。</h1>
+	
+<br>
+<h1 class="htu3">【ランク(ステータス)について】</h1>
+<h1 class="
+honbun">ポイント数に応じてランクが決まります。ポイント数とランクの対応は以下の通りです。</h1>
+<h1 class="
+honbun">　　レギュラー：1 - 19ポイント</h1>
+<h1 class="
+honbun">　　シルバー：20 - 69ポイント</h1>	
+<h1 class="
+honbun">　　ゴールド：70 - 149ポイント</h1>
+<h1 class="
+honbun">　　プラチナ：150 - 349ポイント</h1>
+
+	
+<h1 class="hks2" style = "text-indent: -1em">
+
+	
+<h1 class="htu3">【特典など】</h1>
+<h1 class="honbun" style = "text-indent: -1em">１．シルバーランク以上で予約注文が利用できます。</h1>
+<h1 class="honbun" style = "text-indent: -1em">２．ゴールドランク以上で素敵な景品プレゼント？！</h1>
+<h1 class="honbun" style = "text-indent: -1em">３．その他。</h1>
+	
+<br>									 
+<h1 class="htu3">【注意事項など】</h1>
+<h1 class="
+honbun" style = "text-indent: -1em">１．システムの不具合などにより意図しないポイントが付与された場合は取り消し、修正されることがあります。</h1>
+<h1 class="
+honbun" style = "text-indent: -1em">２．QRコードの複製、改ざん、その他の不正行為が発覚した場合、ポイントの取り消しすることがあります。</h1>
+<h1 class="
+honbun" style = "text-indent: -1em">３．ポイントは換金、譲渡などはできません。</h1>
+
+<h1 class="
+honbun" style = "text-indent: -1em">４．サービスの提供に関して、技術的、運用上の問題、自然災害、またはその他の予見できない理由により、サービスの提供が一時的または永久に中断される場合があります。</h1>	
+<h1 class="
+honbun" style = "text-indent: -1em">５．サービスの中断または停止に関連して発生した直接的または間接的な損害について、「CoCoめだか」は補償の責任を負わないものとします。</h1>
+
+
+													       
+<br>
+<br>
+<h1 class="
+honbun"></h1>
+<h1 class="
+honbun"></h1>
+
+	
+<h1 class="m12">© Coco Medaka35</h1>
+
+
+    <script>
+	    
+  $(window).on("load", function() {
+            setTimeout(function() {
+                $("#loading").fadeOut(500, function() {
+                    $("#main").fadeIn(500);
+                });
+            }, 1000); // 1秒後にフェードアウト
+        });
+
+
+
+	    
+        // LIFFの初期化
+        liff.init({ liffId: '1657196041-ALeOLrEa' }, () => {
+            if (liff.isLoggedIn()) {
+                // ユーザーがログインしている場合
+                sendIdTokenToGAS();
+            } else {
+                // ログインが必要な場合、ログインページを表示
+                liff.login();
+            }
+        });
+
+        // IDトークンをGASに送信する関数
+        function sendIdTokenToGAS() {
+            const idToken = liff.getIDToken();
+
+            // ローディング画像表示
+            $('#loading').show();
+
+            // IDトークンをGASに送信
+            $.ajax({
+                url: 'https://script.google.com/macros/s/AKfycbwU-jlTWnEyMNN7WHoD-tQjFyV_7opWSvNSB6n4nDqub7Hr7TDLmwHW3FBgmkfZ2VEfFw/exec',
+                type: 'POST',
+                data: { idToken: idToken },
+                success: function (response) {
+                    // 成功時
+                    console.log(response);
+                    displayData(response);
+                },
+                error: function (error) {
+                    // エラー時
+                   // console.error(error);
+                    //alert('Failed to send ID Token to GAS.');
+                },
+                complete: function () {
+                    // 通信完了時の処理（ローディング画像を非表示にし、コンテンツを表示）
+                    $('#loading').hide();
+                    $('#content').show();
+                }
+            });
+        }
+  
+ // メッセージを表示する関数
+    function displayMessage(message) {
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message;
+        document.body.appendChild(messageElement);
     }
-  };
-</script>
+
+    // 取得したデータをHTMLに表示する関数
+    function displayData(data) {
+        const jsonData = JSON.parse(data);
+
+
+   const progressBar0 = document.getElementById('progressBar_vertical');
+   // progressBar0.textContent = `あと${jsonData.nextRank} pt `; 
+  progressBar0.style.height = `${jsonData.progress_rate*100}`+'%';
+ //progressBar0.style.height = "10"+"vw";
 
 
 
+  // const progressBar = document.getElementById('progressBar');
+   // progressBar.textCont//ent = `${jsonData.score} `; 
+ // progressBar.style.width = `${jsonData.progress_rate*100}`+'vw';
+ //progressBar.style.height = "10"+"vw";
 
 
 
+        const container2 = document.getElementById("data-container2");
+        const container3 = document.getElementById("data-container3");
+        const container4 = document.getElementById("data-container4");
+
+        const paragraph2 = document.createElement("p_pt");
+        paragraph2.textContent =`${jsonData.score}℗ `;　// pt
+　　　　container2.textContent = ""; // 既存のコンテンツをクリア
+        container2.appendChild(paragraph2);
+
+        const paragraph3 = document.createElement("p_rank");
+        paragraph3.textContent = `${jsonData.rank} `;　//rank
+　　　　container3.textContent = ""; // 既存のコンテンツをクリア
+        container3.appendChild(paragraph3);
+        document.querySelector("pa").style.border = "1vw double gray";
+	    
+  document.querySelector(".vertical-progress-bar").style.border = "0.2vw solid gray";
 
 
 
+  if (jsonData.rank === "レギュラー") {
+      document.querySelector("pa").style.backgroundColor = "#f5deb3";
+    } else if (jsonData.rank === "シルバー") {
+      document.querySelector("pa").style.backgroundColor = "#f5f5f5";
+    } else if (jsonData.rank === "ゴールド") {
+      document.querySelector("pa").style.backgroundColor = "#f0e68c";
+    } else if (jsonData.rank === "プラチナ") {
+      document.querySelector("pa").style.backgroundColor = "#add8e6";
+    } else if (jsonData.rank === "ダイヤモンド") {
+      document.querySelector("pa").style.backgroundColor = "#1e90ff";
+    } else {
+      // その他の場合のデフォルトの背景色を設定
+      document.querySelector("pa").style.backgroundColor = "#f5f5dc";
+    }
 
+    }
+
+
+    </script>
+</body>
+</html>
