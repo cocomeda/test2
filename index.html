@@ -42,7 +42,7 @@ alert(idToken)
   
         if (!res.ok) {  
           const text = await res.text();  
-          output.textContent = `❌ エラー (status ${res.status}):\n${idToken}`;  
+          output.textContent = `❌ エラー (status ${res.status}):\n${text}`;  
           return;  
         }  
   
