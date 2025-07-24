@@ -476,7 +476,8 @@ const LIFF_ID = '1657196041-ALeOLrEa';
 
     const { firebaseToken } = await res.json();
     await firebase.auth().signInWithCustomToken(firebaseToken);
-
+alert("si成功")
+      alert(firebaseToken)
     console.log("✅ Firebase にサインイン成功:", firebase.auth().currentUser.uid);
   });
 
