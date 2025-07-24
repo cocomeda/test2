@@ -42,14 +42,14 @@ alert(idToken)
   
         if (!res.ok) {  
           const text = await res.text();  
-          output.textContent = `❌ エラー (status ${res.status}):\n${text}`;  
+          output.textContent = `❌ エラー (status ${res.status}):\n${idToken}`;  
           return;  
         }  
   
         const json = await res.json();  
         output.textContent = `✅ 成功:\nFirebase Token:\n${json.firebaseToken}`;  
       } catch (err) {  
-        output.textContent = `🚫 実行中エラー:\n${idToken}`;  
+        output.textContent = `🚫 実行中エラー:\n${err}`;  
         console.error(err);  
       }  
     });  
