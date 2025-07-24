@@ -1,66 +1,44 @@
 
 
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>LIFF IDトークン確認</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
-<body>
-  <h2>LIFF → verifyLineTokenAndSignIn2 テスト</h2>
-  <button id="run-test">認証＆テスト実行</button>
-  <pre id="result" style="white-space:pre-wrap;"></pre>
 
-  <script>
+<button id="btn">認証＆送信</button>
+<pre id="result"></pre>
 
-    const LIFF_ID = "1657196041-ALeOLrEa"; // ← あなたのLIFF IDに変更済み
-    const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2";
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+  const LIFF_ID = '1657196041-ALeOLrEa';
+  const VERIFY_URL = 'https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2';
 
-    document.getElementById('run-test').addEventListener('click', async () => {
-      const output = document.getElementById('result');
-      output.textContent = "初期化中...";
-
-      try {
-        await liff.init({ liffId: LIFF_ID });
-
-        if (!liff.isLoggedIn()) {
-          output.textContent = "ログインします...";
-          liff.login();
-          return;
-        }
-
-        const idToken = await liff.getIDToken();
-
-alert(idToken)
-        
-        output.textContent = "IDトークン取得成功。\n送信中...";
-
-        const res = await fetch(VERIFY_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idToken })
-        });
-
-        if (!res.ok) {
-          const text = await res.text();
-          output.textContent = `❌ エラー (status ${res.status}):\n${text}`;
-          return;
-        }
-
-        const json = await res.json();
-        output.textContent = `✅ 成功:\nFirebase Token:\n${json.firebaseToken}`;
-      } catch (err) {
-        output.textContent = `🚫 実行中エラー:\n${err}`;
-        console.error(err);
+  document.getElementById('btn').onclick = async () => {
+    const result = document.getElementById('result');
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
       }
-    });
-  </script>
-</body>
-</html>
+      const idToken = await liff.getIDToken();
+      result.textContent = 'IDトークン取得成功\n送信中...';
 
+      const res = await fetch(VERIFY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      });
 
+      if (!res.ok) {
+        const text = await res.text();
+        result.textContent = `エラー: ${res.status}\n${text}`;
+        return;
+      }
 
+      const json = await res.json();
+      result.textContent = `成功！\nFirebaseトークン:\n${json.firebaseToken}`;
+    } catch (e) {
+      result.textContent = `例外エラー: ${e.message}`;
+    }
+  };
+</script>
 
 
 
