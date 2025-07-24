@@ -6,9 +6,7 @@
     <title>CoCoメダカオークション56</title>
 
     
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-
+ 
 
 
     
@@ -472,13 +470,15 @@ alert("A0")
  // LIFF初期化 & Firebase認証
   window.addEventListener('load', async () => {
     await liff.init({ liffId: "1657196041-ALeOLrEa" });
-
+alert("！！")
     if (!liff.isLoggedIn()) {
+        
       liff.login();
       return;
     }
 alert("0")
     const idToken = await liff.getIDToken();
+alert("1")
     const res = await fetch('https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
