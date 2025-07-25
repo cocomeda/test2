@@ -448,6 +448,11 @@ button:disabled {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Firebaseの初期化（既に設定済みのはず）
+const app = firebase.initializeApp(firebaseConfig);
+const functions = firebase.functions(); // これを追加
+
+    
 // LIFF ID
 // TODO: ここをあなたのLIFF IDに置き換えてください
 const LIFF_ID = '1657196041-ALeOLrEa'; 
