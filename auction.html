@@ -471,43 +471,29 @@ const LIFF_ID = '1657196041-ALeOLrEa';
       return;
     }
 
-       const idToken = await liff.getIDToken();
+    const idToken = await liff.getIDToken();
     const res = await fetch('https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idToken })
     });
 
-    // --- ここからが特に重要です ---
     if (!res.ok) { // レスポンスのステータスが200番台以外の場合（例: 401, 500など）
         const errorText = await res.text();
         alert(`verifyLineTokenAndSignIn2からのエラー (${res.status}):\n${errorText}`);
         return; // エラーなのでここで処理を中断し、以下のJSONパースは行わない
     }
 
-    // レスポンスがOKの場合でも、まず生のテキスト形式で内容を確認
+   // レスポンスがOKの場合でも、まず生のテキスト形式で内容を確認
     const rawResponseText = await res.text();
     alert("verifyLineTokenAndSignIn2からの生レスポンス:\n" + rawResponseText);
 
-    // その後でJSONとしてパースを試みる
-    let responseJson;
-    try {
-        responseJson = JSON.parse(rawResponseText);
-    } catch (e) {
-        alert("レスポンスはJSONとしてパースできませんでした: " + e.message);
-        console.error("JSONパースエラー:", e, rawResponseText);
-        return;
-    }
+    
+    const { firebaseToken } = await res.json();
+    await firebase.auth().signInWithCustomToken(firebaseToken);
 
-    const firebaseToken = responseJson.firebaseToken;
-    alert("受信したFirebaseカスタムトークン: " + firebaseToken);
-
-    if (firebaseToken) {
-        await firebase.auth().signInWithCustomToken(firebaseToken);
-        console.log("✅ Firebase にサインイン成功:", firebase.auth().currentUser.uid);
-    } else {
-        alert("firebaseTokenがレスポンスに含まれていませんでした。");
-    }
+    console.log("✅ Firebase にサインイン成功:", firebase.auth().currentUser.uid);
+  });
 
 
 
