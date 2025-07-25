@@ -453,38 +453,45 @@ const db = firebase.firestore();
 const LIFF_ID = '1657196041-ALeOLrEa'; 
 
 
-
-
-
-
-
- // LIFF初期化 & Firebase認証
+const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2"; 
+    
   window.addEventListener('load', async () => {
-    await liff.init({ liffId: "1657196041-ALeOLrEa" });
+      const output = document.getElementById('result');  
+      output.textContent = "初期化中...";  
+  
+      try {  
+        await liff.init({ liffId: LIFF_ID });  
+  
+        if (!liff.isLoggedIn()) {  
+          output.textContent = "ログインします...";  
+          liff.login();  
+          return;  
+        }  
+  
+        const idToken = await liff.getIDToken();  
+   
+          
+        //output.textContent = "IDトークン取得成功。\n送信中...";  
+  
+        const res = await fetch(VERIFY_URL, {  
+          method: 'POST',  
+          headers: { 'Content-Type': 'application/json' },  
+          body: JSON.stringify({ idToken })  
+        });  
+  
+        if (!res.ok) {  
+          const text = await res.text();  
+          output.textContent = `❌ エラー (status ${res.status}):\n${text}`;  
+          return;  
+        }  
 
-    if (!liff.isLoggedIn()) {
-      liff.login();
-      return;
-    }
 
-    const idToken = await liff.getIDToken();
-    const res = await fetch('https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken })
-    });
 
     const { firebaseToken } = await res.json();
     await firebase.auth().signInWithCustomToken(firebaseToken);
 
     console.log("✅ Firebase にサインイン成功:", firebase.auth().currentUser.uid);
   });
-
-
-
-
-
-
 
 
 
