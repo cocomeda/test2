@@ -435,14 +435,15 @@ button:disabled {
 
 <script>
     // --- あなたのFirebaseプロジェクト設定 ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
-        authDomain: "coco-auction.firebaseapp.com",
-        projectId: "coco-auction",
-        storageBucket: "coco-auction.appspot.com",
-        messagingSenderId: "12632824391",
-        appId: "1:12632824391:web:ab6e784ba311de069eef62"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
+  authDomain: "coco-auction.firebaseapp.com",
+  projectId: "coco-auction",
+  storageBucket: "coco-auction.firebasestorage.app",
+  messagingSenderId: "12632824391",
+  appId: "1:12632824391:web:ab6e784ba311de069eef62",
+  measurementId: "G-ZGX9JVVKE6"
+};
 
 // Firebaseの初期化
 const app = firebase.initializeApp(firebaseConfig);
