@@ -787,12 +787,12 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
             }
 
             // オークションドキュメントの更新
-            transaction.update(auctionRef, {
-                currentBid: bidAmount,
-                highestBidderId: currentUserId,
-                highestBidderName: currentUserName,
-                updatedAt: bidTimestamp
-            });
+      //      transaction.update(auctionRef, {
+      //          currentBid: bidAmount,
+      //          highestBidderId: currentUserId,
+     //           highestBidderName: currentUserName,
+    //            updatedAt: bidTimestamp
+    //        });
 
             // bidsサブコレクションに新しい入札を追加
             const bidDocRef = auctionRef.collection('bids').doc();
