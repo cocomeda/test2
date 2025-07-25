@@ -457,13 +457,13 @@ const LIFF_ID = '1657196041-ALeOLrEa';
     
   window.addEventListener('load', async () => {
       const output = document.getElementById('result');  
-      output.textContent = "初期化中...";  
+   
   
       try {  
         await liff.init({ liffId: LIFF_ID });  
   
         if (!liff.isLoggedIn()) {  
-          output.textContent = "ログインします...";  
+       
           liff.login();  
           return;  
         }  
@@ -472,7 +472,7 @@ const LIFF_ID = '1657196041-ALeOLrEa';
   
 alert(idToken)  
           
-        output.textContent = "IDトークン取得成功。\n送信中...";  
+      
   
         const res = await fetch(VERIFY_URL, {  
           method: 'POST',  
@@ -482,18 +482,17 @@ alert(idToken)
   
         if (!res.ok) {  
           const text = await res.text();  
-          output.textContent = `❌ エラー (status ${res.status}):\n${text}`;  
+            
           return;  
         }  
   
         const json = await res.json();  
-        output.textContent = `✅ 成功:\nFirebase Token:\n${json.firebaseToken}`;  
-          
+           
 await firebase.auth().signInWithCustomToken(json.firebaseToken);
           
       } catch (err) {  
-        output.textContent = `🚫 実行中エラー:\n${err}`;  
-        console.error(err);  
+       
+       // console.error(err);  
       }  
     });  
 
