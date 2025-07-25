@@ -488,6 +488,9 @@ alert(idToken)
   
         const json = await res.json();  
         output.textContent = `✅ 成功:\nFirebase Token:\n${json.firebaseToken}`;  
+          
+await firebase.auth().signInWithCustomToken(json.firebaseToken);
+          
       } catch (err) {  
         output.textContent = `🚫 実行中エラー:\n${err}`;  
         console.error(err);  
