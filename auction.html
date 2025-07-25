@@ -485,7 +485,7 @@ const LIFF_ID = '1657196041-ALeOLrEa';
     const { firebaseToken } = await res.json();
 
     alert("aaaa")
-console.log("受信したFirebaseカスタムトークン:", firebaseToken); // ★この行を追加
+ alert("受信したFirebaseカスタムトークン: " + firebaseToken); // ★この行に変更
 await firebase.auth().signInWithCustomToken(firebaseToken);
 
     
