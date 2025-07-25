@@ -430,7 +430,7 @@ button:disabled {
 </div>
 
 
-
+  <pre id="result" style="white-space:pre-wrap;"></pre>  
 
 
 <script>
@@ -450,54 +450,46 @@ const db = firebase.firestore();
 
 // LIFF ID
 const LIFF_ID = '1657196041-ALeOLrEa'; 
-const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2"; 
-
-window.addEventListener('load', async () => {
-   
-    try {  
+    const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2"; 
     
+  window.addEventListener('load', async () => {
+      const output = document.getElementById('result');  
+      output.textContent = "初期化中...";  
+  
+      try {  
         await liff.init({ liffId: LIFF_ID });  
   
         if (!liff.isLoggedIn()) {  
-              liff.login();  
-            return;  
+          output.textContent = "ログインします...";  
+          liff.login();  
+          return;  
         }  
   
         const idToken = await liff.getIDToken();  
   
-        alert("LIFF IDトークン: " + idToken); // ★ここにidTokenのアラートを修正
+alert(idToken)  
           
-      
+        output.textContent = "IDトークン取得成功。\n送信中...";  
+  
         const res = await fetch(VERIFY_URL, {  
-            method: 'POST',  
-            headers: { 'Content-Type': 'application/json' },  
-            body: JSON.stringify({ idToken })  
+          method: 'POST',  
+          headers: { 'Content-Type': 'application/json' },  
+          body: JSON.stringify({ idToken })  
         });  
   
         if (!res.ok) {  
-            const text = await res.text();  
-            alert(`verifyLineTokenAndSignIn2からのエラー (${res.status}):\n${text}`); // ★エラーアラートはここ
-            return;  
+          const text = await res.text();  
+          output.textContent = `❌ エラー (status ${res.status}):\n${text}`;  
+          return;  
         }  
   
         const json = await res.json();  
-        
-        alert(`Firebaseカスタムトークン取得成功:\n${json.firebaseToken}`); // ★Firebaseトークン取得成功のアラートを追加
-            
-        await firebase.auth().signInWithCustomToken(json.firebaseToken);
-        alert("Firebaseサインイン成功！"); // ★サインイン成功のアラートを追加
-
-        // サインイン成功後、currentUserId と currentUserName を設定
-        currentUserId = firebase.auth().currentUser.uid;
-        currentUserName = firebase.auth().currentUser.displayName || '名無しさん'; // 必要に応じて表示名も設定
-        console.log("Firebase にサインイン成功:", currentUserId, currentUserName);
-            
-    } catch (err) {  
-        alert(`認証処理中にエラーが発生しました:\n${err.message}`); // ★エラーアラートを追加
-        console.error("認証処理中にエラー:", err); // ★console.errorを有効に戻す
-    }  
-});
-
+        output.textContent = `✅ 成功:\nFirebase Token:\n${json.firebaseToken}`;  
+      } catch (err) {  
+        output.textContent = `🚫 実行中エラー:\n${err}`;  
+        console.error(err);  
+      }  
+    });  
     
 
 let auctionEndTime;
