@@ -471,19 +471,7 @@ const LIFF_ID = '1657196041-ALeOLrEa';
       return;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-    const idToken = await liff.getIDToken();
+       const idToken = await liff.getIDToken();
     const res = await fetch('https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -523,8 +511,6 @@ const LIFF_ID = '1657196041-ALeOLrEa';
 
 
 
-    
-    
 
 
 
@@ -871,3 +857,8 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
 
 </body>
 </html>
+
+
+
+
+
