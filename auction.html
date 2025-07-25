@@ -453,7 +453,7 @@ const db = firebase.firestore();
 const LIFF_ID = '1657196041-ALeOLrEa'; 
 
 
-const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2"; 
+    const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2"; 
     
   window.addEventListener('load', async () => {
       const output = document.getElementById('result');  
@@ -469,9 +469,10 @@ const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLi
         }  
   
         const idToken = await liff.getIDToken();  
-   
+  
+alert(idToken)  
           
-        //output.textContent = "IDトークン取得成功。\n送信中...";  
+        output.textContent = "IDトークン取得成功。\n送信中...";  
   
         const res = await fetch(VERIFY_URL, {  
           method: 'POST',  
@@ -484,17 +485,19 @@ const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLi
           output.textContent = `❌ エラー (status ${res.status}):\n${text}`;  
           return;  
         }  
+  
+        const json = await res.json();  
+        output.textContent = `✅ 成功:\nFirebase Token:\n${json.firebaseToken}`;  
+      } catch (err) {  
+        output.textContent = `🚫 実行中エラー:\n${err}`;  
+        console.error(err);  
+      }  
+    });  
 
 
 
-    const { firebaseToken } = await res.json();
-    await firebase.auth().signInWithCustomToken(firebaseToken);
 
-    console.log("✅ Firebase にサインイン成功:", firebase.auth().currentUser.uid);
-  });
-
-
-
+    
 
 let auctionEndTime;
 
