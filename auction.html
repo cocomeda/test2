@@ -471,6 +471,8 @@ const LIFF_ID = '1657196041-ALeOLrEa';
       return;
     }
 
+
+    
     const idToken = await liff.getIDToken();
     const res = await fetch('https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2', {
       method: 'POST',
@@ -478,9 +480,13 @@ const LIFF_ID = '1657196041-ALeOLrEa';
       body: JSON.stringify({ idToken })
     });
 
-    const { firebaseToken } = await res.json();
-    await firebase.auth().signInWithCustomToken(firebaseToken);
 
+
+    const { firebaseToken } = await res.json();
+console.log("受信したFirebaseカスタムトークン:", firebaseToken); // ★この行を追加
+await firebase.auth().signInWithCustomToken(firebaseToken);
+
+    
     console.log("✅ Firebase にサインイン成功:", firebase.auth().currentUser.uid);
   });
 
@@ -710,6 +716,8 @@ async function initializeLiffAndLoadAuction() {
   }
 }
 
+
+  
 // DOM初期化
 window.addEventListener('DOMContentLoaded', initializeLiffAndLoadAuction);
 
