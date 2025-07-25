@@ -454,11 +454,14 @@ const LIFF_ID = '1657196041-ALeOLrEa';
     
   window.addEventListener('load', async () => {
       const output = document.getElementById('result');  
-      output.textContent = "初期化中...";  
+      output.textContent = "初期化中2...";  
   
       try {  
+   output.textContent = "０..."; 
+          
         await liff.init({ liffId: LIFF_ID });  
    output.textContent = "A..."; 
+          
         if (!liff.isLoggedIn()) {  
           output.textContent = "ログインします...";  
           liff.login();  
