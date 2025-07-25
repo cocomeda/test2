@@ -13,9 +13,9 @@
   <script>  
   
     const LIFF_ID = "1657196041-ALeOLrEa"; // ← あなたのLIFF IDに変更済み  
-    const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2";  
-  
-    document.getElementById('run-test').addEventListener('click', async () => {  
+    const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2"; 
+    
+  window.addEventListener('load', async () => {
       const output = document.getElementById('result');  
       output.textContent = "初期化中...";  
   
