@@ -439,14 +439,14 @@ button:disabled {
         liff.init({ liffId: '1657196041-ALeOLrEa' }, () => {
             if (liff.isLoggedIn()) {
                 // ユーザーがログインしている場合
-                
+                all();
             } else {
                 // ログインが必要な場合、ログインページを表示
                 liff.login();
             }
         });
 
-
+function all(){
     
 // --- あなたのFirebaseプロジェクト設定 ---
 const firebaseConfig = {
@@ -866,6 +866,10 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
     }
 });
 
+
+
+
+}
 </script>
 
 </body>
