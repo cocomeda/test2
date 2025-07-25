@@ -750,3 +750,75 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
     // ★★★ LIFF対応変更点ここまで ★★★
 
     
+    document.getElementById('modal-submit-button').disabled = true;
+    showModalMessage('入札中...', 'info');
+
+    try {
+        const auctionRef = db.collection('auctions').doc(auctionId);
+        const bidTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+        await db.runTransaction(async (transaction) => {
+            const auctionDoc = await transaction.get(auctionRef);
+
+            if (!auctionDoc.exists) {
+                throw "Auction does not exist!";
+            }
+
+            const currentAuctionData = auctionDoc.data();
+            const currentMaxBid = currentAuctionData.currentBid || currentAuctionData.startPrice;
+            const auctionEndDate = currentAuctionData.endTime ? currentAuctionData.endTime.toDate() : null;
+
+            if (auctionEndDate && new Date() > auctionEndDate) {
+                throw "オークションは既に終了しています。";
+            }
+
+            if (bidAmount <= currentMaxBid) {
+                throw `現在の最高額 (${currentMaxBid}円) より高い金額を入力してください。`;
+            }
+
+            const maxAllowedBid = currentMaxBid * 5;
+            if (bidAmount > maxAllowedBid) {
+                throw `入札額は現在の最高額の5倍 (${maxAllowedBid}円) を超えることはできません。`;
+            }
+
+            const now = new Date().getTime();
+            if (lastBidTime && (now - lastBidTime) < (BID_COOLDOWN_SECONDS * 1000)) {
+                const remainingTime = Math.ceil((BID_COOLDOWN_SECONDS * 1000 - (now - lastBidTime)) / 1000);
+                throw `前回の入札から${BID_COOLDOWN_SECONDS}秒経過していません。あと${remainingTime}秒お待ちください。`;
+            }
+
+            // オークションドキュメントの更新
+            transaction.update(auctionRef, {
+                currentBid: bidAmount,
+                highestBidderId: currentUserId,
+                highestBidderName: currentUserName,
+                updatedAt: bidTimestamp
+            });
+
+            // bidsサブコレクションに新しい入札を追加
+            const bidDocRef = auctionRef.collection('bids').doc();
+            transaction.set(bidDocRef, {
+                userId: currentUserId,
+                userName: currentUserName,
+                amount: bidAmount,
+                timestamp: bidTimestamp
+            });
+        });
+
+        lastBidTime = new Date().getTime();
+
+        document.getElementById('bid-modal').style.display = 'none';
+        showStatusMessage('入札が完了しました！', 'success');
+
+    } catch (e) {
+        console.error("入札エラー:", e);
+        showModalMessage(`入札に失敗しました: ${e}`, 'error');
+    } finally {
+        document.getElementById('modal-submit-button').disabled = false;
+    }
+});
+
+</script>
+
+</body>
+</html>
