@@ -430,11 +430,11 @@ button:disabled {
 </div>
 
 
-  <pre id="result" style="white-space:pre-wrap;"></pre>
+ <pre id="result" style="white-space:pre-wrap;"></pre>
 
 
 <script>
- const firebaseConfig = {
+    const firebaseConfig = {
       apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
       authDomain: "coco-auction.firebaseapp.com",
       projectId: "coco-auction",
@@ -485,7 +485,7 @@ button:disabled {
 
         const db = firebase.firestore();
         const uid = firebase.auth().currentUser.uid;
-        const doc = await db.collection("auctions").doc(getQueryParam("id")).get();
+        const doc = await db.collection("auctions").doc("auc1").get();
 
         if (doc.exists) {
           output.textContent += `\nデータ取得成功:\n${JSON.stringify(doc.data(), null, 2)}`;
@@ -498,13 +498,107 @@ button:disabled {
         console.error(err);
       }
     });
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
+
+// Firebaseの初期化
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// LIFF ID
+// TODO: ここをあなたのLIFF IDに置き換えてください
+const LIFF_ID = '1657196041-ALeOLrEa'; 
 
 
 
 
 //-----------------------------------------------------------------------------------------------------------
 
+
+
+
+    const idToken = await liff.getIDToken();
+    const res = await fetch('https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken })
+    });
+
+    const { firebaseToken } = await res.json();
+    await firebase.auth().signInWithCustomToken(firebaseToken);
+
+    console.log("✅ Firebase にサインイン成功:", firebase.auth().currentUser.uid);
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function loadAuctionData() {
+  const auctionId = getQueryParam("id");
+
+  if (!auctionId) {
+    console.error("❌ auctionIdが指定されていません。");
+    return;
+  }
+
+  try {
+    const doc = await db.collection("auctions").doc(auctionId).get();
+
+    if (doc.exists) {
+      const data = doc.data();
+      console.log("✅ データ取得成功:", data);
+
+      // 必要に応じてHTMLに反映
+      document.getElementById("auction-title").textContent = data.title || '品種名';
+      document.getElementById("medaka-image").src = data.imageUrl || data.image || '';
+      document.getElementById("item-overview").textContent = data.description || '説明なし';
+      document.getElementById("current-bid").textContent = (data.currentBid || data.startPrice || 0) + "円";
+
+    } else {
+      console.warn("⚠ オークションが見つかりません。");
+    }
+  } catch (error) {
+    console.error("🔥 データ取得エラー:", error);
+  }
+}
+
+// DOM読み込み後に呼び出す
+window.addEventListener('DOMContentLoaded', loadAuctionData);
+
+
+    
 
 
 
@@ -638,8 +732,7 @@ function getQueryParam(name) {
   return urlParams.get(name);
 }
 
-// オークションIDを取得
-const auctionId = getQueryParam("id"); 
+
 
 // LIFF初期化とデータ読み込み
 async function initializeLiffAndLoadAuction() {
