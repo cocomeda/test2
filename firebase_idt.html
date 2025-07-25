@@ -65,7 +65,7 @@
 
         const db = firebase.firestore();
         const uid = firebase.auth().currentUser.uid;
-        const doc = await db.collection("auctions").doc(auc1).get();
+        const doc = await db.collection("auctions").doc("auc1").get();
 
         if (doc.exists) {
           output.textContent += `\nデータ取得成功:\n${JSON.stringify(doc.data(), null, 2)}`;
