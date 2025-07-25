@@ -434,6 +434,29 @@ button:disabled {
 
 
 <script>
+const LIFF_ID = '1657196041-ALeOLrEa'; 
+    
+        // LIFFの初期化
+        liff.init({ liffId: LIFF_ID}, () => {
+            if (liff.isLoggedIn()) {
+                // ユーザーがログインしている場合
+
+                
+                sendFirebase();
+            } else {
+                // ログインが必要な場合、ログインページを表示
+                liff.login();
+            }
+        });
+
+
+
+
+
+
+function sendFirebase(){
+    
+    
     // --- あなたのFirebaseプロジェクト設定 ---
     const firebaseConfig = {
         apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
@@ -448,26 +471,15 @@ button:disabled {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// LIFF ID
-const LIFF_ID = '1657196041-ALeOLrEa'; 
+
+
     const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2"; 
     
-  window.addEventListener('load', async () => {
       const output = document.getElementById('result');  
       output.textContent = "初期化中2...";  
   
       try {  
-   output.textContent = "０..."; 
-          
-        await liff.init({ liffId: LIFF_ID });  
-   output.textContent = "A..."; 
-          
-        if (!liff.isLoggedIn()) {  
-          output.textContent = "ログインします...";  
-          liff.login();  
-          return;  
-        }  
-  
+    
         const idToken = await liff.getIDToken();  
 
 
@@ -493,8 +505,8 @@ const LIFF_ID = '1657196041-ALeOLrEa';
         output.textContent = `🚫 実行中エラー:\n${err}`;  
         console.error(err);  
       }  
-    });  
-    
+   
+}
 
 let auctionEndTime;
 
