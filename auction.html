@@ -449,55 +449,54 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // LIFF ID
-// TODO: ここをあなたのLIFF IDに置き換えてください
 const LIFF_ID = '1657196041-ALeOLrEa'; 
+const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2"; 
 
-
-    const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2"; 
-    
-  window.addEventListener('load', async () => {
-     // const output = document.getElementById('result');  
+window.addEventListener('load', async () => {
    
-  
-      try {  
+    try {  
+    
         await liff.init({ liffId: LIFF_ID });  
   
         if (!liff.isLoggedIn()) {  
-       
-          liff.login();  
-          return;  
+              liff.login();  
+            return;  
         }  
   
         const idToken = await liff.getIDToken();  
   
-alert(idToken)  
+        alert("LIFF IDトークン: " + idToken); // ★ここにidTokenのアラートを修正
           
       
-  
         const res = await fetch(VERIFY_URL, {  
-          method: 'POST',  
-          headers: { 'Content-Type': 'application/json' },  
-          body: JSON.stringify({ idToken })  
+            method: 'POST',  
+            headers: { 'Content-Type': 'application/json' },  
+            body: JSON.stringify({ idToken })  
         });  
   
         if (!res.ok) {  
-          const text = await res.text();  
-            
-          return;  
+            const text = await res.text();  
+            alert(`verifyLineTokenAndSignIn2からのエラー (${res.status}):\n${text}`); // ★エラーアラートはここ
+            return;  
         }  
   
         const json = await res.json();  
-           
-await firebase.auth().signInWithCustomToken(json.firebaseToken);
-          
-      } catch (err) {  
-       
-       // console.error(err);  
-      }  
-    });  
+        
+        alert(`Firebaseカスタムトークン取得成功:\n${json.firebaseToken}`); // ★Firebaseトークン取得成功のアラートを追加
+            
+        await firebase.auth().signInWithCustomToken(json.firebaseToken);
+        alert("Firebaseサインイン成功！"); // ★サインイン成功のアラートを追加
 
-
-
+        // サインイン成功後、currentUserId と currentUserName を設定
+        currentUserId = firebase.auth().currentUser.uid;
+        currentUserName = firebase.auth().currentUser.displayName || '名無しさん'; // 必要に応じて表示名も設定
+        console.log("Firebase にサインイン成功:", currentUserId, currentUserName);
+            
+    } catch (err) {  
+        alert(`認証処理中にエラーが発生しました:\n${err.message}`); // ★エラーアラートを追加
+        console.error("認証処理中にエラー:", err); // ★console.errorを有効に戻す
+    }  
+});
 
     
 
