@@ -11,7 +11,18 @@
   <pre id="result" style="white-space:pre-wrap;"></pre>  
   
   <script>  
-  
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
+        authDomain: "coco-auction.firebaseapp.com",
+        projectId: "coco-auction",
+        storageBucket: "coco-auction.appspot.com",
+        messagingSenderId: "12632824391",
+        appId: "1:12632824391:web:ab6e784ba311de069eef62"
+    };
+
+  firebase.initializeApp(firebaseConfig);
+
     const LIFF_ID = "1657196041-ALeOLrEa"; // ← あなたのLIFF IDに変更済み  
     const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2"; 
     
@@ -53,6 +64,34 @@ alert(idToken)
         console.error(err);  
       }  
     });  
+
+
+
+
+
+const json = await res.json();
+output.textContent = `✅ 成功:\nFirebase Token:\n${json.firebaseToken}`;
+
+await firebase.auth().signInWithCustomToken(json.firebaseToken);
+output.textContent += "\nFirebaseログイン完了 ✅";
+
+// Firestoreからデータ取得（例: "users" コレクションの自分のデータ）
+const db = firebase.firestore();
+const uid = firebase.auth().currentUser.uid;
+const doc = await db.collection("users").doc(uid).get();
+
+if (doc.exists) {
+  output.textContent += `\nデータ取得成功:\n${JSON.stringify(doc.data(), null, 2)}`;
+} else {
+  output.textContent += "\nデータが見つかりませんでした。";
+}
+
+
+
+
+
+
+
   </script>  
 </body>  
 </html>
