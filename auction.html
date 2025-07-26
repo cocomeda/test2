@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     
+    
 <style>
 
 body {
@@ -711,11 +712,7 @@ async function initializeLiffAndLoadAuction() {
     setInterval(updateCurrentTime, 1000);
     setInterval(updateCountdown, 1000);
 
-  } catch (error) {
-    console.error('LIFF初期化またはログインエラー:', error);
-    showStatusMessage('LIFFの初期化またはLINEログインに失敗しました。', 'error');
-    hideLoading();
-  }
+
 }
 
 // DOM初期化
