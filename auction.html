@@ -875,7 +875,7 @@ const functions = firebase.functions();
 document.getElementById('bid-button').addEventListener('click', async () => {
     const bidInput = document.getElementById('bid-amount-input');
     const newBidAmount = parseInt(bidInput.value, 10);
-    const auctionId = new URLSearchParams(window.location.search).get('id'); // URLからオークションIDを取得
+   
 
     if (isNaN(newBidAmount) || newBidAmount <= 0) {
         alert('有効な入札額を入力してください。');
