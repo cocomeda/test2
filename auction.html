@@ -832,12 +832,12 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
 
             // オークションドキュメントの更新とbidsサブコレクションへの追加
             // ここがコメントアウトされていますが、入札処理には必須です。
-            transaction.update(auctionRef, {
-              currentBid: bidAmount,
-            highestBidderId: currentUserId,
-               highestBidderName: currentUserName,
-               updatedAt: bidTimestamp
-            });
+  //          transaction.update(auctionRef, {
+   //           currentBid: bidAmount,
+   //         highestBidderId: currentUserId,
+    //           highestBidderName: currentUserName,
+     //          updatedAt: bidTimestamp
+    //        });
       //      const bidDocRef = auctionRef.collection('bids').doc();
 //           transaction.set(bidDocRef, {
  //            userId: currentUserId,
