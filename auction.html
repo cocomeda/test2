@@ -855,6 +855,10 @@ const functions = firebase.functions();
 // エミュレータを使う場合はコメントを外す (ローカル開発時)
 // functions.useFunctionsEmulator('http://localhost:5001'); // functionsエミュレータのURL
 
+
+ const { firebaseToken } = await res.json();
+    await firebase.auth().signInWithCustomToken(firebaseToken);
+
 document.getElementById('modal-submit-button').addEventListener('click', async () => {
     const bidInput = document.getElementById('modal-bid-amount');
     const newBidAmount = parseInt(bidInput.value, 10);
