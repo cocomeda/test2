@@ -858,47 +858,6 @@ const functions = firebase.functions();
 
 
 
-
-
-
-    // LIFFログインチェック
-    if (!liff.isLoggedIn()) {
-      liff.login();
-      return; // ログインページへリダイレクトされるため、以降の処理は中止
-    }
-
-    // ユーザーIDと表示名の取得
-    const profile = await liff.getProfile();
-    currentUserId = liff.getDecodedIDToken().sub;
-    currentUserName = profile.displayName;
-
-    // LINE IDトークンを取得し、Cloud Functionで検証、Firebaseカスタムトークンを取得
-    const idToken = await liff.getIDToken();
-    const res = await fetch(VERIFY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken })
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error(`❌ LINE認証エラー (status ${res.status}):\n${text}`);
-      showStatusMessage(`LINE認証エラー: ${res.status}`, 'error');
-      return;
-    }
-
-    const { firebaseToken } = await res.json();
-    await firebase.auth().signInWithCustomToken(firebaseToken);
-
-
-
-
-
-
-    
-
- 
-
 document.getElementById('modal-submit-button').addEventListener('click', async () => {
     const bidInput = document.getElementById('modal-bid-amount');
     const newBidAmount = parseInt(bidInput.value, 10);
