@@ -615,6 +615,8 @@ const auctionId = getQueryParam("id");
       messagingSenderId: "12632824391",
       appId: "1:12632824391:web:ab6e784ba311de069eef62"
     };
+
+    
     firebase.initializeApp(firebaseConfig);
 
     const LIFF_ID = "1657196041-ALeOLrEa";
@@ -659,8 +661,8 @@ const auctionId = getQueryParam("id");
        await firebase.auth().signInWithCustomToken(json.firebaseToken);
 
 
-          
-          
+      firebase.initializeApp(firebaseConfig);
+              
         const db = firebase.firestore();
         const uid = firebase.auth().currentUser.uid;
         const doc = await db.collection("auctions").doc(auctionId).get();
