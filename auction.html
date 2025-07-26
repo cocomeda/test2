@@ -865,13 +865,13 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
         //        highestBidderName: currentUserName,
         //        updatedAt: bidTimestamp
        //     });
-            const bidDocRef = auctionRef.collection('bids').doc();
-            transaction.set(bidDocRef, {
-                userId: currentUserId,
-                userName: currentUserName,
-                amount: bidAmount,
-                timestamp: bidTimestamp
-            });
+   //         const bidDocRef = auctionRef.collection('bids').doc();
+    //        transaction.set(bidDocRef, {
+      //          userId: currentUserId,
+       //         userName: currentUserName,
+         //       amount: bidAmount,
+      //          timestamp: bidTimestamp
+     //       });
         });
 
         lastBidTime = new Date().getTime();
