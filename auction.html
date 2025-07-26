@@ -655,49 +655,32 @@ async function initializeLiffAndLoadAuction() {
     document.getElementById('bid-button').disabled = true;
 
     try {
-        // LIFFの初期化
-        await liff.init({ liffId: LIFF_ID });
 
-        // LIFFログインチェック
-        if (!liff.isLoggedIn()) {
-            liff.login();
-            return; // ログインページへリダイレクトされるため、以降の処理は中止
-        }
 
-        // ユーザーIDと表示名の取得
-        const profile = await liff.getProfile();
-        currentUserId = liff.getDecodedIDToken().sub;
-        currentUserName = profile.displayName;
 
-        // LINE IDトークンを取得し、Cloud Functionで検証、Firebaseカスタムトークンを取得
-        const idToken = await liff.getIDToken();
-        const res = await fetch(VERIFY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idToken })
-        });
 
-        if (!res.ok) {
-            const text = await res.text();
-            console.error(`❌ LINE認証エラー (status ${res.status}):\n${text}`);
-            showStatusMessage(`LINE認証エラー: ${res.status}`, 'error');
-            hideLoading();
-            return;
-        }
 
-        const { firebaseToken } = await res.json();
-        await firebase.auth().signInWithCustomToken(firebaseToken);
-        console.log("Firebase signed in successfully with Custom Token.");
 
-        // UIDの取得
-        const uid = firebase.auth().currentUser.uid; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
-        // オークションIDが指定されているか確認
-        if (!auctionId) {
-            showStatusMessage('オークションIDが指定されていません。', 'error');
-            hideLoading();
-            return;
-        }
 
         // Firestoreからオークションデータをリアルタイムで購読
         db.collection('auctions').doc(auctionId).onSnapshot(async (doc) => {
