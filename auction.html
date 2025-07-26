@@ -534,33 +534,6 @@ window.addEventListener('load', async () => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ★★★ LIFF対応変更点ここまで ★★★
 
 
@@ -865,13 +838,13 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
    //            highestBidderName: currentUserName,
     //           updatedAt: bidTimestamp
     //        });
-            const bidDocRef = auctionRef.collection('bids').doc();
-           transaction.set(bidDocRef, {
-             userId: currentUserId,
-                userName: currentUserName,
-               amount: bidAmount,
-                timestamp: bidTimestamp
-           });
+      //      const bidDocRef = auctionRef.collection('bids').doc();
+//           transaction.set(bidDocRef, {
+ //            userId: currentUserId,
+   //             userName: currentUserName,
+     //          amount: bidAmount,
+ //               timestamp: bidTimestamp
+   //        });
         });
 
         lastBidTime = new Date().getTime();
@@ -886,6 +859,72 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
     }
 });
 
+
+
+
+
+
+
+
+
+// Firebase Functionsのインスタンスを取得
+const functions = firebase.functions();
+// エミュレータを使う場合はコメントを外す (ローカル開発時)
+// functions.useFunctionsEmulator('http://localhost:5001'); // functionsエミュレータのURL
+
+document.getElementById('bid-button').addEventListener('click', async () => {
+    const bidInput = document.getElementById('bid-amount-input');
+    const newBidAmount = parseInt(bidInput.value, 10);
+    const auctionId = new URLSearchParams(window.location.search).get('id'); // URLからオークションIDを取得
+
+    if (isNaN(newBidAmount) || newBidAmount <= 0) {
+        alert('有効な入札額を入力してください。');
+        return;
+    }
+
+    if (!auctionId) {
+        alert('オークションIDが見つかりません。');
+        return;
+    }
+
+    // Cloud Function 'bidAuction' を呼び出す
+    try {
+        const bidAuctionFunction = functions.httpsCallable('bidAuction');
+        const result = await bidAuctionFunction({ auctionId: auctionId, amount: newBidAmount });
+
+        if (result.data.success) {
+            alert(`入札に成功しました！現在の最高額: ¥${result.data.newCurrentBid}`);
+            // UIを更新（現在の価格表示など）
+            document.getElementById('current-bid-display').textContent = `現在の価格: ¥${result.data.newCurrentBid}`;
+            bidInput.value = ''; // 入力欄をクリア
+
+            // WebSocketなどでリアルタイムに更新されない場合は、ページを再読み込みするか、
+            // Firestoreのリアルタイムリスナーを設定しておく
+        } else {
+            alert('入札に失敗しました。'); // Cloud Functionが成功しても、ビジネスロジックで失敗した場合
+        }
+    } catch (error) {
+        console.error('入札エラー:', error);
+        // Cloud FunctionからHttpsErrorが返された場合
+        if (error.code) {
+            alert(`入札エラー: ${error.message} (${error.code})`);
+        } else {
+            alert('入札中に予期せぬエラーが発生しました。');
+        }
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+    
 </script>
 
 </body>
