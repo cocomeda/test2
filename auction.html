@@ -464,6 +464,16 @@ const auctionId = getQueryParam("id");
           return;
         }
 
+
+
+    // ユーザーIDと表示名の取得
+    const profile = await liff.getProfile();
+    currentUserId = liff.getDecodedIDToken().sub; // IDトークンのsubクレームがユーザーID
+    currentUserName = profile.displayName; // プロフィールから表示名を取得
+
+
+
+          
     const idToken = await liff.getIDToken();
     const res = await fetch('https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2', {
       method: 'POST',
@@ -649,11 +659,6 @@ async function initializeLiffAndLoadAuction() {
 
   
 
-
-    // ユーザーIDと表示名の取得
-    const profile = await liff.getProfile();
-    currentUserId = liff.getDecodedIDToken().sub; // IDトークンのsubクレームがユーザーID
-    currentUserName = profile.displayName; // プロフィールから表示名を取得
 
 
       
