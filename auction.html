@@ -435,48 +435,30 @@ button:disabled {
 
 <script>
 
-
-
-
-
-
-
-
-
-
-    
-    // --- あなたのFirebaseプロジェクト設定 ---
     const firebaseConfig = {
-        apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
-        authDomain: "coco-auction.firebaseapp.com",
-        projectId: "coco-auction",
-        storageBucket: "coco-auction.appspot.com",
-        messagingSenderId: "12632824391",
-        appId: "1:12632824391:web:ab6e784ba311de069eef62"
+      apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
+      authDomain: "coco-auction.firebaseapp.com",
+      projectId: "coco-auction",
+      storageBucket: "coco-auction.appspot.com",
+      messagingSenderId: "12632824391",
+      appId: "1:12632824391:web:ab6e784ba311de069eef62"
     };
+    firebase.initializeApp(firebaseConfig);
 
-// Firebaseの初期化
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+    const LIFF_ID = "1657196041-ALeOLrEa";
+    const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2";
 
-// LIFF ID
-// TODO: ここをあなたのLIFF IDに置き換えてください
-const LIFF_ID = '1657196041-ALeOLrEa'; 
+    window.addEventListener('load', async () => {
+      
 
+      try {
+        await liff.init({ liffId: LIFF_ID });
 
-
-
-//-----------------------------------------------------------------------------------------------------------
-
-
- // LIFF初期化 & Firebase認証
-  window.addEventListener('load', async () => {
-    await liff.init({ liffId: "1657196041-ALeOLrEa" });
-
-    if (!liff.isLoggedIn()) {
-      liff.login();
-      return;
-    }
+        if (!liff.isLoggedIn()) {
+        
+          liff.login();
+          return;
+        }
 
     const idToken = await liff.getIDToken();
     const res = await fetch('https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2', {
@@ -485,11 +467,37 @@ const LIFF_ID = '1657196041-ALeOLrEa';
       body: JSON.stringify({ idToken })
     });
 
+        if (!res.ok) {
+          const text = await res.text();
+          output.textContent = `❌ エラー (status ${res.status}):\n${text}`;
+          return;
+        }
+
     const { firebaseToken } = await res.json();
     await firebase.auth().signInWithCustomToken(firebaseToken);
 
-    console.log("✅ Firebase にサインイン成功:", firebase.auth().currentUser.uid);
-  });
+
+          
+          
+        const db = firebase.firestore();
+        const uid = firebase.auth().currentUser.uid;
+        const doc = await db.collection("auctions").doc("auc1").get();
+
+    
+
+      } catch (err) {
+        output.textContent = `🚫 実行中エラー:\n${err}`;
+        console.error(err);
+      }
+    });
+
+
+
+
+
+
+
+
 
 
 
@@ -637,24 +645,15 @@ async function initializeLiffAndLoadAuction() {
   document.getElementById('bid-button').disabled = true;
 
   try {
-    // ★★★ LIFF対応変更点 ★★★
-    await liff.init({ liffId: LIFF_ID });
 
-console.log("successfully");
-      console.log("is logged in:",liff.isLoggedIn());
-
-      
-    if (!liff.isLoggedIn()) {
-      // ユーザーがLINEにログインしていない場合、ログインページへリダイレクト
-      liff.login();
-      return; 
-    }
 
     // ユーザーIDと表示名の取得
     const profile = await liff.getProfile();
     currentUserId = liff.getDecodedIDToken().sub; // IDトークンのsubクレームがユーザーID
     currentUserName = profile.displayName; // プロフィールから表示名を取得
-    
+
+
+      
     // ★★★ LIFF対応変更点ここまで ★★★
 
     if (!auctionId) {
