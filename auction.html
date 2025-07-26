@@ -434,7 +434,10 @@ button:disabled {
 
 
 <script>
+// オークションIDを取得
+const auctionId = getQueryParam("id"); 
 
+    
     const firebaseConfig = {
       apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
       authDomain: "coco-auction.firebaseapp.com",
@@ -469,7 +472,7 @@ button:disabled {
 
         if (!res.ok) {
           const text = await res.text();
-          output.textContent = `❌ エラー (status ${res.status}):\n${text}`;
+       //   output.textContent = `❌ エラー (status ${res.status}):\n${text}`;
           return;
         }
 
@@ -486,7 +489,7 @@ button:disabled {
     
 
       } catch (err) {
-        output.textContent = `🚫 実行中エラー:\n${err}`;
+     //   output.textContent = `🚫 実行中エラー:\n${err}`;
         console.error(err);
       }
     });
@@ -636,8 +639,7 @@ function getQueryParam(name) {
   return urlParams.get(name);
 }
 
-// オークションIDを取得
-const auctionId = getQueryParam("id"); 
+
 
 // LIFF初期化とデータ読み込み
 async function initializeLiffAndLoadAuction() {
