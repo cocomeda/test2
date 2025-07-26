@@ -610,78 +610,69 @@ function updateCurrentTime() {
 }
 
 function updateCountdown() {
-  if (!auctionEndTime) return;
+    if (!auctionEndTime) return;
 
-  const now = new Date().getTime();
-  const distance = auctionEndTime.getTime() - now;
+    const now = new Date().getTime();
+    const distance = auctionEndTime.getTime() - now;
 
-  const bidButton = document.getElementById('bid-button');
-  const currentBidElement = document.getElementById('current-bid');
-  const yourStatusElement = document.getElementById('your-status');
-  const passcodeDisplay = document.getElementById('passcode-display');
-  const passcodeValue = document.getElementById('passcode-value');
-    const passcodeDisplay2 = document.getElementById('passcode-display2');
+    const bidButton = document.getElementById('bid-button');
+    const currentPriceDisplayElement = document.getElementById('current-price-display');
+    const yourStatusElement = document.getElementById('your-status');
+    const passcodeDisplay = document.getElementById('passcode-display');
+    const passcodeValue = document.getElementById('passcode-value');
+    const paymentMethodInfo = document.getElementById('payment-method-info');
 
-const currentPriceDisplayElement = document.getElementById('current-price-display');
-const paymentMethodInfo = document.getElementById('payment-method-info'); // 新しい要素を取得
+    if (distance < 0) {
+        document.getElementById('time-remaining').textContent = 'オークションは終了しました';
+        bidButton.disabled = true;
 
-
-    
-  if (distance < 0) {
-    document.getElementById('time-remaining').textContent = 'オークションは終了しました';
-    bidButton.disabled = true;
-
-    const currentAuctionData = window.currentAuctionData;
-    if (currentAuctionData) {
-        if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
-            currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice}円で落札しました🎉`;
-            yourStatusElement.textContent = '';
-            passcodeValue.textContent = `暗証番号: ${currentAuctionData.passcode || '---'}`;
-            passcodeDisplay.style.display = 'block';
- paymentMethodInfo.style.display = 'block'; // ★ 支払い方法も表示
-
-            
-        } else {
-            currentPriceDisplayElement.textContent = `最終価格：${currentAuctionData.currentBid || currentAuctionData.startPrice}円`;
-            yourStatusElement.textContent = `落札できませんでした。`;
-            passcodeDisplay.style.display = 'none';
-                   paymentMethodInfo.style.display = 'none'; // ★ 支払い方法も非表示
+        const currentAuctionData = window.currentAuctionData;
+        if (currentAuctionData) {
+            if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
+                currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice}円で落札しました🎉`;
+                yourStatusElement.textContent = '';
+                passcodeValue.textContent = `暗証番号: ${currentAuctionData.passcode || '---'}`;
+                passcodeDisplay.style.display = 'block';
+                paymentMethodInfo.style.display = 'block';
+            } else {
+                currentPriceDisplayElement.textContent = `最終価格：${currentAuctionData.currentBid || currentAuctionData.startPrice}円`;
+                yourStatusElement.textContent = `落札できませんでした。`;
+                passcodeDisplay.style.display = 'none';
+                paymentMethodInfo.style.display = 'none';
+            }
         }
+        return;
     }
- return; // 終了後の処理なので、これ以降のカウントダウン計算は不要
-  }
-  // オークションがまだ終了していない場合の処理
-  else {
-    bidButton.disabled = false; // 入札ボタンを有効化
-    passcodeDisplay.style.display = 'none'; // 暗証番号表示エリアを隠す
-    paymentMethodInfo.style.display = 'none'; // 支払い方法表示エリアを隠す
-  }
+    else {
+        bidButton.disabled = false;
+        passcodeDisplay.style.display = 'none';
+        paymentMethodInfo.style.display = 'none';
+    }
 
-  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-  document.getElementById('time-remaining').textContent =
-    `終了まで：${days}日${hours}時間${minutes}分${seconds}秒`;
+    document.getElementById('time-remaining').textContent =
+        `終了まで：${days}日${hours}時間${minutes}分${seconds}秒`;
 }
 
 // UI反映
 function updateAuctionUI(auctionData, latestBidAmount = 0, highestBidderId = null, yourBidAmount = 0) {
-  document.getElementById('auction-title').textContent = auctionData.title || '品種名';
-  document.getElementById("medaka-image").src = auctionData.imageUrl || auctionData.image || '';
-  document.getElementById('item-overview').textContent = auctionData.description || '----';
-  document.getElementById('current-bid').textContent = `${latestBidAmount}円`;
+    document.getElementById('auction-title').textContent = auctionData.title || '品種名';
+    document.getElementById("medaka-image").src = auctionData.imageUrl || auctionData.image || '';
+    document.getElementById('item-overview').textContent = auctionData.description || '----';
+    document.getElementById('current-bid').textContent = `${latestBidAmount}円`;
 
-  if (currentUserId && highestBidderId === currentUserId) {
-    document.getElementById('your-status').textContent = `あなたが最高額！`;
-  } else {
-    document.getElementById('your-status').textContent = `あなたの入札額: ${yourBidAmount > 0 ? yourBidAmount + '円' : '---'}`;
-  }
+    if (currentUserId && highestBidderId === currentUserId) {
+        document.getElementById('your-status').textContent = `あなたが最高額！`;
+    } else {
+        document.getElementById('your-status').textContent = `あなたの入札額: ${yourBidAmount > 0 ? yourBidAmount + '円' : '---'}`;
+    }
 
-  window.currentAuctionData = auctionData;
-
-  updateCountdown();
+    window.currentAuctionData = auctionData;
+    updateCountdown();
 }
 
 // URLからパラメータを取得する関数
@@ -693,100 +684,115 @@ function getQueryParam(name) {
 
 
 // LIFF初期化とデータ読み込み
+// ====== メインの初期化・ロード関数 ======
 async function initializeLiffAndLoadAuction() {
-  showLoading();
-  document.getElementById('bid-button').disabled = true;
+    showLoading();
+    document.getElementById('bid-button').disabled = true;
 
+    try {
+        // LIFFの初期化
+        await liff.init({ liffId: LIFF_ID });
 
+        // LIFFログインチェック
+        if (!liff.isLoggedIn()) {
+            liff.login();
+            return; // ログインページへリダイレクトされるため、以降の処理は中止
+        }
 
+        // ユーザーIDと表示名の取得
+        const profile = await liff.getProfile();
+        currentUserId = liff.getDecodedIDToken().sub;
+        currentUserName = profile.displayName;
 
+        // LINE IDトークンを取得し、Cloud Functionで検証、Firebaseカスタムトークンを取得
+        const idToken = await liff.getIDToken();
+        const res = await fetch(VERIFY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken })
+        });
 
+        if (!res.ok) {
+            const text = await res.text();
+            console.error(`❌ LINE認証エラー (status ${res.status}):\n${text}`);
+            showStatusMessage(`LINE認証エラー: ${res.status}`, 'error');
+            hideLoading();
+            return;
+        }
 
+        const { firebaseToken } = await res.json();
+        await firebase.auth().signInWithCustomToken(firebaseToken);
+        console.log("Firebase signed in successfully with Custom Token.");
 
+        // UIDの取得
+        const uid = firebase.auth().currentUser.uid; 
+        
+        // オークションIDが指定されているか確認
+        if (!auctionId) {
+            showStatusMessage('オークションIDが指定されていません。', 'error');
+            hideLoading();
+            return;
+        }
 
+        // Firestoreからオークションデータをリアルタイムで購読
+        db.collection('auctions').doc(auctionId).onSnapshot(async (doc) => {
+            if (doc.exists) {
+                const auctionData = doc.data();
+                auctionEndTime = auctionData.endTime ? auctionData.endTime.toDate() : null;
 
+                let yourBid = 0;
+                if (currentUserId) {
+                    const userBidsSnapshot = await db.collection('auctions').doc(auctionId)
+                                                    .collection('bids')
+                                                    .where('userId', '==', currentUserId)
+                                                    .orderBy('timestamp', 'desc')
+                                                    .limit(1)
+                                                    .get();
+                    if (!userBidsSnapshot.empty) {
+                        yourBid = userBidsSnapshot.docs[0].data().amount;
+                        lastBidTime = userBidsSnapshot.docs[0].data().timestamp.toDate().getTime();
+                    }
+                }
+                
+                updateAuctionUI(auctionData, auctionData.currentBid || auctionData.startPrice, auctionData.highestBidderId, yourBid);
+                
+                if (auctionEndTime && new Date().getTime() < auctionEndTime.getTime()) {
+                    document.getElementById('bid-button').disabled = false;
+                } else {
+                    document.getElementById('bid-button').disabled = true;
+                }
 
+                showStatusMessage('オークション情報を更新しました', 'success');
 
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-      
-    // ★★★ LIFF対応変更点ここまで ★★★
-
-    if (!auctionId) {
-      showStatusMessage('オークションIDが指定されていません。', 'error');
-      hideLoading();
-      return;
-    }
-
-    // Firestoreからオークションデータをリアルタイムで購読
-    db.collection('auctions').doc(auctionId).onSnapshot(async (doc) => {
-      if (doc.exists) {
-        const auctionData = doc.data();
-        auctionEndTime = auctionData.endTime ? auctionData.endTime.toDate() : null;
-
-        let yourBid = 0;
-        // currentUserIdが空でないことを確認（LIFFログインが成功している場合）
-        if (currentUserId) { 
-            const userBidsSnapshot = await db.collection('auctions').doc(auctionId)
-                                            .collection('bids')
-                                            .where('userId', '==', currentUserId)
-                                            .orderBy('timestamp', 'desc')
-                                            .limit(1)
-                                            .get();
-            if (!userBidsSnapshot.empty) {
-                yourBid = userBidsSnapshot.docs[0].data().amount;
-                lastBidTime = userBidsSnapshot.docs[0].data().timestamp.toDate().getTime();
+            } else {
+                showStatusMessage('指定されたオークションは見つかりませんでした。', 'error');
+                document.getElementById('bid-button').disabled = true;
             }
-        }
-        
-        updateAuctionUI(auctionData, auctionData.currentBid || auctionData.startPrice, auctionData.highestBidderId, yourBid);
-        
-        if (auctionEndTime && new Date().getTime() < auctionEndTime.getTime()) {
-            document.getElementById('bid-button').disabled = false;
-        } else {
-            document.getElementById('bid-button').disabled = true;
-        }
+            hideLoading();
+        }, (error) => {
+            console.error("Firestoreリアルタイム更新エラー:", error);
+            showStatusMessage('オークション情報の取得に失敗しました。', 'error');
+            hideLoading();
+        });
 
-        showStatusMessage('オークション情報を更新しました', 'success');
+        // 時刻とカウントダウンの更新を開始
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+        setInterval(updateCountdown, 1000);
 
-      } else {
-        showStatusMessage('指定されたオークションは見つかりませんでした。', 'error');
-        document.getElementById('bid-button').disabled = true;
-      }
-      hideLoading();
-    }, (error) => {
-      console.error("Firestoreリアルタイム更新エラー:", error);
-      showStatusMessage('オークション情報の取得に失敗しました。', 'error');
-      hideLoading();
-    });
-
-    // 時刻とカウントダウンの更新を開始
-    updateCurrentTime();
-    setInterval(updateCurrentTime, 1000);
-    setInterval(updateCountdown, 1000);
-
-
+    } catch (err) {
+        console.error('🚫 実行中エラー:', err);
+        showStatusMessage(`初期化またはログインに失敗しました: ${err.message}`, 'error');
+        hideLoading(); // エラー発生時もローディングを非表示にする
+    }
 }
 
-// DOM初期化
+// ====== イベントリスナー群 ======
+// DOMContentLoadedでメインの初期化関数を実行
 window.addEventListener('DOMContentLoaded', initializeLiffAndLoadAuction);
 
 // 入札モーダル表示
 document.getElementById('bid-button').addEventListener('click', () => {
-    // オークションが終了しているか再度チェック
     if (auctionEndTime && new Date().getTime() >= auctionEndTime.getTime()) {
         showStatusMessage('オークションは既に終了しています。', 'error');
         return;
@@ -808,22 +814,19 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
     const agreed = document.getElementById('modal-agree-checkbox').checked;
 
     if (!agreed) {
-      showModalMessage('規約に同意してください。', 'error');
-      return;
+        showModalMessage('規約に同意してください。', 'error');
+        return;
     }
 
     if (bidAmount < 100 || bidAmount % 100 !== 0) {
-      showModalMessage('100円単位で正しい入札金額を入力してください。', 'error');
-      return;
+        showModalMessage('100円単位で正しい入札金額を入力してください。', 'error');
+        return;
     }
 
-    // ★★★ LIFF対応変更点 ★★★
-    if (!currentUserId) { 
+    if (!currentUserId) {
         showModalMessage('LINEユーザー情報が取得できていません。LIFFを再起動してください。', 'error');
-        return; // ユーザーIDがない場合は処理を中断
+        return;
     }
-    // ★★★ LIFF対応変更点ここまで ★★★
-
     
     document.getElementById('modal-submit-button').disabled = true;
     showModalMessage('入札中...', 'info');
@@ -862,26 +865,24 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
                 throw `前回の入札から${BID_COOLDOWN_SECONDS}秒経過していません。あと${remainingTime}秒お待ちください。`;
             }
 
-            // オークションドキュメントの更新
-        //    transaction.update(auctionRef, {
-//                currentBid: bidAmount,
-  //              highestBidderId: currentUserId,
-    //            highestBidderName: currentUserName,
-      //          updatedAt: bidTimestamp
-        //    });
-
-            // bidsサブコレクションに新しい入札を追加
-          //  const bidDocRef = auctionRef.collection('bids').doc();
-    //        transaction.set(bidDocRef, {
-      //          userId: currentUserId,
-        //        userName: currentUserName,
-          //      amount: bidAmount,
- //               timestamp: bidTimestamp
-   //         });
+            // オークションドキュメントの更新とbidsサブコレクションへの追加
+            // ここがコメントアウトされていますが、入札処理には必須です。
+            transaction.update(auctionRef, {
+                currentBid: bidAmount,
+                highestBidderId: currentUserId,
+                highestBidderName: currentUserName,
+                updatedAt: bidTimestamp
+            });
+            const bidDocRef = auctionRef.collection('bids').doc();
+            transaction.set(bidDocRef, {
+                userId: currentUserId,
+                userName: currentUserName,
+                amount: bidAmount,
+                timestamp: bidTimestamp
+            });
         });
 
         lastBidTime = new Date().getTime();
-
         document.getElementById('bid-modal').style.display = 'none';
         showStatusMessage('入札が完了しました！', 'success');
 
