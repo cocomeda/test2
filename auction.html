@@ -484,7 +484,7 @@ const auctionId = getQueryParam("id");
           
         const db = firebase.firestore();
         const uid = firebase.auth().currentUser.uid;
-        const doc = await db.collection("auctions").doc("auc1").get();
+        const doc = await db.collection("auctions").doc(auctionId).get();
 
     
 
