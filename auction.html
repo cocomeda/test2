@@ -872,7 +872,7 @@ const functions = firebase.functions();
 // エミュレータを使う場合はコメントを外す (ローカル開発時)
 // functions.useFunctionsEmulator('http://localhost:5001'); // functionsエミュレータのURL
 
-document.getElementById('bid-button').addEventListener('click', async () => {
+document.getElementById('modal-submit-button').addEventListener('click', async () => {
     const bidInput = document.getElementById('bid-amount-input');
     const newBidAmount = parseInt(bidInput.value, 10);
    
