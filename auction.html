@@ -488,6 +488,10 @@ const BID_COOLDOWN_SECONDS = 30;
           body: JSON.stringify({ idToken })
         });
 
+
+ alert("a2");
+
+          
         if (!res.ok) {
           const text = await res.text();
           output.textContent = `❌ エラー (status ${res.status}):\n${text}`;
@@ -499,7 +503,7 @@ const BID_COOLDOWN_SECONDS = 30;
 
         await firebase.auth().signInWithCustomToken(json.firebaseToken);
         output.textContent += "\nFirebaseログイン完了 ✅";
-
+alert("a3");
        
         const uid = firebase.auth().currentUser.uid;
         const doc = await db.collection("auctions").doc("auc1").get();
