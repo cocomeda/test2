@@ -436,101 +436,80 @@ button:disabled {
 
 
 <script>
-// オークションIDを取得
-// 注意: getQueryParam 関数がこの行より前に定義されていることを確認してください
 const auctionId = getQueryParam("id");
 
-// Firebase設定
-const firebaseConfig = {
-  apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
-  authDomain: "coco-auction.firebaseapp.com",
-  projectId: "coco-auction",
-  storageBucket: "coco-auction.appspot.com",
-  messagingSenderId: "12632824391",
-  appId: "1:12632824391:web:ab6e784ba311de069eef62"
-};
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
+      authDomain: "coco-auction.firebaseapp.com",
+      projectId: "coco-auction",
+      storageBucket: "coco-auction.appspot.com",
+      messagingSenderId: "12632824391",
+      appId: "1:12632824391:web:ab6e784ba311de069eef62"
+    };
+    firebase.initializeApp(firebaseConfig);
 
-// ★修正点1: Firebaseの初期化はここで一度だけ行います
-firebase.initializeApp(firebaseConfig);
+ const db = firebase.firestore();
+    
+    const LIFF_ID = "1657196041-ALeOLrEa";
+    const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2";
 
-// ★修正点2: dbをグローバルスコープで定義します
-const db = firebase.firestore();
+    window.addEventListener('load', async () => {
+      const output = document.getElementById('result');
+      output.textContent = "初期化中...";
 
-// LIFF設定
-const LIFF_ID = "1657196041-ALeOLrEa";
-const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2";
+      try {
+        await liff.init({ liffId: LIFF_ID });
 
-// グローバル変数（他の関数でも使われるため）
-let auctionEndTime;
-let currentUserId = '';
-let currentUserName = '';
-let lastBidTime = 0;
-const BID_COOLDOWN_SECONDS = 30;
+        if (!liff.isLoggedIn()) {
+          output.textContent = "ログインします...";
+          liff.login();
+          return;
+        }
 
-// getQueryParam 関数 (もしこのスクリプト内にない場合、HTMLのheadかbodyの最初の方に置いてください)
-function getQueryParam(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
-}
+        const idToken = await liff.getIDToken();
+        alert(idToken);
 
-// showLoading, hideLoading, showModalMessage, showStatusMessage, 
-// updateCurrentTime, updateCountdown, updateAuctionUI などの関数定義はここに続く
+        output.textContent = "IDトークン取得成功。\n送信中...";
 
-// main処理をDOMContentLoadedイベントリスナーで囲む (推奨される方法)
-// または、元の `window.addEventListener('load', ...)` のままでもよいですが、
-// その場合、そのブロック内のFirebase初期化は削除してください。
-window.addEventListener('load', async () => {
-  try {
-    // LIFFの初期化
-    await liff.init({ liffId: LIFF_ID });
+        const res = await fetch(VERIFY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
 
-    // LIFFログインチェック
-    if (!liff.isLoggedIn()) {
-      liff.login();
-      return; // ログインページへリダイレクトされるため、以降の処理は中止
-    }
+        if (!res.ok) {
+          const text = await res.text();
+          output.textContent = `❌ エラー (status ${res.status}):\n${text}`;
+          return;
+        }
 
-    // ユーザーIDと表示名の取得
-    const profile = await liff.getProfile();
-    currentUserId = liff.getDecodedIDToken().sub;
-    currentUserName = profile.displayName;
+        const json = await res.json();
+        output.textContent = `✅ 成功:\nFirebase Token:\n${json.firebaseToken}`;
 
-    // LINE IDトークンを取得し、Cloud Functionで検証、Firebaseカスタムトークンを取得
-    const idToken = await liff.getIDToken();
-    const res = await fetch(VERIFY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken })
+        await firebase.auth().signInWithCustomToken(json.firebaseToken);
+        output.textContent += "\nFirebaseログイン完了 ✅";
+
+       
+        const uid = firebase.auth().currentUser.uid;
+        const doc = await db.collection("auctions").doc("auc1").get();
+
+        if (doc.exists) {
+          output.textContent += `\nデータ取得成功:\n${JSON.stringify(doc.data(), null, 2)}`;
+        } else {
+          output.textContent += "\nデータが見つかりませんでした。";
+        }
+
+      } catch (err) {
+        output.textContent = `🚫 実行中エラー:\n${err}`;
+        console.error(err);
+      }
     });
 
-    if (!res.ok) {
-      const text = await res.text();
-      console.error(`❌ LINE認証エラー (status ${res.status}):\n${text}`);
-      showStatusMessage(`LINE認証エラー: ${res.status}`, 'error');
-      return;
-    }
 
-    const { firebaseToken } = await res.json();
-    await firebase.auth().signInWithCustomToken(firebaseToken);
-    console.log("Firebase signed in successfully with Custom Token.");
 
-    // ここから、Firestoreのデータ取得とUI更新のロジックが始まります
-    // dbはすでにグローバルで定義されているため、ここで const db = ... は不要です。
-    // firebase.initializeApp(firebaseConfig); もここにはもう書きません。
 
-    // UIDの取得はFirebaseログイン後に安全に行えます
-    const uid = firebase.auth().currentUser.uid; 
-    
-    // オークションデータ取得 (dbは利用可能)
-    const doc = await db.collection("auctions").doc(auctionId).get();
 
-    // ... 以降のオークションデータの処理、Firestoreリアルタイム購読、UI更新など
-
-  } catch (err) {
-    console.error('🚫 実行中エラー:', err);
-    showStatusMessage(`初期化またはログインに失敗しました: ${err.message}`, 'error');
-  }
-});
 
 
 
