@@ -493,6 +493,9 @@ const BID_COOLDOWN_SECONDS = 30;
 
           
         if (!res.ok) {
+
+            alert("a2a");
+            
           const text = await res.text();
           output.textContent = `❌ エラー (status ${res.status}):\n${text}`;
           return;
