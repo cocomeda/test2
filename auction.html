@@ -516,7 +516,7 @@ alert("a4");
         if (doc.exists) {
           output.textContent += `\nデータ取得成功:\n${JSON.stringify(doc.data(), null, 2)}`;
 
-
+ initializeLiffAndLoadAuction();
 hideLoading(); //
 
             
@@ -745,7 +745,7 @@ async function initializeLiffAndLoadAuction() {
 
 // ====== イベントリスナー群 ======
 // DOMContentLoadedでメインの初期化関数を実行
-window.addEventListener('DOMContentLoaded', initializeLiffAndLoadAuction);
+//window.addEventListener('DOMContentLoaded', initializeLiffAndLoadAuction);
 
 // 入札モーダル表示
 document.getElementById('bid-button').addEventListener('click', () => {
