@@ -508,7 +508,7 @@ alert("a3");
         output.textContent += "\nFirebaseログイン完了 ✅";
 alert("a4");
        
-        const uid = firebase.auth().currentUser.uid;
+        const currentuserId = firebase.auth().currentUser.uid; // change uid to currentuserId
         const doc = await db.collection("auctions").doc("auc1").get();
 
         if (doc.exists) {
