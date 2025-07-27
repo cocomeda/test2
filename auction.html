@@ -524,7 +524,7 @@ alert("a4");
 
 
 
-async initializeLiffAndLoadAuction();
+
             
 hideLoading(); //
 
@@ -543,7 +543,7 @@ hideLoading(); //
 
 
 
-
+async initializeLiffAndLoadAuction();
 
 
 // ★★★ LIFF対応変更点ここまで ★★★
@@ -648,7 +648,7 @@ function updateAuctionUI(auctionData, latestBidAmount = 0, highestBidderId = nul
         document.getElementById('your-status').textContent = `あなたの入札額: ${yourBidAmount > 0 ? yourBidAmount + '円' : '---'}`;
     }
 
-    window.currentAuctionData = auctionData;
+    //window.currentAuctionData = auctionData;
     updateCountdown();
 }
 
