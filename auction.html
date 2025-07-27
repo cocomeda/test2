@@ -509,6 +509,9 @@ alert("a3");
 
        
        currentUserId = firebase.auth().currentUser.uid; // change uid to currentUserId
+
+alert(currentUserId)
+          
         const doc = await db.collection("auctions").doc("auc1").get();
           
 alert("a4");
@@ -680,7 +683,7 @@ async function initializeLiffAndLoadAuction() {
 
  alert("a1");
 
-
+alert(currentUserId)
 
 
 
