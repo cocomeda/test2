@@ -750,151 +750,93 @@ document.getElementById('modal-cancel-button').addEventListener('click', () => {
     document.getElementById('bid-modal').style.display = 'none';
 });
 
-// モーダル内送信処理
+
+
+
+
+
+
+
+
+
+// Firebase Functionsのインスタンスを取得
+const functions = firebase.functions();
+// エミュレータを使う場合はコメントを外す (ローカル開発時)
+// functions.useFunctionsEmulator('http://localhost:5001'); // functionsエミュレータのURL
+
 document.getElementById('modal-submit-button').addEventListener('click', async () => {
-    const bidAmount = Number(document.getElementById('modal-bid-amount').value);
+    const bidAmountInput = document.getElementById('modal-bid-amount');
+    const newBidAmount = Number(bidAmountInput.value); // Number() で数値に変換
     const agreed = document.getElementById('modal-agree-checkbox').checked;
 
+    // --- クライアントサイドでの基本的な入力検証 ---
+    // (サーバーサイドでも同様の検証が必要です)
     if (!agreed) {
         showModalMessage('規約に同意してください。', 'error');
         return;
     }
 
-    if (bidAmount < 100 || bidAmount % 100 !== 0) {
+    if (isNaN(newBidAmount) || newBidAmount < 100 || newBidAmount % 100 !== 0) {
         showModalMessage('100円単位で正しい入札金額を入力してください。', 'error');
         return;
     }
 
-    if (!currentUserId) {
+    if (!currentUserId) { // currentUserId はグローバルで取得済みと仮定
         showModalMessage('LINEユーザー情報が取得できていません。LIFFを再起動してください。', 'error');
         return;
     }
-    
+
+    if (!auctionId) { // auctionId もグローバルで取得済みと仮定
+        showModalMessage('オークションIDが見つかりません。', 'error');
+        return;
+    }
+
+    // --- クールダウンチェック（クライアント側でのUX向上のため） ---
+    const now = new Date().getTime();
+    if (lastBidTime && (now - lastBidTime) < (BID_COOLDOWN_SECONDS * 1000)) {
+        const remainingTime = Math.ceil((BID_COOLDOWN_SECONDS * 1000 - (now - lastBidTime)) / 1000);
+        showModalMessage(`前回の入札から${BID_COOLDOWN_SECONDS}秒経過していません。あと${remainingTime}秒お待ちください。`, 'error');
+        return;
+    }
+
+    // 入札ボタンを無効化し、ユーザーに処理中であることを示す
     document.getElementById('modal-submit-button').disabled = true;
     showModalMessage('入札中...', 'info');
-    
- alert("a2");
-    
+
     try {
-        const auctionRef = db.collection('auctions').doc(auctionId);
-        const bidTimestamp = firebase.firestore.FieldValue.serverTimestamp();
-
-        await db.runTransaction(async (transaction) => {
-            const auctionDoc = await transaction.get(auctionRef);
-
-            if (!auctionDoc.exists) {
-                throw "Auction does not exist!";
-            }
-
-            const currentAuctionData = auctionDoc.data();
-            const currentMaxBid = currentAuctionData.currentBid || currentAuctionData.startPrice;
-            const auctionEndDate = currentAuctionData.endTime ? currentAuctionData.endTime.toDate() : null;
-
-            if (auctionEndDate && new Date() > auctionEndDate) {
-                throw "オークションは既に終了しています。";
-            }
-
-            if (bidAmount <= currentMaxBid) {
-                throw `現在の最高額 (${currentMaxBid}円) より高い金額を入力してください。`;
-            }
-
-            const maxAllowedBid = currentMaxBid * 5;
-            if (bidAmount > maxAllowedBid) {
-                throw `入札額は現在の最高額の5倍 (${maxAllowedBid}円) を超えることはできません。`;
-            }
-
-            const now = new Date().getTime();
-            if (lastBidTime && (now - lastBidTime) < (BID_COOLDOWN_SECONDS * 1000)) {
-                const remainingTime = Math.ceil((BID_COOLDOWN_SECONDS * 1000 - (now - lastBidTime)) / 1000);
-                throw `前回の入札から${BID_COOLDOWN_SECONDS}秒経過していません。あと${remainingTime}秒お待ちください。`;
-            }
-
-
-
-
-
-
-
-
-
-
-            
-// Firebase Functionsのインスタンスを取得
-const functions = firebase.functions();
-    const bidInput = document.getElementById('modal-bid-amount');
-    const newBidAmount = parseInt(bidInput.value, 10);
-   
-
-    if (isNaN(newBidAmount) || newBidAmount <= 0) {
-        alert('有効な入札額を入力してください。');
-        return;
-    }
-
-    if (!auctionId) {
-        alert('オークションIDが見つかりません。');
-        return;
-    }
-
-    // Cloud Function 'bidAuction' を呼び出す
-    try {
+        // Cloud Function 'bidAuction' を呼び出す
         const bidAuctionFunction = functions.httpsCallable('bidAuction');
         const result = await bidAuctionFunction({ auctionId: auctionId, amount: newBidAmount });
 
-        if (result.data.success) {
-            alert(`入札に成功しました！現在の最高額: ¥${result.data.newCurrentBid}`);
-            // UIを更新（現在の価格表示など）
-            document.getElementById('current-bid-display').textContent = `現在の価格: ¥${result.data.newCurrentBid}`;
-            bidInput.value = ''; // 入力欄をクリア
+        // Cloud Functionからのレスポンスを処理
+        // Cloud Function内で成功/失敗のフラグやメッセージを返すように設計する
+        if (result.data && result.data.success) {
+            showStatusMessage(`入札が成功しました！現在の最高額: ¥${result.data.newCurrentBid || newBidAmount}`, 'success');
+            // 必要に応じてUIを更新
+            // document.getElementById('current-bid-display').textContent = `現在の価格: ¥${result.data.newCurrentBid}`;
+            // bidAmountInput.value = ''; // 入力欄をクリア
+            document.getElementById('bid-modal').style.display = 'none'; // モーダルを閉じる
+            lastBidTime = now; // 成功した場合のみクールダウン時間を更新
 
-            // WebSocketなどでリアルタイムに更新されない場合は、ページを再読み込みするか、
-            // Firestoreのリアルタイムリスナーを設定しておく
+        } else if (result.data && result.data.message) {
+            // Cloud Functionが成功レスポンスを返したが、ビジネスロジックで失敗したケース
+            showModalMessage(`入札失敗: ${result.data.message}`, 'error');
+            console.error('Cloud Functionからの入札失敗メッセージ:', result.data.message);
         } else {
-            alert('入札に失敗しました。'); // Cloud Functionが成功しても、ビジネスロジックで失敗した場合
+            // 予期せぬレスポンス形式
+            throw new Error('Cloud Functionからの予期せぬレスポンス形式。');
         }
     } catch (error) {
         console.error('入札エラー:', error);
-        // Cloud FunctionからHttpsErrorが返された場合
+        // Cloud FunctionからHttpsErrorが返された場合（例: `functions.https.Callable`からのエラー）
         if (error.code) {
-            alert(`入札エラー: ${error.message} (${error.code})`);
+            showModalMessage(`入札エラー: ${error.message} (${error.code})`, 'error');
         } else {
-            alert('入札中に予期せぬエラーが発生しました。');
+            // その他のクライアントサイドでのエラー
+            showModalMessage(`入札中に予期せぬエラーが発生しました: ${error.message}`, 'error');
         }
-    }
-
-
-
-
-
-
-
-
-            
-            
-            // オークションドキュメントの更新とbidsサブコレクションへの追加
-            // ここがコメントアウトされていますが、入札処理には必須です。
-       //     transaction.update(auctionRef, {
-     //         currentBid: bidAmount,
-    //         highestBidderId: currentUserId,
-   //            highestBidderName: currentUserName,
-    //           updatedAt: bidTimestamp
-    //        });
-      //      const bidDocRef = auctionRef.collection('bids').doc();
-//           transaction.set(bidDocRef, {
- //            userId: currentUserId,
-   //             userName: currentUserName,
-     //          amount: bidAmount,
- //               timestamp: bidTimestamp
-   //        });
-        });
-
-        lastBidTime = new Date().getTime();
-        document.getElementById('bid-modal').style.display = 'none';
-        showStatusMessage('入札が完了しました！', 'success');
-
-    } catch (e) {
-        console.error("入札エラー:", e);
-        showModalMessage(`入札に失敗しました: ${e}`, 'error');
     } finally {
+        // 処理が完了したらボタンを再度有効化
         document.getElementById('modal-submit-button').disabled = false;
     }
 });
@@ -903,9 +845,7 @@ const functions = firebase.functions();
 
 
 
-
-
-
+    
 
 
 
