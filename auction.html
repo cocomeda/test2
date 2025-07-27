@@ -454,7 +454,7 @@ const auctionId = getQueryParam("id");
 
     
 let auctionEndTime;
-//let currentUserId = '';
+let currentUserId = '';
 let currentUserName = '';
 let lastBidTime = 0;
 const BID_COOLDOWN_SECONDS = 30;
@@ -508,7 +508,7 @@ alert("a3");
         output.textContent += "\nFirebaseログイン完了 ✅";
 
        
-        const currentUserId = firebase.auth().currentUser.uid; // change uid to currentUserId
+       currentUserId = firebase.auth().currentUser.uid; // change uid to currentUserId
         const doc = await db.collection("auctions").doc("auc1").get();
           
 alert("a4");
@@ -520,46 +520,6 @@ alert("a4");
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-            
-     // オークションIDが指定されているか確認
-        if (!auctionId) {
-            showStatusMessage('オークションIDが指定されていません。', 'error');
-            hideLoading();
-            return;
-        }
-
-        // Firestoreからオークションデータをリアルタイムで購読
-        db.collection('auctions').doc(auctionId).onSnapshot(async (doc) => {
-            if (doc.exists) {
-                const auctionData = doc.data();
-                auctionEndTime = auctionData.endTime ? auctionData.endTime.toDate() : null;
-
-                let yourBid = 0;
-                if (currentUserId) {
-                    const userBidsSnapshot = await db.collection('auctions').doc(auctionId)
-                                                    .collection('bids')
-                                                    .where('userId', '==', currentUserId)
-                                                    .orderBy('timestamp', 'desc')
-                                                    .limit(1)
-                                                    .get();
-                    if (!userBidsSnapshot.empty) {
-                        yourBid = userBidsSnapshot.docs[0].data().amount;
-                        lastBidTime = userBidsSnapshot.docs[0].data().timestamp.toDate().getTime();
-                    }
-                }
-                
-                updateAuctionUI(auctionData, auctionData.currentBid || auctionData.startPrice, auctionData.highestBidderId, yourBid);
 
 
 
@@ -793,7 +753,7 @@ async function initializeLiffAndLoadAuction() {
 
 // ====== イベントリスナー群 ======
 // DOMContentLoadedでメインの初期化関数を実行
-//window.addEventListener('DOMContentLoaded', initializeLiffAndLoadAuction);
+window.addEventListener('DOMContentLoaded', initializeLiffAndLoadAuction);
 
 // 入札モーダル表示
 document.getElementById('bid-button').addEventListener('click', () => {
