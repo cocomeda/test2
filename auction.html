@@ -506,11 +506,13 @@ const BID_COOLDOWN_SECONDS = 30;
 alert("a3");
         await firebase.auth().signInWithCustomToken(json.firebaseToken);
         output.textContent += "\nFirebaseログイン完了 ✅";
-alert("a4");
-       
-        const currentuserId = firebase.auth().currentUser.uid; // change uid to currentuserId
-        const doc = await db.collection("auctions").doc("auc1").get();
 
+       
+        const currentUserId = firebase.auth().currentUser.uid; // change uid to currentuserId
+        const doc = await db.collection("auctions").doc("auc1").get();
+          
+alert("a4");
+          
         if (doc.exists) {
           output.textContent += `\nデータ取得成功:\n${JSON.stringify(doc.data(), null, 2)}`;
         } else {
