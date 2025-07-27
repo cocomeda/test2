@@ -612,7 +612,7 @@ async function initializeLiffAndLoadAuction() {
         console.log("Cloud FunctionからのFirebaseトークン取得成功。");
         // output.textContent = `✅ 成功:\nFirebase Token:\n${json.firebaseToken}`; // 詳細なデバッグ情報を表示したい場合
 
-        await firebase.auth().signInWithCustomToken(firebaseToken);
+        await firebase.auth().signInWithCustomToken(json.firebaseToken);
         console.log("Firebaseログイン完了 ✅");
         currentUserId = firebase.auth().currentUser.uid; // 現在のユーザーIDを設定
         // LIFFプロフィールからユーザー表示名を取得することも可能
