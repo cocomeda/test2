@@ -480,7 +480,7 @@ const BID_COOLDOWN_SECONDS = 30;
         const idToken = await liff.getIDToken();
         alert(idToken);
 
-        output.textContent = "IDトークン取得成功。\n送信中...";
+        output.textContent = "IDトークン取得成功。送信中...";
 
         const res = await fetch(VERIFY_URL, {
           method: 'POST',
