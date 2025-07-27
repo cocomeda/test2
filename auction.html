@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CoCoメダカオークション</title>
     
-      <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
     
 <style>
-
+/* CSSのスタイルは変更なし */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f4f7f6;
@@ -48,12 +48,12 @@ hr {
 }
 
 .product-media img {
-    max-width: 100%; /* 親要素の幅を超えないようにする */
-    height: auto; /* 画像の比率を維持する */
+    max-width: 100%;
+    height: auto;
     border-radius: 8px;
     margin-bottom: 15px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    width: 80vw; /* ここで画像の横幅を300pxに指定 */
+    width: 80vw;
 }
 
 .product-description {
@@ -81,13 +81,13 @@ hr {
     text-align: center;
     font-size: 4vw;
     font-weight: bold;
-    color:#27ae60; /* 緑色で目立たせる */
-}    
+    color:#27ae60;
+}   
 
 .bid-section {
-    padding: 15px 20px 20px 20px; /* 上パディングを少し減らす */
-    margin-top: 10px;             /* 必要ならここも減らす */
-    background-color:lightblue;    /* #f9f9f9;*/
+    padding: 15px 20px 20px 20px;
+    margin-top: 10px;
+    background-color:lightblue;
     border-radius: 8px;
     border: 1px solid #eee;
 }
@@ -98,12 +98,10 @@ hr {
     font-size: 1.2em;
 }
 
-
-    
 .bid-section_current {
-    padding: 15px 20px 20px 20px; /* 上パディングを少し減らす */
-    margin-top: 10px;             /* 必要ならここも減らす */
-    background-color:;    /* #f9f9f9;*/
+    padding: 15px 20px 20px 20px;
+    margin-top: 10px;
+    background-color:;
     border-radius: 0.2vw;
     border: 1px solid black;
     box-shadow: 3px 2px 2px gray;
@@ -114,8 +112,6 @@ hr {
     margin-bottom: 15px;
     font-size: 1.2em;
 }
-
-    
 
 .input-group {
     margin-bottom: 15px;
@@ -129,12 +125,12 @@ hr {
 }
 
 .input-group input[type="number"] {
-    width: calc(100% - 20px); /* パディング分を考慮して幅を調整 */
+    width: calc(100% - 20px);
     padding: 12px 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1em;
-    box-sizing: border-box; /* パディングを含めて幅を計算 */
+    box-sizing: border-box;
 }
 
 .input-group input[type="checkbox"] {
@@ -145,7 +141,7 @@ button {
     display: block;
     width: 100%;
     padding: 1vw;
-    background-color: #007bff; /* 青色ボタン */
+    background-color: #007bff;
     color: white;
     border: none;
     border-radius: 5px;
@@ -167,17 +163,16 @@ button:disabled {
     text-align: center;
     margin-top: 20px;
     font-weight: bold;
-    color: #d35400; /* エラーや警告はオレンジ */
+    color: #d35400;
 }
 
 .status-message {
     font-size: 1em;
     font-weight: normal;
-    color: #27ae60; /* 自分の状態は緑色 */
+    color: #27ae60;
     margin-top: 5px;
 }
 
-/* モバイル対応のメディアクエリ */
 @media (max-width: 600px) {
     body {
         padding: 10px;
@@ -187,7 +182,7 @@ button:disabled {
         margin: 10px auto;
     }
     .product-media img {
-        width: 100%; /* 小さい画面では横幅いっぱいに表示 */
+        width: 100%;
     }
 }
 
@@ -197,7 +192,6 @@ button:disabled {
     gap: 10px;
 }
 
-/* チェックボックスのサイズと位置調整 */
 .input-group.horizontal input[type="checkbox"] {
     width: 20px;
     height: 20px;
@@ -206,14 +200,12 @@ button:disabled {
     display: inline-block;
 }
 
-/* ラベルの位置調整（高さを合わせる） */
 .input-group.horizontal label {
     margin: 0;
     line-height: 1;
     display: inline-block;
 }
 
-/* 金額入力欄の右寄せと円表示用スタイル */
 .currency-input .input-wrapper {
     position: relative;
     width: 100%;
@@ -221,8 +213,8 @@ button:disabled {
 
 .currency-input input[type="number"] {
     width: 100%;
-    padding: 12px 35px 12px 10px; /* 右に余白を追加して円ラベル分を確保 */
-    text-align: right; /* 右寄せ */
+    padding: 12px 35px 12px 10px;
+    text-align: right;
     font-size: 1em;
     box-sizing: border-box;
 }
@@ -236,7 +228,6 @@ button:disabled {
     font-size: 1em;
 }
 
-/* 追加スタイル */
 .time-info {
     text-align: center;
     font-size: 1em;
@@ -246,14 +237,10 @@ button:disabled {
 .countdown {
     font-size: 1.2em;
     font-weight: bold;
-    color: #e74c3c; /* カウントダウンは赤色で目立たせる */
+    color: #e74c3c;
     margin-top: 5px;
     text-align: center;
 }
-
-
-
-
 
 #bid-modal {
     position: fixed;
@@ -285,7 +272,6 @@ button:disabled {
     box-shadow: 0 0 20px rgba(0,0,0,0.2);
 }
 
-/* ローディング用のくるくる */
 .loader {
   border: 8px solid #f3f3f3;
   border-top: 8px solid #007bff;
@@ -309,8 +295,6 @@ button:disabled {
   margin: 20px 0;
   box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
 }
-
-
 </style>
 </head>
 <body>
@@ -327,12 +311,9 @@ button:disabled {
   <div class="loader"></div>
 </div>
 
-
-
-
     <div class="container">
         <div class="product-section">
-       <h2>CoCoめだか無人オークション</h2>
+        <h2>CoCoめだか無人オークション</h2>
 <h2 id="auction-title" class="title-box">品種名</h2>
             <div class="product-media">
                 <img id="medaka-image" src="" alt="メダカの画像">
@@ -346,38 +327,25 @@ button:disabled {
       <div class="bid-section_current">
         <div class="auction-info">
             <p id="current-price-display">現在の価格: <span id="current-bid">--円</span></p>
-     </div>
+       </div>
 
-
-          
 <div class="auction-info2">
             <p id="your-status" class="status-message"></p>
         
             </div>
       </div>
 
-   
-<!-- <p class="time-info">現在時刻: <span id="current-time">--:--:--</span></p> -->
-        
             <p class="countdown"><span id="time-remaining">--日--時間--分--秒</span></p>
 
-
-
-
-          
-          <div id="passcode-display" style="display: none; margin-top: 20px;">
-    <p class="auction-info0" id="passcode-value"></p>
-          </div>
-
-
+            <div id="passcode-display" style="display: none; margin-top: 20px;">
+        <p class="auction-info0" id="passcode-value"></p>
+            </div>
 
     <p class="payment-info" id="payment-method-info" style="font-size: 0.8em; color: #666; margin-top: 5px;">
     ※代金は代金箱に入れるか、PayPayでお支払いください。
     </p>
     </div>
 
-        
-        
         <hr>
 
 <div id="bid-modal" style="
@@ -432,12 +400,8 @@ button:disabled {
 </div>
 
 
-
-
-
 <script>
 // オークションIDを取得
-// 注意: getQueryParam 関数がこの行より前に定義されていることを確認してください
 const auctionId = getQueryParam("id");
 
 // Firebase設定
@@ -450,11 +414,13 @@ const firebaseConfig = {
   appId: "1:12632824391:web:ab6e784ba311de069eef62"
 };
 
-// ★修正点1: Firebaseの初期化はここで一度だけ行います
+// Firebaseの初期化は一度だけ行います
 firebase.initializeApp(firebaseConfig);
 
-// ★修正点2: dbをグローバルスコープで定義します
+// dbとfunctionsをグローバルスコープで宣言します
 const db = firebase.firestore();
+// functionsインスタンスは、認証後に初期化するため、ここでは 'let' で宣言し、後で値を代入します。
+let functions; 
 
 // LIFF設定
 const LIFF_ID = "1657196041-ALeOLrEa";
@@ -467,111 +433,46 @@ let currentUserName = '';
 let lastBidTime = 0;
 const BID_COOLDOWN_SECONDS = 30;
 
-// getQueryParam 関数 (もしこのスクリプト内にない場合、HTMLのheadかbodyの最初の方に置いてください)
+// getQueryParam 関数
 function getQueryParam(name) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(name);
 }
 
-// showLoading, hideLoading, showModalMessage, showStatusMessage, 
-// updateCurrentTime, updateCountdown, updateAuctionUI などの関数定義はここに続く
-
-// main処理をDOMContentLoadedイベントリスナーで囲む (推奨される方法)
-// または、元の `window.addEventListener('load', ...)` のままでもよいですが、
-// その場合、そのブロック内のFirebase初期化は削除してください。
-window.addEventListener('load', async () => {
-  try {
-    // LIFFの初期化
-    await liff.init({ liffId: LIFF_ID });
-
-    // LIFFログインチェック
-    if (!liff.isLoggedIn()) {
-      liff.login();
-      return; // ログインページへリダイレクトされるため、以降の処理は中止
-    }
-
-    // ユーザーIDと表示名の取得
-    const profile = await liff.getProfile();
-    currentUserId = liff.getDecodedIDToken().sub;
-    currentUserName = profile.displayName;
-
-    // LINE IDトークンを取得し、Cloud Functionで検証、Firebaseカスタムトークンを取得
-    const idToken = await liff.getIDToken();
-    const res = await fetch(VERIFY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken })
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error(`❌ LINE認証エラー (status ${res.status}):\n${text}`);
-      showStatusMessage(`LINE認証エラー: ${res.status}`, 'error');
-      return;
-    }
-
-    const { firebaseToken } = await res.json();
-    await firebase.auth().signInWithCustomToken(firebaseToken);
-    console.log("Firebase signed in successfully with Custom Token.");
-
-    // ここから、Firestoreのデータ取得とUI更新のロジックが始まります
-    // dbはすでにグローバルで定義されているため、ここで const db = ... は不要です。
-    // firebase.initializeApp(firebaseConfig); もここにはもう書きません。
-
-    // UIDの取得はFirebaseログイン後に安全に行えます
-    const uid = firebase.auth().currentUser.uid; 
-    
-    // オークションデータ取得 (dbは利用可能)
-    const doc = await db.collection("auctions").doc(auctionId).get();
-
-    // ... 以降のオークションデータの処理、Firestoreリアルタイム購読、UI更新など
-
-  } catch (err) {
-    console.error('🚫 実行中エラー:', err);
-    showStatusMessage(`初期化またはログインに失敗しました: ${err.message}`, 'error');
-  }
-});
-
-
-
-// ★★★ LIFF対応変更点ここまで ★★★
-
-
-
 // ローディング制御
 function showLoading() {
-  document.getElementById('loading-screen').style.display = 'flex';
+    document.getElementById('loading-screen').style.display = 'flex';
 }
 function hideLoading() {
-  document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('loading-screen').style.display = 'none';
 }
 
 // メッセージ表示（モーダル内）
 function showModalMessage(text, type = 'info') {
-  const msgEl = document.getElementById('modal-message');
-  msgEl.textContent = text;
-  msgEl.style.color = {
-    success: '#27ae60',
-    error: '#e74c3c',
-    info: '#2980b9'
-  }[type] || '#333';
+    const msgEl = document.getElementById('modal-message');
+    msgEl.textContent = text;
+    msgEl.style.color = {
+        success: '#27ae60',
+        error: '#e74c3c',
+        info: '#2980b9'
+    }[type] || '#333';
 }
 
 // 状態メッセージ（画面下）
 function showStatusMessage(text, type = 'info') {
-  const msgEl = document.getElementById('message');
-  msgEl.textContent = text;
-  msgEl.style.color = {
-    success: '#27ae60',
-    error: '#e74c3c',
-    info: '#2980b9'
-  }[type] || '#333';
+    const msgEl = document.getElementById('message');
+    msgEl.textContent = text;
+    msgEl.style.color = {
+        success: '#27ae60',
+        error: '#e74c3c',
+        info: '#2980b9'
+    }[type] || '#333';
 }
 
-// 現在の入札・時間表示
+// 現在の入札・時間表示 (この関数は未使用のようです。必要であれば適宜利用してください)
 function updateCurrentTime() {
-  const now = new Date();
-  document.getElementById('current-time').textContent = now.toLocaleTimeString();
+    // const now = new Date();
+    // document.getElementById('current-time').textContent = now.toLocaleTimeString();
 }
 
 function updateCountdown() {
@@ -640,47 +541,47 @@ function updateAuctionUI(auctionData, latestBidAmount = 0, highestBidderId = nul
     updateCountdown();
 }
 
-// URLからパラメータを取得する関数
-function getQueryParam(name) {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(name);
-}
 
-
-
-// LIFF初期化とデータ読み込み
 // ====== メインの初期化・ロード関数 ======
 async function initializeLiffAndLoadAuction() {
     showLoading();
     document.getElementById('bid-button').disabled = true;
 
     try {
+        await liff.init({ liffId: LIFF_ID });
 
+        if (!liff.isLoggedIn()) {
+            liff.login();
+            return;
+        }
 
+        const profile = await liff.getProfile();
+        currentUserId = liff.getDecodedIDToken().sub;
+        currentUserName = profile.displayName;
 
+        const idToken = await liff.getIDToken();
+        const res = await fetch(VERIFY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken })
+        });
 
+        if (!res.ok) {
+            const text = await res.text();
+            console.error(`❌ LINE認証エラー (status ${res.status}):\n${text}`);
+            showStatusMessage(`LINE認証エラー: ${res.status}`, 'error');
+            hideLoading();
+            return;
+        }
 
+        const { firebaseToken } = await res.json();
+        await firebase.auth().signInWithCustomToken(firebaseToken);
+        console.log("Firebase signed in successfully with Custom Token.");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
+        // ★★★修正点: Firebase Authenticationが完了した後にfunctionsインスタンスを初期化★★★
+        functions = firebase.functions();
+        // エミュレータを使う場合はコメントを外す (ローカル開発時)
+        // functions.useFunctionsEmulator('http://localhost:5001'); // functionsエミュレータのURL
 
         // Firestoreからオークションデータをリアルタイムで購読
         db.collection('auctions').doc(auctionId).onSnapshot(async (doc) => {
@@ -691,11 +592,11 @@ async function initializeLiffAndLoadAuction() {
                 let yourBid = 0;
                 if (currentUserId) {
                     const userBidsSnapshot = await db.collection('auctions').doc(auctionId)
-                                                    .collection('bids')
-                                                    .where('userId', '==', currentUserId)
-                                                    .orderBy('timestamp', 'desc')
-                                                    .limit(1)
-                                                    .get();
+                                                      .collection('bids')
+                                                      .where('userId', '==', currentUserId)
+                                                      .orderBy('timestamp', 'desc')
+                                                      .limit(1)
+                                                      .get();
                     if (!userBidsSnapshot.empty) {
                         yourBid = userBidsSnapshot.docs[0].data().amount;
                         lastBidTime = userBidsSnapshot.docs[0].data().timestamp.toDate().getTime();
@@ -731,7 +632,7 @@ async function initializeLiffAndLoadAuction() {
     } catch (err) {
         console.error('🚫 実行中エラー:', err);
         showStatusMessage(`初期化またはログインに失敗しました: ${err.message}`, 'error');
-        hideLoading(); // エラー発生時もローディングを非表示にする
+        hideLoading();
     }
 }
 
@@ -756,7 +657,8 @@ document.getElementById('modal-cancel-button').addEventListener('click', () => {
     document.getElementById('bid-modal').style.display = 'none';
 });
 
-// モーダル内送信処理
+// ★★★修正点: モーダル内送信処理はCloud Function呼び出しのみにする★★★
+// 古いdb.runTransactionのコードは削除しました。
 document.getElementById('modal-submit-button').addEventListener('click', async () => {
     const bidAmount = Number(document.getElementById('modal-bid-amount').value);
     const agreed = document.getElementById('modal-agree-checkbox').checked;
@@ -771,165 +673,49 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
         return;
     }
 
-    if (!currentUserId) {
+    if (!currentUserId || !currentUserName) { // currentUserNameも確認
         showModalMessage('LINEユーザー情報が取得できていません。LIFFを再起動してください。', 'error');
         return;
     }
     
+    // functionsインスタンスが初期化されているか確認
+    if (!functions) {
+        showModalMessage('システムエラー：入札機能が準備できていません。ページを再読み込みしてください。', 'error');
+        return;
+    }
+
     document.getElementById('modal-submit-button').disabled = true;
     showModalMessage('入札中...', 'info');
 
     try {
-        const auctionRef = db.collection('auctions').doc(auctionId);
-        const bidTimestamp = firebase.firestore.FieldValue.serverTimestamp();
-
-        await db.runTransaction(async (transaction) => {
-            const auctionDoc = await transaction.get(auctionRef);
-
-            if (!auctionDoc.exists) {
-                throw "Auction does not exist!";
-            }
-
-            const currentAuctionData = auctionDoc.data();
-            const currentMaxBid = currentAuctionData.currentBid || currentAuctionData.startPrice;
-            const auctionEndDate = currentAuctionData.endTime ? currentAuctionData.endTime.toDate() : null;
-
-            if (auctionEndDate && new Date() > auctionEndDate) {
-                throw "オークションは既に終了しています。";
-            }
-
-            if (bidAmount <= currentMaxBid) {
-                throw `現在の最高額 (${currentMaxBid}円) より高い金額を入力してください。`;
-            }
-
-            const maxAllowedBid = currentMaxBid * 5;
-            if (bidAmount > maxAllowedBid) {
-                throw `入札額は現在の最高額の5倍 (${maxAllowedBid}円) を超えることはできません。`;
-            }
-
-            const now = new Date().getTime();
-            if (lastBidTime && (now - lastBidTime) < (BID_COOLDOWN_SECONDS * 1000)) {
-                const remainingTime = Math.ceil((BID_COOLDOWN_SECONDS * 1000 - (now - lastBidTime)) / 1000);
-                throw `前回の入札から${BID_COOLDOWN_SECONDS}秒経過していません。あと${remainingTime}秒お待ちください。`;
-            }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-// Firebase Functionsのインスタンスを取得
-const functions = firebase.functions();
-
-    const bidInput = document.getElementById('modal-bid-amount');
-    const newBidAmount = parseInt(bidInput.value, 10);
-   
-
-    if (isNaN(newBidAmount) || newBidAmount <= 0) {
-        alert('有効な入札額を入力してください。');
-        return;
-    }
-
-    if (!auctionId) {
-        alert('オークションIDが見つかりません。');
-        return;
-    }
-
-    // Cloud Function 'bidAuction' を呼び出す
-    try {
         const bidAuctionFunction = functions.httpsCallable('bidAuction');
-        const result = await bidAuctionFunction({ auctionId: auctionId, amount: newBidAmount });
+        // Cloud Functionに送るデータを定義。userIdはcontext.auth.uidで自動取得されるため、ここではuserNameを渡すのが適切です。
+        const result = await bidAuctionFunction({
+            auctionId: auctionId,
+            amount: bidAmount,
+            userName: currentUserName // ユーザー名はCloud Functionに渡す
+        });
 
         if (result.data.success) {
-            alert(`入札に成功しました！現在の最高額: ¥${result.data.newCurrentBid}`);
-            // UIを更新（現在の価格表示など）
-            document.getElementById('current-bid-display').textContent = `現在の価格: ¥${result.data.newCurrentBid}`;
-            bidInput.value = ''; // 入力欄をクリア
-
-            // WebSocketなどでリアルタイムに更新されない場合は、ページを再読み込みするか、
-            // Firestoreのリアルタイムリスナーを設定しておく
+            document.getElementById('bid-modal').style.display = 'none';
+            showStatusMessage('入札が完了しました！', 'success');
+            // UI更新はFirestoreのリアルタイムリスナーが自動で行うため、ここでは特に何もする必要はありません。
         } else {
-            alert('入札に失敗しました。'); // Cloud Functionが成功しても、ビジネスロジックで失敗した場合
+            // Cloud Functionが成功しても、ビジネスロジックで失敗した場合
+            showModalMessage(`入札に失敗しました: ${result.data.message}`, 'error');
         }
     } catch (error) {
         console.error('入札エラー:', error);
         // Cloud FunctionからHttpsErrorが返された場合
         if (error.code) {
-            alert(`入札エラー: ${error.message} (${error.code})`);
+            showModalMessage(`入札エラー: ${error.message} (${error.code})`, 'error');
         } else {
-            alert('入札中に予期せぬエラーが発生しました。');
+            showModalMessage('入札中に予期せぬエラーが発生しました。', 'error');
         }
-    }
-
-
-
-
-
-
-
-
-
-
-            
-
-
-
-
-
-            
-            // オークションドキュメントの更新とbidsサブコレクションへの追加
-            // ここがコメントアウトされていますが、入札処理には必須です。
-  //          transaction.update(auctionRef, {
-   //           currentBid: bidAmount,
-   //         highestBidderId: currentUserId,
-    //           highestBidderName: currentUserName,
-     //          updatedAt: bidTimestamp
-    //        });
-      //      const bidDocRef = auctionRef.collection('bids').doc();
-//           transaction.set(bidDocRef, {
- //            userId: currentUserId,
-   //             userName: currentUserName,
-     //          amount: bidAmount,
- //               timestamp: bidTimestamp
-   //        });
-        });
-
-        lastBidTime = new Date().getTime();
-        document.getElementById('bid-modal').style.display = 'none';
-        showStatusMessage('入札が完了しました！', 'success');
-
-    } catch (e) {
-        console.error("入札エラー:", e);
-        showModalMessage(`入札に失敗しました: ${e}`, 'error');
     } finally {
         document.getElementById('modal-submit-button').disabled = false;
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
 </script>
 
 </body>
