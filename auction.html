@@ -516,7 +516,55 @@ alert("a4");
         if (doc.exists) {
           output.textContent += `\nデータ取得成功:\n${JSON.stringify(doc.data(), null, 2)}`;
 
- initializeLiffAndLoadAuction();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+     // オークションIDが指定されているか確認
+        if (!auctionId) {
+            showStatusMessage('オークションIDが指定されていません。', 'error');
+            hideLoading();
+            return;
+        }
+
+        // Firestoreからオークションデータをリアルタイムで購読
+        db.collection('auctions').doc(auctionId).onSnapshot(async (doc) => {
+            if (doc.exists) {
+                const auctionData = doc.data();
+                auctionEndTime = auctionData.endTime ? auctionData.endTime.toDate() : null;
+
+                let yourBid = 0;
+                if (currentUserId) {
+                    const userBidsSnapshot = await db.collection('auctions').doc(auctionId)
+                                                    .collection('bids')
+                                                    .where('userId', '==', currentUserId)
+                                                    .orderBy('timestamp', 'desc')
+                                                    .limit(1)
+                                                    .get();
+                    if (!userBidsSnapshot.empty) {
+                        yourBid = userBidsSnapshot.docs[0].data().amount;
+                        lastBidTime = userBidsSnapshot.docs[0].data().timestamp.toDate().getTime();
+                    }
+                }
+                
+                updateAuctionUI(auctionData, auctionData.currentBid || auctionData.startPrice, auctionData.highestBidderId, yourBid);
+
+
+
+
+            
 hideLoading(); //
 
             
