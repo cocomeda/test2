@@ -515,6 +515,11 @@ alert("a4");
           
         if (doc.exists) {
           output.textContent += `\nデータ取得成功:\n${JSON.stringify(doc.data(), null, 2)}`;
+
+
+hideLoading(); //
+
+            
         } else {
           output.textContent += "\nデータが見つかりませんでした。";
         }
