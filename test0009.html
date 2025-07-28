@@ -1,78 +1,20 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud Function 認証テスト (匿名認証)</title>
-
+  <meta charset="UTF-8">
+  <title>Firebase Auth テスト</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
-
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 20px;
-      text-align: center;
-    }
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1em;
-      margin-top: 20px;
-      cursor: pointer;
-    }
-    #status-messages {
-      margin-top: 20px;
-      padding: 10px;
-      border: 1px dashed #eee;
-      min-height: 100px;
-      text-align: left;
-      overflow-y: scroll;
-    }
-    .success {
-      color: green;
-    }
-    .error {
-      color: red;
-    }
-    .info {
-      color: blue;
-    }
-    .loader {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      margin-left: 10px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Cloud Function 認証テスト</h1>
-    <p>Firebase匿名認証後、「認証テスト」ボタンでFunctionsを呼び出します。</p>
-    <button id="test-auth-button">認証テスト</button>
-    <div id="status-messages">
-      <p><strong>ログ:</strong></p>
-    </div>
-  </div>
+  <h1>Firebase 認証テスト</h1>
+  <button id="callFunction">Cloud Function 呼び出し</button>
+
+  <pre id="log"></pre>
 
   <script>
+
+
     // Firebaseプロジェクト設定
     const firebaseConfig = {
       apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
@@ -83,94 +25,63 @@
       appId: "1:12632824391:web:ab6e784ba311de069eef62"
     };
 
-    // Firebase初期化
+
+
+
+
+    // ✅ Firebase 初期化
     firebase.initializeApp(firebaseConfig);
-    const functions = firebase.functions(); // 引数なしで初期化
 
-    const statusMessagesDiv = document.getElementById('status-messages');
-    const testAuthButton = document.getElementById('test-auth-button');
+    const log = (...args) => {
+      const logEl = document.getElementById("log");
+      logEl.textContent += args.join(" ") + "\n";
+      console.log(...args);
+    };
 
-    function appendMessage(message, type = 'info') {
-      const p = document.createElement('p');
-      p.className = type;
-      p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-      statusMessagesDiv.appendChild(p);
-      statusMessagesDiv.scrollTop = statusMessagesDiv.scrollHeight;
-      console.log(`[${type.toUpperCase()}] ${message}`);
-    }
+    // 🔐 匿名ログイン
+    firebase.auth().signInAnonymously()
+      .then(cred => {
+        log("✅ Firebase匿名ログイン完了！UID:", cred.user.uid);
+      })
+      .catch(error => {
+        log("❌ Firebase匿名ログイン失敗:", error);
+      });
 
-    async function initializeAndAuthenticate() {
-      appendMessage('Firebase匿名認証を開始します...');
-      testAuthButton.disabled = true;
-      testAuthButton.innerHTML = '認証中 <span class="loader"></span>';
+    // 📡 Cloud Function 呼び出し
+    document.getElementById("callFunction").addEventListener("click", async () => {
+      log("🚀 Cloud Function呼び出し開始...");
+
+      const user = firebase.auth().currentUser;
+      if (!user) return log("❌ 認証されていません");
+
+      const idToken = await user.getIdToken(true); // 🔁 強制リフレッシュ
+      log("🪪 IDトークン取得:", idToken.slice(0, 20) + "...");
+
+      // 🌐 Cloud Function エンドポイント
+      const endpoint = "https://us-central1-coco-auction.cloudfunctions.net/testAuthFunction";
 
       try {
-        await firebase.auth().signInAnonymously();
-        const currentUser = firebase.auth().currentUser;
-        appendMessage(`Firebase匿名ログイン完了！UID: ${currentUser.uid}`, 'success');
-        testAuthButton.disabled = false;
-        testAuthButton.textContent = '認証テスト';
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({ message: "Hello from frontend" })
+        });
+
+        const json = await res.json();
+        log("✅ Cloud Function 応答:", JSON.stringify(json));
       } catch (err) {
-        appendMessage(`Firebase匿名認証中にエラーが発生しました: ${err.message}`, 'error');
-        console.error('匿名認証エラー詳細:', err);
-        testAuthButton.disabled = false;
-        testAuthButton.textContent = '認証テスト';
+        log("❌ Cloud Function エラー:", err);
       }
-    }
-
-    async function callTestAuthFunction() {
-      appendMessage('testAuthFunction Cloud Functionの呼び出しを開始します...');
-      testAuthButton.disabled = true;
-      testAuthButton.innerHTML = 'テスト中 <span class="loader"></span>';
-
-      const currentUser = firebase.auth().currentUser;
-      if (!currentUser || !currentUser.uid) {
-        appendMessage('テスト時: Firebaseに認証されていません。再認証が必要です。', 'error');
-        testAuthButton.disabled = false;
-        testAuthButton.textContent = '認証テスト';
-        return;
-      }
-
-      appendMessage(`テスト時: Firebase認証済みユーザーUID: ${currentUser.uid}`);
-
-      try {
-        const idTokenResult = await currentUser.getIdTokenResult(true);
-        appendMessage(`IDトークンを強制リフレッシュしました。Expiration Time: ${new Date(idTokenResult.expirationTime).toLocaleTimeString()}`);
-      } catch (tokenRefreshError) {
-        appendMessage(`IDトークンリフレッシュ中にエラーが発生しました: ${tokenRefreshError.message}`, 'error');
-        testAuthButton.disabled = false;
-        testAuthButton.textContent = '認証テスト';
-        return;
-      }
-
-      try {
-        // リージョンを明示的に指定する（us-central1）
-        const testAuthFunctionCallable = firebase.app().functions('us-central1').httpsCallable('testAuthFunction');
-
-        const result = await testAuthFunctionCallable({});
-
-        if (result.data && result.data.success) {
-          appendMessage(`Functionsからの応答: ${result.data.message}`, 'success');
-          appendMessage(`認証済みUID: ${result.data.uid}`, 'success');
-          appendMessage(`Email (もしあれば): ${result.data.email || 'なし'}`, 'info');
-          appendMessage(`Name (もしあれば): ${result.data.name || 'なし'}`, 'info');
-        } else if (result.data && result.data.message) {
-          appendMessage(`Functionsからのエラー応答: ${result.data.message}`, 'error');
-        } else {
-          appendMessage('Functionsからの予期せぬ応答。', 'error');
-          console.error('Functionsレスポンス詳細:', result);
-        }
-      } catch (error) {
-        console.error('Cloud Function呼び出しエラー:', error);
-        appendMessage(`エラー: ${error.message}`, 'error');
-      } finally {
-        testAuthButton.disabled = false;
-        testAuthButton.textContent = '認証テスト';
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', initializeAndAuthenticate);
-    testAuthButton.addEventListener('click', callTestAuthFunction);
+    });
   </script>
 </body>
 </html>
+
+
+
+
+
+
