@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase simpleOnCallTest</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+    
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f7f6; color: #333; }
+        .container { max-width: 600px; margin: 30px auto; padding: 25px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background-color: #fff; }
+        h1 { text-align: center; color: #4CAF50; margin-bottom: 25px; }
+        .status-section { margin-bottom: 20px; padding: 15px; border-radius: 5px; background-color: #e0f2f1; border: 1px solid #b2dfdb; }
+        #login-status { font-weight: bold; color: #00796B; }
+        .button-group { text-align: center; margin-top: 25px; }
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #4CAF50;
+        }
+        button:hover:enabled { background-color: #388E3C; }
+        button:disabled { background-color: #BDBDBD; cursor: not-allowed; }
+        .messages-box { 
+            margin-top: 25px; 
+            padding: 15px; 
+            border: 1px dashed #BDBDBD; 
+            min-height: 150px; 
+            max-height: 300px; 
+            overflow-y: auto; 
+            background-color: #f9f9f9; 
+            border-radius: 5px; 
+            font-family: monospace; 
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .message { margin-bottom: 8px; line-height: 1.4; }
+        .message-info { color: #2196F3; }
+        .message-success { color: #4CAF50; font-weight: bold; }
+        .message-error { color: #F44336; font-weight: bold; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Firebase Cloud Function Test</h1>
+        
+        <div class="status-section">
+            <p><strong>ログインステータス:</strong> <span id="login-status">未ログイン</span></p>
+        </div>
+
+        <div class="button-group">
+            <button id="auth-button">匿名認証</button>
+            <button id="call-function-button" disabled>Functions呼び出し</button>
+        </div>
+
+        <h3>ログ:</h3>
+        <div id="messages" class="messages-box">
+            <p class="message-info">ここにログが表示されます。</p>
+        </div>
+    </div>
+
+    <script>
+        // --- あなたのFirebaseプロジェクト設定をここに貼り付けてください ---
+        // Firebase Console のプロジェクト設定 -> あなたのアプリ -> Web アプリから取得
+     const firebaseConfig = {
+        apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
+        authDomain: "coco-auction.firebaseapp.com",
+        projectId: "coco-auction",
+        storageBucket: "coco-auction.appspot.com",
+        messagingSenderId: "12632824391",
+        appId: "1:12632824391:web:ab6e784ba311de069eef62"
+    };
+        // --- 設定ここまで ---
+
+        // Firebase の初期化
+        firebase.initializeApp(firebaseConfig);
+
+        // Firebase サービスへの参照を取得
+        const auth = firebase.auth();
+        // Functions の参照を取得。Functions をデプロイしたリージョンを指定してください！
+        // 例: 'asia-northeast1' または 'us-central1' (デフォルト)
+        const functions = firebase.functions('us-central1'); // ★ ここをデプロイしたリージョンに合わせる ★
+
+        // DOM要素への参照
+        const loginStatusSpan = document.getElementById('login-status');
+        const messagesBox = document.getElementById('messages');
+        const authButton = document.getElementById('auth-button');
+        const callFunctionButton = document.getElementById('call-function-button');
+
+        // メッセージ表示関数
+        function appendMessage(msg, type = 'info') {
+            const p = document.createElement('p');
+            p.className = `message message-${type}`;
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            messagesBox.appendChild(p);
+            messagesBox.scrollTop = messagesBox.scrollHeight; // スクロール
+            console.log(`[${type.toUpperCase()}] ${msg}`);
+        }
+
+        // 匿名認証処理
+        async function authenticateAnonymously() {
+            authButton.disabled = true;
+            authButton.innerHTML = '認証中 <span class="loader"></span>';
+            appendMessage('Firebase匿名認証を開始します...');
+
+            try {
+                const userCredential = await auth.signInAnonymously();
+                const user = userCredential.user;
+                appendMessage(`Firebase匿名ログイン成功！UID: ${user.uid}`, 'success');
+                loginStatusSpan.textContent = `ログイン済み (UID: ${user.uid})`;
+                callFunctionButton.disabled = false; // 認証成功後、Functions呼び出しボタンを有効化
+            } catch (error) {
+                console.error('匿名認証エラー:', error);
+                appendMessage(`匿名認証に失敗しました: ${error.message}`, 'error');
+                loginStatusSpan.textContent = '未ログイン';
+            } finally {
+                authButton.disabled = false;
+                authButton.textContent = '匿名認証';
+            }
+        }
+
+        // Cloud Function (simpleOnCallTest) の呼び出し処理
+        async function callSimpleOnCallTest() {
+            appendMessage('simpleOnCallTest Cloud Functionの呼び出しを開始します...');
+            callFunctionButton.disabled = true;
+            callFunctionButton.innerHTML = '呼び出し中 <span class="loader"></span>';
+
+            try {
+                // Callable Function の参照を取得
+                const callableFunction = functions.httpsCallable('simpleOnCallTest'); // 関数の名前を正確に指定
+                
+                // Function に送信するデータ (今回はシンプルに文字列)
+                const dataToSend = { clientRequest: "Hello from client!" };
+
+                // Callable Function を呼び出す
+                const result = await callableFunction(dataToSend);
+
+                // Function からの応答を処理
+                if (result.data) {
+                    appendMessage(`Functionsからの応答: ${result.data.message}`, 'success');
+                    appendMessage(`Functionsが受け取ったデータ: ${JSON.stringify(result.data.receivedData)}`, 'info');
+                    appendMessage(`Functionsでの認証ステータス: ${result.data.authStatus}`, 'info');
+                    if (result.data.uid) {
+                        appendMessage(`Functionsで認識されたUID: ${result.data.uid}`, 'info');
+                    }
+                } else {
+                    appendMessage('Functionsからの予期せぬ応答。', 'error');
+                    console.error('Functionsレスポンス詳細:', result);
+                }
+            } catch (error) {
+                console.error('Cloud Function呼び出しエラー:', error);
+                // Firebase Callable Function のエラーコードがあれば表示
+                if (error.code) {
+                    appendMessage(`エラー: ${error.message} (コード: ${error.code})`, 'error');
+                } else {
+                    appendMessage(`エラー: ${error.message}`, 'error');
+                }
+            } finally {
+                callFunctionButton.disabled = false;
+                callFunctionButton.textContent = 'Functions呼び出し';
+            }
+        }
+
+        // イベントリスナーの設定
+        authButton.addEventListener('click', authenticateAnonymously);
+        callFunctionButton.addEventListener('click', callSimpleOnCallTest);
+
+        // ページロード時に自動的に匿名認証を試みる
+        window.addEventListener('DOMContentLoaded', authenticateAnonymously);
+    </script>
+
+</body>
+</html>
