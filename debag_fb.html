@@ -168,6 +168,26 @@
         appendMessage(`入札時: Firebase認証済みユーザーUID: ${currentUser.uid}`);
 
 
+
+
+
+
+
+        
+    try {
+        const idTokenResult = await currentUser.getIdTokenResult(true); // true を渡すと強制的にリフレッシュ
+        appendMessage(`IDトークンを強制リフレッシュしました。Expiration Time: ${new Date(idTokenResult.expirationTime).toLocaleTimeString()}`);
+    } catch (tokenRefreshError) {
+        appendMessage(`IDトークンリフレッシュ中にエラーが発生しました: ${tokenRefreshError.message}`, 'error');
+        testBidButton.disabled = false;
+        testBidButton.textContent = '入札テスト';
+        return;
+    }
+
+
+
+
+        
         try {
             const bidAuctionFunction = functions.httpsCallable('bidAuction');
             const result = await bidAuctionFunction({ auctionId: AUCTION_ID, amount: TEST_BID_AMOUNT });
