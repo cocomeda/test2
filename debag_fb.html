@@ -66,6 +66,8 @@
 
     // Firebase初期化
     firebase.initializeApp(firebaseConfig);
+
+    //const functions = firebase.app().functions('asia-northeast1'); // 例
     const functions = firebase.functions(); // デフォルトリージョン
     // Functionsがus-central1以外のリージョンにある場合、以下のように指定してください
     // const functions = firebase.functions('asia-northeast1'); 
