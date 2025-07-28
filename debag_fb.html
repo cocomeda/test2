@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoCoメダカオークション - デバッグ書き込み</title>
+    <title>Cloud Function 認証テスト (匿名認証)</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script> <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
-    
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     
     <style>
         body { font-family: sans-serif; margin: 20px; text-align: center; }
         .container { max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
         button { padding: 10px 20px; font-size: 1em; margin-top: 20px; cursor: pointer; }
-        #status-messages { margin-top: 20px; padding: 10px; border: 1px dashed #eee; min-height: 50px; text-align: left; }
+        #status-messages { margin-top: 20px; padding: 10px; border: 1px dashed #eee; min-height: 100px; text-align: left; overflow-y: scroll; }
         .success { color: green; }
         .error { color: red; }
         .info { color: blue; }
@@ -39,9 +37,9 @@
 <body>
 
     <div class="container">
-        <h1>Cloud Function認証デバッグ</h1>
-        <p>「入札テスト」ボタンを押して、認証とFunctions呼び出しをテストします。</p>
-        <button id="test-bid-button">入札テスト</button>
+        <h1>Cloud Function 認証テスト</h1>
+        <p>Firebase匿名認証後、「認証テスト」ボタンでFunctionsを呼び出します。</p>
+        <button id="test-auth-button">認証テスト</button>
         <div id="status-messages">
             <p><strong>ログ:</strong></p>
         </div>
@@ -49,12 +47,6 @@
 
 <script>
     // --- あなたの環境に合わせて設定してください ---
-    const LIFF_ID = "1657196041-ALeOLrEa"; // 例: "1234567890-abcdefgh"
-    const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2"; // あなたのverifyLineTokenAndSignIn2関数のURL
-    const AUCTION_ID = "auc1"; // テストするオークションID
-    const TEST_BID_AMOUNT = 15000; // テストする入札額
-    // --- ここまで ---
-
     const firebaseConfig = {
       apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8", // あなたのFirebase APIキー
       authDomain: "coco-auction.firebaseapp.com",
@@ -63,163 +55,108 @@
       messagingSenderId: "12632824391",
       appId: "1:12632824391:web:ab6e784ba311de069eef62"
     };
+    // --- ここまで ---
 
     // Firebase初期化
     firebase.initializeApp(firebaseConfig);
 
-   // const functions = firebase.app().functions('us-central1'); // 例
-    const functions = firebase.functions(); // デフォルトリージョン
-    // Functionsがus-central1以外のリージョンにある場合、以下のように指定してください
+    // Functionsのインスタンス（デフォルトリージョン: us-central1）
+    const functions = firebase.functions(); 
+    // もしFunctionsが us-central1 以外のリージョンにある場合、以下のように指定してください:
     // const functions = firebase.functions('asia-northeast1'); 
     
-    let currentUserId = null; // FirebaseのUIDを保持
-
     const statusMessagesDiv = document.getElementById('status-messages');
-    const testBidButton = document.getElementById('test-bid-button');
+    const testAuthButton = document.getElementById('test-auth-button');
 
     function appendMessage(message, type = 'info') {
         const p = document.createElement('p');
         p.className = type;
         p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
         statusMessagesDiv.appendChild(p);
-        statusMessagesDiv.scrollTop = statusMessagesDiv.scrollHeight; // スクロールして最新を表示
-        console.log(`[${type.toUpperCase()}] ${message}`); // コンソールにも出力
+        statusMessagesDiv.scrollTop = statusMessagesDiv.scrollHeight; 
+        console.log(`[${type.toUpperCase()}] ${message}`); 
     }
 
     async function initializeAndAuthenticate() {
-        appendMessage('LIFFとFirebaseの認証を開始します...');
-        testBidButton.disabled = true;
-        testBidButton.innerHTML = '認証中 <span class="loader"></span>';
+        appendMessage('Firebase匿名認証を開始します...');
+        testAuthButton.disabled = true;
+        testAuthButton.innerHTML = '認証中 <span class="loader"></span>';
 
         try {
-            // LIFF初期化
-            await liff.init({ liffId: LIFF_ID });
-            appendMessage('LIFF初期化完了。');
-
-            if (!liff.isLoggedIn()) {
-                appendMessage('LIFFにログインしていません。ログインページへリダイレクトします...');
-                liff.login();
-                return; // LIFFログインが完了するまで処理を停止
-            }
-            appendMessage('LIFFログイン済み。');
-
-            // LINE IDトークン取得
-            const idToken = await liff.getIDToken();
-            if (!idToken) {
-                appendMessage('LINE IDトークンの取得に失敗しました。', 'error');
-                testBidButton.disabled = false;
-                testBidButton.textContent = '入札テスト';
-                return;
-            }
-            appendMessage('LINE IDトークン取得成功。Cloud FunctionでFirebase認証トークンを検証・取得します...');
-
-            // Cloud Function (verifyLineTokenAndSignIn2) 呼び出し
-            const verifyRes = await fetch(VERIFY_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ idToken })
-            });
-
-            if (!verifyRes.ok) {
-                const errorText = await verifyRes.text();
-                appendMessage(`Firebase認証トークン取得失敗: ${errorText}`, 'error');
-                testBidButton.disabled = false;
-                testBidButton.textContent = '入札テスト';
-                return;
-            }
-
-            const json = await verifyRes.json();
-            const firebaseToken = json.firebaseToken;
-            if (!firebaseToken) {
-                appendMessage('Cloud FunctionからFirebaseトークンが返されませんでした。', 'error');
-                testBidButton.disabled = false;
-                testBidButton.textContent = '入札テスト';
-                return;
-            }
-            appendMessage('Firebaseカスタムトークン取得成功。');
-
-            // Firebaseカスタム認証
-            await firebase.auth().signInWithCustomToken(firebaseToken);
-            currentUserId = firebase.auth().currentUser.uid;
-            appendMessage(`Firebaseログイン完了！UID: ${currentUserId}`, 'success');
+            // Firebase匿名認証を実行
+            await firebase.auth().signInAnonymously();
+            const currentUser = firebase.auth().currentUser;
+            appendMessage(`Firebase匿名ログイン完了！UID: ${currentUser.uid}`, 'success');
             
-            testBidButton.disabled = false;
-            testBidButton.textContent = '入札テスト';
+            testAuthButton.disabled = false;
+            testAuthButton.textContent = '認証テスト';
 
         } catch (err) {
-            appendMessage(`認証中にエラーが発生しました: ${err.message}`, 'error');
-            console.error('認証エラー詳細:', err);
-            testBidButton.disabled = false;
-            testBidButton.textContent = '入札テスト';
+            appendMessage(`Firebase匿名認証中にエラーが発生しました: ${err.message}`, 'error');
+            console.error('匿名認証エラー詳細:', err);
+            testAuthButton.disabled = false;
+            testAuthButton.textContent = '認証テスト';
         }
     }
 
-    async function callBidAuction() {
-        appendMessage('入札 Cloud Functionの呼び出しを開始します...');
-        testBidButton.disabled = true;
-        testBidButton.innerHTML = '入札中 <span class="loader"></span>';
+    async function callTestAuthFunction() {
+        appendMessage('testAuthFunction Cloud Functionの呼び出しを開始します...');
+        testAuthButton.disabled = true;
+        testAuthButton.innerHTML = 'テスト中 <span class="loader"></span>';
 
-        // 念のため、呼び出し直前にFirebase認証状態を再確認
         const currentUser = firebase.auth().currentUser;
         if (!currentUser || !currentUser.uid) {
-            appendMessage('入札時: Firebaseに認証されていません。再認証が必要です。', 'error');
-            testBidButton.disabled = false;
-            testBidButton.textContent = '入札テスト';
+            appendMessage('テスト時: Firebaseに認証されていません。再認証が必要です。', 'error');
+            testAuthButton.disabled = false;
+            testAuthButton.textContent = '認証テスト';
             return;
         }
-        appendMessage(`入札時: Firebase認証済みユーザーUID: ${currentUser.uid}`);
+        appendMessage(`テスト時: Firebase認証済みユーザーUID: ${currentUser.uid}`);
 
-
-
-
-
-
-
-        
-    try {
-        const idTokenResult = await currentUser.getIdTokenResult(true); // true を渡すと強制的にリフレッシュ
-        appendMessage(`IDトークンを強制リフレッシュしました。Expiration Time: ${new Date(idTokenResult.expirationTime).toLocaleTimeString()}`);
-    } catch (tokenRefreshError) {
-        appendMessage(`IDトークンリフレッシュ中にエラーが発生しました: ${tokenRefreshError.message}`, 'error');
-        testBidButton.disabled = false;
-        testBidButton.textContent = '入札テスト';
-        return;
-    }
-
-
-
-
+        // IDトークンを強制リフレッシュ
+        try {
+            const idTokenResult = await currentUser.getIdTokenResult(true); // true で強制リフレッシュ
+            appendMessage(`IDトークンを強制リフレッシュしました。Expiration Time: ${new Date(idTokenResult.expirationTime).toLocaleTimeString()}`);
+        } catch (tokenRefreshError) {
+            appendMessage(`IDトークンリフレッシュ中にエラーが発生しました: ${tokenRefreshError.message}`, 'error');
+            testAuthButton.disabled = false;
+            testAuthButton.textContent = '認証テスト';
+            return;
+        }
         
         try {
-            const bidAuctionFunction = functions.httpsCallable('bidAuction');
-            const result = await bidAuctionFunction({ auctionId: AUCTION_ID, amount: TEST_BID_AMOUNT });
+            const testAuthFunctionCallable = functions.httpsCallable('testAuthFunction');
+            const result = await testAuthFunctionCallable({}); // データは空でOK
 
             if (result.data && result.data.success) {
-                appendMessage(`入札成功！現在の最高額: ¥${result.data.newCurrentBid}`, 'success');
+                appendMessage(`Functionsからの応答: ${result.data.message}`, 'success');
+                appendMessage(`認証済みUID: ${result.data.uid}`, 'success');
+                appendMessage(`Email (もしあれば): ${result.data.email}`, 'info');
+                appendMessage(`Name (もしあれば): ${result.data.name}`, 'info');
             } else if (result.data && result.data.message) {
-                appendMessage(`入札失敗（Functionsからのメッセージ）: ${result.data.message}`, 'error');
+                appendMessage(`Functionsからのエラー応答: ${result.data.message}`, 'error');
             } else {
-                appendMessage('入札失敗: 予期せぬFunctionsレスポンス。', 'error');
+                appendMessage('Functionsからの予期せぬ応答。', 'error');
                 console.error('Functionsレスポンス詳細:', result);
             }
         } catch (error) {
             console.error('Cloud Function呼び出しエラー:', error);
             if (error.code) {
-                appendMessage(`入札エラー: ${error.message} (コード: ${error.code})`, 'error');
+                appendMessage(`エラー: ${error.message} (コード: ${error.code})`, 'error');
             } else {
-                appendMessage(`入札エラー: ${error.message}`, 'error');
+                appendMessage(`エラー: ${error.message}`, 'error');
             }
         } finally {
-            testBidButton.disabled = false;
-            testBidButton.textContent = '入札テスト';
+            testAuthButton.disabled = false;
+            testAuthButton.textContent = '認証テスト';
         }
     }
 
     // 初期化と認証をDOM読み込み後に実行
     window.addEventListener('DOMContentLoaded', initializeAndAuthenticate);
 
-    // ボタンクリックで入札関数を呼び出す
-    testBidButton.addEventListener('click', callBidAuction);
+    // ボタンクリックでテスト関数を呼び出す
+    testAuthButton.addEventListener('click', callTestAuthFunction);
 </script>
 
 </body>
