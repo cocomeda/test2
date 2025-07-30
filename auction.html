@@ -801,6 +801,11 @@ const functions = firebase.functions();
 document.getElementById('modal-submit-button').addEventListener('click', async () => {
     const bidAmountInput = document.getElementById('modal-bid-amount');
     const newBidAmount = Number(bidAmountInput.value); // Number() で数値に変換
+
+
+
+alert(newBidAmount)
+    
     const agreed = document.getElementById('modal-agree-checkbox').checked;
 
     // --- クライアントサイドでの基本的な入力検証 ---
