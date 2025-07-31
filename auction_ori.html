@@ -539,11 +539,7 @@ const paymentMethodInfo = document.getElementById('payment-method-info'); // 新
 
 
 
-   const currentAuctionData = window.currentAuctionData;
-    if (currentAuctionData) {
-        if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
-            currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice}円で落札しました🎉`;
-            yourStatusElement.textContent = '';
+
             
 
       
@@ -552,6 +548,8 @@ const paymentMethodInfo = document.getElementById('payment-method-info'); // 新
         if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
             currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice}円で落札しました🎉`;
             yourStatusElement.textContent = '';            // privateAuctionInfo コレクションからパスコードを非同期で取得
+
+            
             db.collection('privateAuctionInfo').doc(currentAuctionData.id) // オークションIDでドキュメントを指定
                 .get().then(privateInfoDoc => {
                     if (privateInfoDoc.exists) {
