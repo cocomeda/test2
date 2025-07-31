@@ -348,7 +348,6 @@ button:disabled {
             <p id="current-price-display">現在の価格: <span id="current-bid">--円</span></p>
      </div>
 
-
           
 <div class="auction-info2">
             <p id="your-status" class="status-message"></p>
@@ -438,6 +437,22 @@ button:disabled {
 
 
 <script>
+
+
+
+    
+function formatPrice(price) {
+    if (typeof price !== 'number' && typeof price !== 'string' || isNaN(Number(price))) {
+        // 数値に変換できない場合、そのまま返すか適切な処理
+        console.warn('formatPrice: 無効な数値が渡されました', price);
+        return price; 
+    }
+    // 文字列として渡された場合も数値に変換して処理
+    const numericPrice = Number(price);
+    // 日本語ロケールで数値のフォーマットを行う (例: 123456 -> 123,456)
+    return new Intl.NumberFormat('ja-JP').format(numericPrice);
+}
+
 const auctionId = getQueryParam("id");
 
     
@@ -562,17 +577,24 @@ function updateCountdown() {
         `終了まで：${days}日${hours}時間${minutes}分${seconds}秒`;
 }
 
-// UI反映
+    
+
+
+    // UI反映
 function updateAuctionUI(auctionData, latestBidAmount = 0, highestBidderId = null, yourBidAmount = 0) {
     document.getElementById('auction-title').textContent = auctionData.title || '品種名';
     document.getElementById("medaka-image").src = auctionData.imageUrl || auctionData.image || '';
     document.getElementById('item-overview').textContent = auctionData.description || '----';
-    document.getElementById('current-bid').textContent = `${latestBidAmount}円`;
+    document.getElementById('current-bid').textContent = `${formatPrice(latestBidAmount)}円`;
 
+
+
+    
+    
     if (currentUserId && highestBidderId === currentUserId) {
         document.getElementById('your-status').textContent = `あなたが最高額！`;
     } else {
-        document.getElementById('your-status').textContent = `あなたの入札額: ${yourBidAmount > 0 ? yourBidAmount + '円' : '---'}`;
+        document.getElementById('your-status').textContent = `あなたの入札額: ${formatPrice(yourBidAmount) > 0 ? formatPrice(yourBidAmount) + '円' : '---'}`;
     }
 
     //window.currentAuctionData = auctionData;
@@ -814,6 +836,9 @@ alert(newBidAmount)
             // 必要に応じてUIを更新
             // document.getElementById('current-bid-display').textContent = `現在の価格: ¥${result.data.newCurrentBid}`;
             // bidAmountInput.value = ''; // 入力欄をクリア
+
+
+            
             document.getElementById('bid-modal').style.display = 'none'; // モーダルを閉じる
             lastBidTime = now; // 成功した場合のみクールダウン時間を更新
 
@@ -839,23 +864,13 @@ alert('入札エラー詳細: ' + error);
             showModalMessage(`入札中に予期せぬエラーが発生しました: ${error.message}`, 'error');
 
 
-
-
-
-            
+    
         }
     } finally {
         // 処理が完了したらボタンを再度有効化
         document.getElementById('modal-submit-button').disabled = false;
     }
 });
-
-
-
-
-
-
-
 
 
 
