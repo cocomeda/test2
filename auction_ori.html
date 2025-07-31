@@ -530,14 +530,45 @@ const paymentMethodInfo = document.getElementById('payment-method-info'); // 新
     document.getElementById('time-remaining').textContent = 'オークションは終了しました';
     bidButton.disabled = true;
 
-    const currentAuctionData = window.currentAuctionData;
+
+
+
+
+
+
+
+
+
+   const currentAuctionData = window.currentAuctionData;
     if (currentAuctionData) {
         if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
             currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice}円で落札しました🎉`;
             yourStatusElement.textContent = '';
-            passcodeValue.textContent = `暗証番号: ${currentAuctionData.passcode || '---'}`;
-            passcodeDisplay.style.display = 'block';
- paymentMethodInfo.style.display = 'block'; // ★ 支払い方法も表示
+            
+
+      
+    const currentAuctionData = window.currentAuctionData;
+    if (currentAuctionData) {
+        if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
+            currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice}円で落札しました🎉`;
+            yourStatusElement.textContent = '';            // privateAuctionInfo コレクションからパスコードを非同期で取得
+            db.collection('privateAuctionInfo').doc(currentAuctionData.id) // オークションIDでドキュメントを指定
+                .get().then(privateInfoDoc => {
+                    if (privateInfoDoc.exists) {
+                        const privateInfoData = privateInfoDoc.data();
+                        passcodeValue.textContent = `暗証番号: ${privateInfoData.passcode || '---'}`;
+                    } else {
+                        passcodeValue.textContent = `暗証番号: --- (情報なし)`;
+                    }
+                    passcodeDisplay.style.display = 'block';
+                    paymentMethodInfo.style.display = 'block'; // ★ 支払い方法も表示
+                }).catch(error => {
+                    console.error("Failed to get private auction info:", error);
+                    passcodeValue.textContent = `暗証番号: --- (取得エラー)`;
+                    passcodeDisplay.style.display = 'block'; // エラーでも表示はする
+                    paymentMethodInfo.style.display = 'block';
+                });
+
 
             
         } else {
