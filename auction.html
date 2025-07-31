@@ -828,17 +828,31 @@ alert(newBidAmount)
     } catch (error) {
         console.error('入札エラー:', error);
         // Cloud FunctionからHttpsErrorが返された場合（例: `functions.https.Callable`からのエラー）
+
+
+
+        
         if (error.code) {
             showModalMessage(`入札エラー: ${error.message} (${error.code})`, 'error');
         } else {
             // その他のクライアントサイドでのエラー
             showModalMessage(`入札中に予期せぬエラーが発生しました: ${error.message}`, 'error');
+
+
+
+
+
+            
         }
     } finally {
         // 処理が完了したらボタンを再度有効化
         document.getElementById('modal-submit-button').disabled = false;
     }
 });
+
+
+
+
 
 
 
