@@ -573,9 +573,10 @@ function updateAuctionUI(auctionData, latestBidAmount = 0, highestBidderId = nul
   document.getElementById('current-bid').textContent = `${latestBidAmount}円`;
 
   if (currentUserId && highestBidderId === currentUserId) {
-    document.getElementById('your-status').textContent = `あなたが最高額！`;
+    document.getElementById('your-status').textContent = `現在、あなたが最高入札者です！`;
   } else {
-    document.getElementById('your-status').textContent = `あなたの入札額: ${yourBidAmount > 0 ? yourBidAmount + '円' : '---'}`;
+    //document.getElementById('your-status').textContent = `あなたの入札額: ${yourBidAmount > 0 ? yourBidAmount + '円' : '---'}`;
+       document.getElementById('your-status').textContent = `落札するには入札が必要です。`;
   }
 
   window.currentAuctionData = auctionData;
@@ -670,7 +671,7 @@ alert("ログイン状態: " + liff.isLoggedIn());
 
     // 時刻とカウントダウンの更新を開始
     updateCurrentTime();
-    setInterval(updateCurrentTime, 1000);
+    //setInterval(updateCurrentTime, 1000);
     setInterval(updateCountdown, 1000);
 
   } catch (error) {
