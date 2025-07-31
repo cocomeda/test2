@@ -356,10 +356,7 @@ button:disabled {
       </div>
 
    
-<!-- <p class="time-info">現在時刻: <span id="current-time">--:--:--</span></p> -->
-        
-            <p class="countdown"><span id="time-remaining">--日--時間--分--秒</span></p>
-
+<p class="countdown"><span id="time-remaining">--日--時間--分--秒</span></p>
 
 
 
@@ -528,56 +525,71 @@ function updateCurrentTime() {
  // document.getElementById('current-time').textContent = now.toLocaleTimeString();
 }
 
+// ★ 更新された updateCountdown 関数
 function updateCountdown() {
-    if (!auctionEndTime) return;
+  if (!auctionEndTime) return;
 
-    const now = new Date().getTime();
-    const distance = auctionEndTime.getTime() - now;
+  const now = new Date().getTime();
+  const distance = auctionEndTime.getTime() - now;
 
-    const bidButton = document.getElementById('bid-button');
-    const currentPriceDisplayElement = document.getElementById('current-price-display');
-    const yourStatusElement = document.getElementById('your-status');
-    const passcodeDisplay = document.getElementById('passcode-display');
-    const passcodeValue = document.getElementById('passcode-value');
-    const paymentMethodInfo = document.getElementById('payment-method-info');
+  const bidButton = document.getElementById('bid-button');
+  const yourStatusElement = document.getElementById('your-status');
+  const passcodeDisplay = document.getElementById('passcode-display');
+  const passcodeValue = document.getElementById('passcode-value');
+  const currentPriceDisplayElement = document.getElementById('current-price-display');
+  const paymentMethodInfo = document.getElementById('payment-method-info');
 
-    if (distance < 0) {
-        document.getElementById('time-remaining').textContent = 'オークションは終了しました';
-        bidButton.disabled = true;
+  if (distance < 0) {
+    document.getElementById('time-remaining').textContent = 'オークションは終了しました';
+    bidButton.disabled = true;
 
-        const currentAuctionData = window.currentAuctionData;
-        if (currentAuctionData) {
-            if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
-                currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice|| 10}円で落札しました🎉`;
-                yourStatusElement.textContent = '';
-                passcodeValue.textContent = `暗証番号: ${currentAuctionData.passcode || '---'}`;
-                passcodeDisplay.style.display = 'block';
-                paymentMethodInfo.style.display = 'block';
+    const currentAuctionData = window.currentAuctionData;
+    if (currentAuctionData) {
+      if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
+        currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice || 10}円で落札しました🎉`;
+        yourStatusElement.textContent = '';
+        
+        // privateAuctionInfo コレクションからパスコードを非同期で取得
+        db.collection('privateAuctionInfo').doc(auctionId).get().then(privateInfoDoc => {
+            if (privateInfoDoc.exists) {
+                const privateInfoData = privateInfoDoc.data();
+                passcodeValue.textContent = `暗証番号: ${privateInfoData.passcode || '---'}`;
             } else {
-                currentPriceDisplayElement.textContent = `最終価格：${currentAuctionData.currentBid || currentAuctionData.startPrice|| 10}円`;
-                yourStatusElement.textContent = `落札できませんでした。`;
-                passcodeDisplay.style.display = 'none';
-                paymentMethodInfo.style.display = 'none';
+                passcodeValue.textContent = `暗証番号: --- (情報なし)`;
             }
-        }
-        return;
-    }
-    else {
-        bidButton.disabled = false;
+            passcodeDisplay.style.display = 'block';
+            paymentMethodInfo.style.display = 'block';
+        }).catch(error => {
+            console.error("Failed to get private auction info:", error);
+            passcodeValue.textContent = `暗証番号: --- (取得エラー)`;
+            passcodeDisplay.style.display = 'block';
+            paymentMethodInfo.style.display = 'block';
+        });
+
+      } else {
+        currentPriceDisplayElement.textContent = `最終価格：${currentAuctionData.currentBid || currentAuctionData.startPrice || 10}円`;
+        yourStatusElement.textContent = `落札できませんでした。`;
         passcodeDisplay.style.display = 'none';
         paymentMethodInfo.style.display = 'none';
+      }
     }
+    return;
+  }
+  // オークションがまだ終了していない場合の処理
+  else {
+    bidButton.disabled = false;
+    passcodeDisplay.style.display = 'none';
+    paymentMethodInfo.style.display = 'none';
+  }
 
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-    document.getElementById('time-remaining').textContent =
-        `終了まで：${days}日${hours}時間${minutes}分${seconds}秒`;
+  document.getElementById('time-remaining').textContent =
+    `終了まで：${days}日${hours}時間${minutes}分${seconds}秒`;
 }
-
-    
 
 
     // UI反映
@@ -586,7 +598,6 @@ function updateAuctionUI(auctionData, latestBidAmount = 10, highestBidderId = nu
     document.getElementById("medaka-image").src = auctionData.imageUrl || auctionData.image || '';
     document.getElementById('item-overview').textContent = auctionData.description || '----';
     document.getElementById('current-bid').textContent = `${formatPrice(latestBidAmount)}円`;
-
 
 
     
@@ -598,6 +609,7 @@ function updateAuctionUI(auctionData, latestBidAmount = 10, highestBidderId = nu
     }
 
     //window.currentAuctionData = auctionData;
+    window.currentAuctionData = auctionData;
     updateCountdown();
 }
 
@@ -777,10 +789,6 @@ document.getElementById('modal-cancel-button').addEventListener('click', () => {
 
 
 
-
-
-
-
 // Firebase Functionsのインスタンスを取得
 const functions = firebase.functions();
 // エミュレータを使う場合はコメントを外す (ローカル開発時)
@@ -877,7 +885,6 @@ alert('入札エラー詳細: ' + error);
         document.getElementById('modal-submit-button').disabled = false;
     }
 });
-
 
 
     
