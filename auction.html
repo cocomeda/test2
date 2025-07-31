@@ -548,13 +548,13 @@ function updateCountdown() {
         const currentAuctionData = window.currentAuctionData;
         if (currentAuctionData) {
             if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
-                currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice}円で落札しました🎉`;
+                currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice|| 10}円で落札しました🎉`;
                 yourStatusElement.textContent = '';
                 passcodeValue.textContent = `暗証番号: ${currentAuctionData.passcode || '---'}`;
                 passcodeDisplay.style.display = 'block';
                 paymentMethodInfo.style.display = 'block';
             } else {
-                currentPriceDisplayElement.textContent = `最終価格：${currentAuctionData.currentBid || currentAuctionData.startPrice}円`;
+                currentPriceDisplayElement.textContent = `最終価格：${currentAuctionData.currentBid || currentAuctionData.startPrice|| 10}円`;
                 yourStatusElement.textContent = `落札できませんでした。`;
                 passcodeDisplay.style.display = 'none';
                 paymentMethodInfo.style.display = 'none';
@@ -581,7 +581,7 @@ function updateCountdown() {
 
 
     // UI反映
-function updateAuctionUI(auctionData, latestBidAmount = 0, highestBidderId = null, yourBidAmount = 0) {
+function updateAuctionUI(auctionData, latestBidAmount = 10, highestBidderId = null, yourBidAmount = 0) {
     document.getElementById('auction-title').textContent = auctionData.title || '品種名';
     document.getElementById("medaka-image").src = auctionData.imageUrl || auctionData.image || '';
     document.getElementById('item-overview').textContent = auctionData.description || '----';
@@ -712,7 +712,13 @@ async function initializeLiffAndLoadAuction() {
                     }
                 }
                 
-                updateAuctionUI(auctionData, auctionData.currentBid || auctionData.startPrice, auctionData.highestBidderId, yourBid);
+                //updateAuctionUI(auctionData, auctionData.currentBid || auctionData.startPrice, auctionData.highestBidderId, yourBid);
+                
+const initialDisplayBid = auctionData.currentBid || auctionData.startPrice || 10; 
+updateAuctionUI(auctionData, initialDisplayBid, auctionData.highestBidderId, yourBid);
+
+
+
                 
                 if (auctionEndTime && new Date().getTime() < auctionEndTime.getTime()) {
                     document.getElementById('bid-button').disabled = false;
