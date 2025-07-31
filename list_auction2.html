@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CoCo無人オークション</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .auction-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .auction-card {
+      display: flex;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+
+    }
+
+    .auction-card:hover {
+      transform: scale(1.02);
+    }
+
+    .auction-card img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .auction-info {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .auction-title {
+      font-size: 1.2em;
+      margin-bottom: 8px;
+      font-weight: bold;
+
+padding-left: 5vw
+    }
+
+    .auction-detail {
+      font-size: 0.9em;
+      color: #555;
+padding-left: 6vw
+    }
+
+    .warning-box {
+      background: #fffbe0;
+      border: 1px solid #999;
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 600px;
+      margin: 50px auto;
+      text-align: center;
+    }
+
+    .warning-box button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="warning-box" id="warning-box">
+  <h2>ご利用にあたっての注意事項</h2>
+  <p>無人販売所まで取りに来られる方のみ入札してください。<br>
+  実物をご覧になりたい場合は、CoCo無人販売所までお越しください。<br>
+  同意いただける方のみ、下の「同意する」ボタンを押してオークションを表示してください。</p>
+  <button onclick="agreeAndShow()">同意する</button>
+  <button onclick="history.back()">戻る</button>
+</div>
+
+<div id="main-content" class="hidden">
+  <h1>開催中のCoCoオークション</h1>
+  <div class="auction-list" id="auction-list">読み込み中...</div>
+</div>
+
+
+<script>
+    // --- あなたのFirebaseプロジェクト設定 ---
+    // Firebase Consoleの「プロジェクトの設定」>「全般」から取得した情報を貼り付けてください
+    const firebaseConfig = {
+        apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
+        authDomain: "coco-auction.firebaseapp.com",
+        projectId: "coco-auction",
+        storageBucket: "coco-auction.appspot.com",
+        messagingSenderId: "12632824391",
+        appId: "1:12632824391:web:ab6e784ba311de069eef62"
+    };
+
+    // Firebaseを初期化
+    firebase.initializeApp(firebaseConfig);
+
+    // Firestoreのインスタンスを取得
+    const db = firebase.firestore();
+
+    function agreeAndShow() {
+        localStorage.setItem('cocoAuctionAgreed', 'true'); // 同意状態を保存
+        document.getElementById("warning-box").style.display = "none";
+        document.getElementById("main-content").classList.remove("hidden");
+        loadAuctions();
+    }
+
+    // Firestoreからオークションデータを読み込むように変更
+    async function loadAuctions() {
+        const container = document.getElementById('auction-list');
+        container.innerHTML = '読み込み中...'; // 読み込み中のメッセージをセット
+
+
+
+        try {
+            // 'auctions' コレクションから公開されているアイテムのみ取得
+
+
+            const snapshot = await db.collection('auctions')
+                                     .where('isPublished', '==', true) // 'isPublished' が true のもののみ
+                                     .orderBy('endTime', 'asc') // 終了日時でソート (必要に応じて)
+                                     .get();
+
+
+
+            if (snapshot.empty) {
+                container.innerHTML = '現在、開催中のオークションはありません。';
+                return;
+            }
+
+            container.innerHTML = ''; // 既存のメッセージをクリア
+
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                const auctionId = doc.id; // ドキュメントIDを auctionId として使用
+
+                const link = document.createElement('a');
+                link.className = 'auction-card';
+                link.href = `auction.html?id=${auctionId}`; // ドキュメントIDをURLパラメータに
+
+                // FirestoreのTimestamp型をJavaScriptのDateオブジェクトに変換
+                const endTimeJs = item.endTime ? item.endTime.toDate() : null;
+                let endText = '';
+                if (endTimeJs) {
+                    const now = new Date();
+                    if (endTimeJs.getTime() < now.getTime()) {
+                        endText = '終了済み';
+                    } else {
+                        // 日本時間に変換して表示 (例: 7/18 1:00 終了)
+                        endText = `${endTimeJs.getMonth() + 1}/${endTimeJs.getDate()} ${endTimeJs.getHours()}:00 終了`;
+                    }
+                } else {
+                    endText = '終了日時不明';
+                }
+
+
+
+                link.innerHTML = `
+                    <img src="${item.image}" alt="${item.title}">
+                    <div class="auction-info">
+                        <div class="auction-title">${item.title}</div>
+                        <div class="auction-detail">
+                          <!-- 開始価格: ¥${item.price}<br> -->
+                            
+                            現在の価格: ¥${item.currentBid}<br>
+                            ${endText}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(link);
+            });
+
+        } catch (err) {
+            console.error('Firestoreからのデータ取得に失敗しました:', err);
+            container.textContent = 'データの取得に失敗しました';
+        }
+    }
+
+    // LIFF初期化の代わりに、直接同意状態をチェックして表示・読み込みを行う
+    window.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('cocoAuctionAgreed') === 'true') {
+            document.getElementById("warning-box").style.display = "none";
+            document.getElementById("main-content").classList.remove("hidden");
+            loadAuctions();
+        }
+    });
+</script>
+
+</body>
+</html>
+
