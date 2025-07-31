@@ -432,7 +432,6 @@ button:disabled {
 </div>
 
     
-  <pre id="result" style="white-space:pre-wrap;"></pre>
 
 
 
@@ -609,7 +608,7 @@ async function initializeLiffAndLoadAuction() {
         if (!liff.isLoggedIn()) {
 
             
-          output.textContent = "ログインします...";
+          //output.textContent = "ログインします...";
           liff.login();
           return;
         }
@@ -617,7 +616,7 @@ async function initializeLiffAndLoadAuction() {
         const idToken = await liff.getIDToken();
 
 
-        output.textContent = "IDトークン取得成功。送信中...";
+        //output.textContent = "IDトークン取得成功。送信中...";
 
         const res = await fetch(VERIFY_URL, {
           method: 'POST',
@@ -634,15 +633,15 @@ async function initializeLiffAndLoadAuction() {
             alert("a2a");
             
           const text = await res.text();
-          output.textContent = `❌ エラー (status ${res.status}):\n${text}`;
+          //output.textContent = `❌ エラー (status ${res.status}):\n${text}`;
           return;
         }
 
         const json = await res.json();
-        output.textContent = `✅ 成功:\nFirebase Token:\n${json.firebaseToken}`;
+        //output.textContent = `✅ 成功:\nFirebase Token:\n${json.firebaseToken}`;
 
         await firebase.auth().signInWithCustomToken(json.firebaseToken);
-        output.textContent += "\nFirebaseログイン完了 ✅";
+        //output.textContent += "\nFirebaseログイン完了 ✅";
 
        
        currentUserId = firebase.auth().currentUser.uid; // change uid to currentUserId
@@ -652,34 +651,15 @@ async function initializeLiffAndLoadAuction() {
         const doc = await db.collection("auctions").doc(auctionId).get();
           
           
-        if (doc.exists) {
-          output.textContent += `\nデータ取得成功:\n${JSON.stringify(doc.data(), null, 2)}`;
-
-
-
-
-
-
-
-            
-//hideLoading(); //
-
-            
-        } else {
-          output.textContent += "\nデータが見つかりませんでした。";
-        }
-
+    
       } catch (err) {
-        output.textContent = `🚫 実行中エラー:\n${err}`;
+        //output.textContent = `🚫 実行中エラー:\n${err}`;
         console.error(err);
       }
 
 
     try {
 
- alert("a1");
-
-alert(currentUserId)
 
         
         // オークションIDが指定されているか確認
