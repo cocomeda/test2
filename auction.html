@@ -830,8 +830,8 @@ alert(newBidAmount)
         // Cloud FunctionからHttpsErrorが返された場合（例: `functions.https.Callable`からのエラー）
 
    console.error('入札エラー詳細:', error); // ★ ここを修正
-alert('入札エラー詳細:', error); // ★ ここを修正
-        
+alert('入札エラー詳細: ' + error);
+      
         if (error.code) {
             showModalMessage(`入札エラー: ${error.message} (${error.code})`, 'error');
         } else {
