@@ -592,9 +592,9 @@ function updateAuctionUI(auctionData, latestBidAmount = 0, highestBidderId = nul
     
     
     if (currentUserId && highestBidderId === currentUserId) {
-        document.getElementById('your-status').textContent = `あなたが最高額！`;
+        document.getElementById('your-status').textContent = `現在、最高入札者です。`;
     } else {
-        document.getElementById('your-status').textContent = `あなたの入札額: ${formatPrice(yourBidAmount) > 0 ? formatPrice(yourBidAmount) + '円' : '---'}`;
+        document.getElementById('your-status').textContent = `落札には入札が必要です。'}`;
     }
 
     //window.currentAuctionData = auctionData;
