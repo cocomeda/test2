@@ -176,16 +176,15 @@ padding-left: 6vw
                     endText = '終了日時不明';
                 }
 
-
+const displayBid0 = item.currentBid && item.currentBid > 0 ? item.currentBid : 100;
 
                 link.innerHTML = `
                     <img src="${item.image}" alt="${item.title}">
                     <div class="auction-info">
                         <div class="auction-title">${item.title}</div>
                         <div class="auction-detail">
-                          <!-- 開始価格: ¥${item.price}<br> -->
-                            
-                            現在の価格: ¥${item.currentBid}<br>
+                                                 
+                            現在の価格: ¥${displayBid0}<br>
                             ${endText}
                         </div>
                     </div>
