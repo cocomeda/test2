@@ -569,7 +569,7 @@ function updateCountdown() {
         });
 
       } else {
-        currentPriceDisplayElement.textContent = `最終価格：${currentAuctionData.currentBid || currentAuctionData.startPrice || 100}円`;
+        currentPriceDisplayElement.textContent = `最終価格：${formatPrice(currentAuctionData.currentBid || currentAuctionData.startPrice || 100)}円`;
         yourStatusElement.textContent = `落札できませんでした。`;
         passcodeDisplay.style.display = 'none';
         paymentMethodInfo.style.display = 'none';
