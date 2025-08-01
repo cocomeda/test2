@@ -77,7 +77,21 @@
       border-radius: 5px;
       margin-top: 8px;
     }
+    
+    .active-label {
+      display: inline-block;
+      background-color: 98e93a;
+      color: white;
+      font-size: 0.8em;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 5px;
+      margin-top: 8px;
+    }
 
+
+
+    
     .warning-box {
       background: #fffbe0;
       border: 1px solid #999;
@@ -191,9 +205,12 @@
           <div class="auction-info">
             <div class="auction-title">${item.title}</div>
             <div class="auction-detail">
-              現在の価格: ¥${displayBid}<br>
-              ${endText}
-              ${isEnded ? '<div class="ended-label">終了しています</div>' : ''}
+                   現在の価格: ¥${displayBid}<br>
+      ${endText}
+      ${isEnded
+        ? '<div class="ended-label">終了済</div>'
+        : '<div class="active-label">受付中</div>'
+      }
             </div>
           </div>
         `;
