@@ -200,20 +200,19 @@
 
         const displayBid = item.currentBid && item.currentBid > 0 ? item.currentBid : 100;
 
-        link.innerHTML = `
-          <img src="${item.image}" alt="${item.title}">
-          <div class="auction-info">
-            <div class="auction-title">${item.title}</div>
-            <div class="auction-detail">
-                   現在の価格: ¥${displayBid}<br>
-      ${endText}
-      ${isEnded
-        ? '<div class="ended-label">終了済</div>'
-        : '<div class="active-label">受付中</div>'
-      }
-            </div>
-          </div>
-        `;
+ link.innerHTML = `
+  <img src="${item.image}" alt="${item.title}">
+  <div class="auction-info">
+    <div class="auction-title">${item.title}</div>
+    <div class="auction-detail">
+      <div>現在の価格: ¥${displayBid}</div>
+      <div>${endText}</div>
+      <div class="${isEnded ? 'ended-label' : 'active-label'}">
+        ${isEnded ? '終了済' : '受付中'}
+      </div>
+    </div>
+  </div>
+`;
 
         if (isEnded) {
           link.style.opacity = "0.6";
