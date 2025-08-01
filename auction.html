@@ -546,7 +546,7 @@ function updateCountdown() {
     const currentAuctionData = window.currentAuctionData;
     if (currentAuctionData) {
       if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
-        currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${currentAuctionData.currentBid || currentAuctionData.startPrice || 100}円で落札しました🎉`;//??
+        currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${formatPrice(currentAuctionData.currentBid || currentAuctionData.startPrice || 100)}円で落札しました🎉`;//??
         yourStatusElement.textContent = '';
         
         // privateAuctionInfo コレクションからパスコードを非同期で取得
@@ -844,7 +844,7 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
         // Cloud Functionからのレスポンスを処理
         // Cloud Function内で成功/失敗のフラグやメッセージを返すように設計する
         if (result.data && result.data.success) {
-            showStatusMessage(`入札が成功しました！現在の最高額: ¥${result.data.newCurrentBid || newBidAmount}`, 'success');
+            showStatusMessage(`入札が成功しました！`, 'success');
             // 必要に応じてUIを更新
             // document.getElementById('current-bid-display').textContent = `現在の価格: ¥${result.data.newCurrentBid}`;
             // bidAmountInput.value = ''; // 入力欄をクリア
