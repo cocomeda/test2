@@ -605,6 +605,7 @@ function updateCountdown() {
 function updateAuctionUI(auctionData, latestBidAmount = 100, highestBidderId = null, yourBidAmount = 0) {
     document.getElementById('auction-title').textContent = auctionData.title || '品種名';
     document.getElementById("medaka-image").src = auctionData.imageUrl || auctionData.image || '';
+    
     document.getElementById('item-overview').textContent = auctionData.description || '----';
     document.getElementById('current-bid').textContent = `${formatPrice(latestBidAmount)}円`;
 
@@ -919,6 +920,7 @@ function launchConfettiTimes(times) {
 
 </body>
 </html>
+
 
 
 
