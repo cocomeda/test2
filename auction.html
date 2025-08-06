@@ -433,6 +433,7 @@ button:disabled {
 
 
 
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
 
@@ -549,7 +550,10 @@ function updateCountdown() {
       if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
         currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${formatPrice(currentAuctionData.currentBid || currentAuctionData.startPrice || 100)}円で落札しました🎉`;//??
         yourStatusElement.textContent = '';
-        
+
+        // ★紙吹雪（自分が落札者の場合のみ）
+        launchConfetti();
+          
         // privateAuctionInfo コレクションからパスコードを非同期で取得
         db.collection('privateAuctionInfo').doc(auctionId).get().then(privateInfoDoc => {
             if (privateInfoDoc.exists) {
@@ -886,8 +890,38 @@ alert('入札エラー詳細: ' + error);
 });
 
 
+
+
+
+
+
+
+
+
+    
+
+
+function launchConfetti() {
+    // CDNからcanvas-confettiを読み込む必要あり
+    confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.6 }
+    });
+}
+
+
+
+
+
+
+
+
+
+    
     
 </script>
 
 </body>
 </html>
+
