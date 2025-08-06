@@ -551,9 +551,11 @@ function updateCountdown() {
         yourStatusElement.textContent = '';
 
 
+    if (distance > -5) {
+        launchConfettiTimes(3); // 終了時だけ
+    }
 
 
-launchConfettiTimes(3);
           
           
         // privateAuctionInfo コレクションからパスコードを非同期で取得
@@ -917,6 +919,7 @@ function launchConfettiTimes(times) {
 
 </body>
 </html>
+
 
 
 
