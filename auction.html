@@ -313,6 +313,29 @@ button:disabled {
 }
 
 
+/* スライダー */
+.slider {
+    width: 80%;
+    margin: 0 auto;
+}
+.slider img {
+    width: 100%;
+    height: auto;
+}
+
+.thumbnail-slider {
+    width: 80%;
+    margin: 10px auto;
+}
+.thumbnail-slider img {
+    width: 100px;
+    cursor: pointer;
+}
+
+
+
+    
+
 </style>
 </head>
 <body>
@@ -330,7 +353,13 @@ button:disabled {
 </div>
 
 
+<!-- メインスライダー -->
+<div class="slider"></div>
+<!-- サムネイル -->
+<div class="thumbnail-slider"></div>
 
+
+    
 
     <div class="container">
         <div class="product-section">
@@ -915,11 +944,74 @@ function launchConfettiTimes(times) {
 }
     
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function initSlider(images) {
+    const slider = $('.slider');
+    const thumbnailSlider = $('.thumbnail-slider');
+    slider.empty();
+    thumbnailSlider.empty();
+
+    images.forEach(url => {
+        slider.append(`<div><img src="${url}" alt=""></div>`);
+        thumbnailSlider.append(`<div><img src="${url}" alt=""></div>`);
+    });
+
+    // slick初期化
+    slider.slick({
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        arrows: true,
+        asNavFor: '.thumbnail-slider'
+    });
+    thumbnailSlider.slick({
+        slidesToShow: Math.min(images.length, 5),
+        slidesToScroll: 1,
+        asNavFor: '.slider',
+        dots: false,
+        centerMode: true,
+        focusOnSelect: true
+    });
+}
+
+    
+  // 画像配列作成
+    const images = [];
+    if (data.image) images.push(data.image);
+    if (data.image2) images.push(data.image2);
+    if (data.image3) images.push(data.image3);
+
+    if (images.length > 0) {
+        initSlider(images);
+    }
+
+
+
+
+
+
+    
     
 </script>
 
 </body>
 </html>
+
 
 
 
