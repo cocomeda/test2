@@ -3,161 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Function 認証テスト (匿名認証)</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
-    
-    <style>
-        body { font-family: sans-serif; margin: 20px; text-align: center; }
-        .container { max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        button { padding: 10px 20px; font-size: 1em; margin-top: 20px; cursor: pointer; }
-        #status-messages { margin-top: 20px; padding: 10px; border: 1px dashed #eee; min-height: 100px; text-align: left; overflow-y: scroll; }
-        .success { color: green; }
-        .error { color: red; }
-        .info { color: blue; }
-        .loader {
-          border: 4px solid #f3f3f3;
-          border-top: 4px solid #3498db;
-          border-radius: 50%;
-          width: 20px;
-          height: 20px;
-          animation: spin 1s linear infinite;
-          display: inline-block;
-          vertical-align: middle;
-          margin-left: 10px;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-    </style>
+    <title>Firebase Storage 画像アップロード</title>
 </head>
 <body>
+    <h1>Firebase Storage 画像アップロード</h1>
+    
+    <input type="file" id="image-upload-input" accept="image/*">
+    <button id="upload-button">画像をアップロード</button>
 
-    <div class="container">
-        <h1>Cloud Function 認証テスト</h1>
-        <p>Firebase匿名認証後、「認証テスト」ボタンでFunctionsを呼び出します。</p>
-        <button id="test-auth-button">認証テスト</button>
-        <div id="status-messages">
-            <p><strong>ログ:</strong></p>
-        </div>
+    <div id="message"></div>
+    <div id="image-preview">
+        <img id="uploaded-image" style="max-width: 300px; display: none;">
     </div>
 
-<script>
-    // --- あなたの環境に合わせて設定してください ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8", // あなたのFirebase APIキー
-      authDomain: "coco-auction.firebaseapp.com",
-      projectId: "coco-auction", // あなたのFirebase Project ID
-      storageBucket: "coco-auction.appspot.com",
-      messagingSenderId: "12632824391",
-      appId: "1:12632824391:web:ab6e784ba311de069eef62"
-    };
-    // --- ここまで ---
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
 
-    // Firebase初期化
-    firebase.initializeApp(firebaseConfig);
+    <script>
+        // Firebase Configuration (YOUR_XXXXを実際のプロジェクト情報に置き換えてください)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-    // Functionsのインスタンス（デフォルトリージョン: us-central1）
-    const functions = firebase.functions(); 
-    // もしFunctionsが us-central1 以外のリージョンにある場合、以下のように指定してください:
-    // const functions = firebase.functions('asia-northeast1'); 
-    
-    const statusMessagesDiv = document.getElementById('status-messages');
-    const testAuthButton = document.getElementById('test-auth-button');
-
-    function appendMessage(message, type = 'info') {
-        const p = document.createElement('p');
-        p.className = type;
-        p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-        statusMessagesDiv.appendChild(p);
-        statusMessagesDiv.scrollTop = statusMessagesDiv.scrollHeight; 
-        console.log(`[${type.toUpperCase()}] ${message}`); 
-    }
-
-    async function initializeAndAuthenticate() {
-        appendMessage('Firebase匿名認証を開始します...');
-        testAuthButton.disabled = true;
-        testAuthButton.innerHTML = '認証中 <span class="loader"></span>';
-
-        try {
-            // Firebase匿名認証を実行
-            await firebase.auth().signInAnonymously();
-            const currentUser = firebase.auth().currentUser;
-            appendMessage(`Firebase匿名ログイン完了！UID: ${currentUser.uid}`, 'success');
-            
-            testAuthButton.disabled = false;
-            testAuthButton.textContent = '認証テスト';
-
-        } catch (err) {
-            appendMessage(`Firebase匿名認証中にエラーが発生しました: ${err.message}`, 'error');
-            console.error('匿名認証エラー詳細:', err);
-            testAuthButton.disabled = false;
-            testAuthButton.textContent = '認証テスト';
-        }
-    }
-
-    async function callTestAuthFunction() {
-        appendMessage('testAuthFunction Cloud Functionの呼び出しを開始します...');
-        testAuthButton.disabled = true;
-        testAuthButton.innerHTML = 'テスト中 <span class="loader"></span>';
-
-        const currentUser = firebase.auth().currentUser;
-        if (!currentUser || !currentUser.uid) {
-            appendMessage('テスト時: Firebaseに認証されていません。再認証が必要です。', 'error');
-            testAuthButton.disabled = false;
-            testAuthButton.textContent = '認証テスト';
-            return;
-        }
-        appendMessage(`テスト時: Firebase認証済みユーザーUID: ${currentUser.uid}`);
-
-        // IDトークンを強制リフレッシュ
-        try {
-            const idTokenResult = await currentUser.getIdTokenResult(true); // true で強制リフレッシュ
-            appendMessage(`IDトークンを強制リフレッシュしました。Expiration Time: ${new Date(idTokenResult.expirationTime).toLocaleTimeString()}`);
-        } catch (tokenRefreshError) {
-            appendMessage(`IDトークンリフレッシュ中にエラーが発生しました: ${tokenRefreshError.message}`, 'error');
-            testAuthButton.disabled = false;
-            testAuthButton.textContent = '認証テスト';
-            return;
-        }
+        // Firebaseの初期化
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
         
-        try {
-            const testAuthFunctionCallable = functions.httpsCallable('testAuthFunction');
-            const result = await testAuthFunctionCallable({}); // データは空でOK
+        const fileInput = document.getElementById('image-upload-input');
+        const uploadButton = document.getElementById('upload-button');
+        const messageDiv = document.getElementById('message');
+        const uploadedImage = document.getElementById('uploaded-image');
 
-            if (result.data && result.data.success) {
-                appendMessage(`Functionsからの応答: ${result.data.message}`, 'success');
-                appendMessage(`認証済みUID: ${result.data.uid}`, 'success');
-                appendMessage(`Email (もしあれば): ${result.data.email}`, 'info');
-                appendMessage(`Name (もしあれば): ${result.data.name}`, 'info');
-            } else if (result.data && result.data.message) {
-                appendMessage(`Functionsからのエラー応答: ${result.data.message}`, 'error');
-            } else {
-                appendMessage('Functionsからの予期せぬ応答。', 'error');
-                console.error('Functionsレスポンス詳細:', result);
-            }
-        } catch (error) {
-            console.error('Cloud Function呼び出しエラー:', error);
-            if (error.code) {
-                appendMessage(`エラー: ${error.message} (コード: ${error.code})`, 'error');
-            } else {
-                appendMessage(`エラー: ${error.message}`, 'error');
-            }
-        } finally {
-            testAuthButton.disabled = false;
-            testAuthButton.textContent = '認証テスト';
+        // メッセージ表示関数
+        function showMessage(text, color) {
+            messageDiv.textContent = text;
+            messageDiv.style.color = color;
         }
-    }
 
-    // 初期化と認証をDOM読み込み後に実行
-    window.addEventListener('DOMContentLoaded', initializeAndAuthenticate);
+        // 画像をアップロードする関数
+        async function uploadImage() {
+            const file = fileInput.files[0];
 
-    // ボタンクリックでテスト関数を呼び出す
-    testAuthButton.addEventListener('click', callTestAuthFunction);
-</script>
+            if (!file) {
+                showMessage("ファイルを選択してください。", "red");
+                return;
+            }
 
+            showMessage("アップロード中...", "blue");
+            uploadButton.disabled = true;
+
+            try {
+                // Storageの参照を作成（例: 'images/ユニークなファイル名.jpg'）
+                const timestamp = Date.now();
+                const fileName = `images/${timestamp}_${file.name}`;
+                const storageRef = storage.ref().child(fileName);
+
+                // ファイルをアップロード
+                const snapshot = await storageRef.put(file);
+
+                // ダウンロードURLを取得
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                
+                showMessage("アップロードが完了しました！", "green");
+                console.log("ダウンロードURL:", downloadURL);
+
+                // 画像をプレビューに表示
+                uploadedImage.src = downloadURL;
+                uploadedImage.style.display = 'block';
+
+            } catch (error) {
+                showMessage(`アップロードに失敗しました: ${error.message}`, "red");
+                console.error("アップロードエラー:", error);
+            } finally {
+                uploadButton.disabled = false;
+            }
+        }
+
+        // ボタンにクリックイベントを設定
+        uploadButton.addEventListener('click', uploadImage);
+    </script>
 </body>
 </html>
