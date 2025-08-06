@@ -313,9 +313,65 @@ button:disabled {
 }
 
 
+
+
+
+
+
+
+    
+
+
+
+
+  /* メインスライダー */
+  .slider {
+    width: 80%;
+    margin: 2vw auto;
+  }
+  .slider img {
+    width: 100%;
+    height: auto;
+  }
+
+  /* 固定サムネイル */
+  .thumbnail-container {
+    width: 80%;
+    margin: 2vw auto;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  .thumbnail-container img {
+    width: 100px;
+    height: auto;
+    cursor: pointer;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+  }
+  .thumbnail-container img.active {
+    border: 2px solid blue;
+  }
+    
+
 </style>
 </head>
 <body>
+
+
+
+<div class="slider"></div>
+<div class="thumbnail-container"></div>
+
+<!-- jQuery & slick-carousel JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+
+
+
+
+
+    
 
 <div id="loading-screen" style="
   position: fixed;
@@ -915,11 +971,121 @@ function launchConfettiTimes(times) {
 }
     
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
+
+// Firestoreから画像データを読み込み
+async function loadImagesFromFirestore(docId) {
+  try {
+    const docRef = db.collection("auctions").doc(docId);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      console.error("データが見つかりません");
+      return [];
+    }
+
+    const auctionData = docSnap.data();
+    
+    // image, image2, image3... を配列化（空は除外）
+    const images = [
+      auctionData.imageUrl,
+      auctionData.image,
+      auctionData.image2,
+      auctionData.image3
+    ].filter(Boolean);
+
+    // スライダー用データ形式に変換
+    return images.map(url => ({ imageUrl: url }));
+
+  } catch (error) {
+    console.error("Firestore取得エラー:", error);
+    return [];
+  }
+}
+
+// ページロード後にFirestoreから読み込んでスライダー初期化
+document.addEventListener("DOMContentLoaded", async () => {
+  const data = await loadImagesFromFirestore(auctionId);
+  initializeSlider(data); // 取得した配列をスライダーに渡す
+});
+
+    
+
+
+
+function initializeSlider() {
+  const slider = document.querySelector('.slider');
+  const thumbnailContainer = document.querySelector('.thumbnail-container');
+
+  // メイン画像追加
+  data.forEach(item => {
+    const img = document.createElement('img');
+    img.src = item.imageUrl;
+    slider.appendChild(img);
+  });
+
+  // サムネイル追加
+  data.forEach((item, index) => {
+    const thumb = document.createElement('img');
+    thumb.src = item.imageUrl;
+    thumb.dataset.index = index;
+    thumbnailContainer.appendChild(thumb);
+  });
+
+  // slick メインスライダー
+  $('.slider').slick({
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    dots: true,
+    arrows: true,
+    infinite: true
+  });
+
+  // 初期アクティブ枠
+  updateThumbnailActive(0);
+
+  // スライド変更時に青枠更新
+  $('.slider').on('afterChange', function(event, slick, currentSlide){
+    updateThumbnailActive(currentSlide);
+  });
+
+  // サムネイルクリックでメインスライド移動
+  thumbnailContainer.addEventListener('click', e => {
+    if(e.target.tagName === 'IMG'){
+      const index = parseInt(e.target.dataset.index, 10);
+      $('.slider').slick('slickGoTo', index);
+    }
+  });
+}
+
+// 青枠を更新する関数
+function updateThumbnailActive(index) {
+  document.querySelectorAll('.thumbnail-container img').forEach((img, i) => {
+    img.classList.toggle('active', i === index);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initializeSlider);    
 </script>
 
 </body>
 </html>
+
 
 
 
