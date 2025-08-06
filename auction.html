@@ -337,7 +337,7 @@ button:disabled {
     gap: 10px;
 }
 .thumbnail-container img {
-    width: 100px; /* サムネイルの幅を調整 */
+    width: 15vw; /* サムネイルの幅を調整 */
     height: auto;
     cursor: pointer;
     border: 2px solid transparent;
@@ -558,7 +558,7 @@ function updateCountdown() {
         const currentAuctionData = window.currentAuctionData;
         if (currentAuctionData) {
             if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
-                currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${formatPrice(currentAuctionData.currentBid || currentAuctionData.startPrice || 100)}円で落札しました�`;
+                currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${formatPrice(currentAuctionData.currentBid || currentAuctionData.startPrice || 100)}円で落札しました🎉`;
                 yourStatusElement.textContent = '';
 
                 if (distance > -2000) { // 終了直後のみ紙吹雪
@@ -715,7 +715,14 @@ async function initializeLiffAndLoadAuction() {
                 console.log('Loading images from Firestore...');
                 const imageData = await loadImagesFromFirestore(auctionId);
                 console.log('Images loaded. Initializing slider with', imageData.length, 'images.');
-                initializeSlider(imageData); // ここで画像データを渡す
+                
+                // 画像データがある場合のみスライダーを初期化
+                if (imageData.length > 0) {
+                    initializeSlider(imageData); 
+                    console.log('Slider initialized.');
+                } else {
+                    console.warn('No image data found for slider initialization.');
+                }
 
                 if (auctionEndTime && new Date().getTime() < auctionEndTime.getTime()) {
                     document.getElementById('bid-button').disabled = false;
@@ -872,16 +879,18 @@ function launchConfettiTimes(times) {
     
 // Firestoreから画像データを読み込み
 async function loadImagesFromFirestore(docId) {
+  console.log('loadImagesFromFirestore: Attempting to load images for docId:', docId);
   try {
     const docRef = db.collection("auctions").doc(docId);
     const docSnap = await docRef.get();
 
     if (!docSnap.exists) {
-      console.error("データが見つかりません");
+      console.error("loadImagesFromFirestore: データが見つかりません (Document does not exist).");
       return [];
     }
 
     const auctionData = docSnap.data();
+    console.log('loadImagesFromFirestore: Raw auctionData from Firestore:', auctionData);
     
     // image, image2, image3... を配列化（空は除外）
     const images = [
@@ -898,39 +907,69 @@ async function loadImagesFromFirestore(docId) {
       auctionData.image10
     ].filter(Boolean); // null, undefined, 空文字列を除外
 
+    console.log('loadImagesFromFirestore: Filtered image URLs:', images);
+
     // スライダー用データ形式に変換
-    return images.map(url => ({ imageUrl: url }));
+    const sliderData = images.map(url => ({ imageUrl: url }));
+    console.log('loadImagesFromFirestore: Formatted slider data:', sliderData);
+    return sliderData;
 
   } catch (error) {
-    console.error("Firestore取得エラー:", error);
+    console.error("loadImagesFromFirestore: Firestore取得エラー:", error);
     return [];
   }
 }
 
 // Slick Carouselの初期化
 function initializeSlider(data) {
+    console.log('initializeSlider: Function called with data:', data);
+    if (!data || data.length === 0) {
+        console.warn('initializeSlider: No data provided or data is empty. Slider will not be initialized.');
+        return;
+    }
+
     const slider = $('.slider'); // jQueryオブジェクトを取得
     const thumbnailContainer = $('.thumbnail-container'); // jQueryオブジェクトを取得
 
     // 既存のスライダーとサムネイルをクリア
     // slickが既に初期化されている場合は unslick を呼び出す
     if (slider.hasClass('slick-initialized')) {
+        console.log('initializeSlider: Slider already initialized, unslicking...');
         slider.slick('unslick');
     }
     slider.empty();
     thumbnailContainer.empty();
+    console.log('initializeSlider: Slider and thumbnail containers cleared.');
+
+    let imagesLoadedCount = 0;
+    const totalImages = data.length;
 
     // メイン画像追加
-    data.forEach(item => {
-        slider.append(`<div><img src="${item.imageUrl}" alt="メダカの画像"></div>`);
+    data.forEach((item, index) => {
+        const imgDiv = $('<div></div>');
+        const img = $(`<img src="${item.imageUrl}" alt="メダカの画像 ${index + 1}">`);
+        
+        img.on('load', function() {
+            imagesLoadedCount++;
+            // 最初の画像が読み込まれたらsetPositionを呼び出す
+            if (imagesLoadedCount === 1) { 
+                console.log('initializeSlider: First image loaded, setting slider position.');
+                slider.slick('setPosition');
+            }
+        });
+        imgDiv.append(img);
+        slider.append(imgDiv);
+        console.log(`initializeSlider: Added main image: ${item.imageUrl}`);
     });
 
     // サムネイル追加
     data.forEach((item, index) => {
-        thumbnailContainer.append(`<img src="${item.imageUrl}" data-index="${index}" alt="サムネイル画像">`);
+        thumbnailContainer.append(`<img src="${item.imageUrl}" data-index="${index}" alt="サムネイル画像 ${index + 1}">`);
+        console.log(`initializeSlider: Added thumbnail image: ${item.imageUrl}`);
     });
 
     // slick メインスライダーの初期化
+    console.log('initializeSlider: Initializing Slick Carousel...');
     slider.slick({
         slidesToShow: 1,
         slidesToScroll: 1,
@@ -939,26 +978,32 @@ function initializeSlider(data) {
         infinite: true,
         adaptiveHeight: true // 画像の高さに合わせてスライダーの高さを調整
     });
+    console.log('initializeSlider: Slick Carousel initialized.');
 
     // 初期アクティブ枠
     updateThumbnailActive(0);
+    console.log('initializeSlider: Initial thumbnail active state set.');
 
     // スライド変更時に青枠更新
     slider.on('afterChange', function(event, slick, currentSlide){
+        console.log('initializeSlider: Slick afterChange event. Current slide:', currentSlide);
         updateThumbnailActive(currentSlide);
     });
 
     // サムネイルクリックでメインスライド移動
     thumbnailContainer.on('click', 'img', function() { // イベントデリゲーションを使用
         const index = parseInt($(this).data('index'), 10);
+        console.log('initializeSlider: Thumbnail clicked. Going to slide:', index);
         slider.slick('slickGoTo', index);
     });
+    console.log('initializeSlider: Event listeners for slider and thumbnails set.');
 }
 
 // 青枠を更新する関数
 function updateThumbnailActive(index) {
     $('.thumbnail-container img').removeClass('active');
     $(`.thumbnail-container img[data-index="${index}"]`).addClass('active');
+    console.log('updateThumbnailActive: Active thumbnail set to index:', index);
 }
     
 </script>
