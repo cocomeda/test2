@@ -896,17 +896,19 @@ alert('入札エラー詳細: ' + error);
 
 function launchConfettiTimes(times) {
     let count = 0;
-    const interval = setInterval(() => {
+
+    function fire() {
+        if (count >= times) return;
         confetti({
             particleCount: 100,
             spread: 70,
             origin: { y: 0.6 }
         });
         count++;
-        if (count >= times) {
-            clearInterval(interval); // 指定回数で停止
-        }
-    }, 400); // 0.4秒ごとに発射
+        setTimeout(fire, 500);
+    }
+
+    fire();
 }
     
 
@@ -915,6 +917,7 @@ function launchConfettiTimes(times) {
 
 </body>
 </html>
+
 
 
 
