@@ -553,7 +553,7 @@ function updateCountdown() {
 
 
 
-launchConfettiForSeconds(5);
+launchConfettiTimes(3);
           
           
         // privateAuctionInfo コレクションからパスコードを非同期で取得
@@ -894,21 +894,20 @@ alert('入札エラー詳細: ' + error);
 
 
 
-function launchConfettiForSeconds(seconds) {
-    const endTime = Date.now() + seconds * 1000;
+function launchConfettiTimes(times) {
+    let count = 0;
     const interval = setInterval(() => {
         confetti({
             particleCount: 100,
             spread: 70,
             origin: { y: 0.6 }
         });
-        if (Date.now() > endTime) {
-            clearInterval(interval); // 停止
+        count++;
+        if (count >= times) {
+            clearInterval(interval); // 指定回数で停止
         }
-    }, 300);
+    }, 400); // 0.4秒ごとに発射
 }
-
-
     
 
     
@@ -916,5 +915,6 @@ function launchConfettiForSeconds(seconds) {
 
 </body>
 </html>
+
 
 
