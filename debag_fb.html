@@ -2,92 +2,116 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Storage 画像アップロード</title>
+    <title>管理者用画像アップローダー</title>
 </head>
 <body>
-    <h1>Firebase Storage 画像アップロード</h1>
-    
-    <input type="file" id="image-upload-input" accept="image/*">
-    <button id="upload-button">画像をアップロード</button>
+    <h1>管理者用画像アップローダー</h1>
 
-    <div id="message"></div>
-    <div id="image-preview">
-        <img id="uploaded-image" style="max-width: 300px; display: none;">
+    <div id="auth-ui">
+        <h2>ログイン</h2>
+        <input type="email" id="email" placeholder="メールアドレス"><br>
+        <input type="password" id="password" placeholder="パスワード"><br>
+        <button id="login-btn">ログイン</button>
+        <p id="error-message"></p>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    <div id="upload-ui" style="display: none;">
+        <h2>画像アップロード</h2>
+        <input type="file" id="file-input" accept="image/*"><br>
+        <button id="upload-btn">アップロード</button>
+        <p id="upload-message"></p>
+        <button id="logout-btn">ログアウト</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
     <script>
-        // Firebase Configuration (YOUR_XXXXを実際のプロジェクト情報に置き換えてください)
-    // Firebase設定
-    const firebaseConfig = {
-        apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
-        authDomain: "coco-auction.firebaseapp.com",
-        projectId: "coco-auction",
-        storageBucket: "coco-auction.appspot.com",
-        messagingSenderId: "12632824391",
-        appId: "1:12632824391:web:ab6e784ba311de069eef62"
-    };
-
-        // Firebaseの初期化
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
+            authDomain: "coco-auction.firebaseapp.com",
+            projectId: "coco-auction",
+            storageBucket: "coco-auction.appspot.com",
+            messagingSenderId: "12632824391",
+            appId: "1:12632824391:web:ab6e784ba311de069eef62"
+        };
         firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
         const storage = firebase.storage();
-        
-        const fileInput = document.getElementById('image-upload-input');
-        const uploadButton = document.getElementById('upload-button');
-        const messageDiv = document.getElementById('message');
-        const uploadedImage = document.getElementById('uploaded-image');
 
-        // メッセージ表示関数
-        function showMessage(text, color) {
-            messageDiv.textContent = text;
-            messageDiv.style.color = color;
-        }
+        const authUi = document.getElementById('auth-ui');
+        const uploadUi = document.getElementById('upload-ui');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const fileInput = document.getElementById('file-input');
+        const uploadBtn = document.getElementById('upload-btn');
+        const errorMessage = document.getElementById('error-message');
+        const uploadMessage = document.getElementById('upload-message');
 
-        // 画像をアップロードする関数
-        async function uploadImage() {
+        // ログイン状態の変化を監視
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // ログイン済み
+                authUi.style.display = 'none';
+                uploadUi.style.display = 'block';
+            } else {
+                // 未ログイン
+                authUi.style.display = 'block';
+                uploadUi.style.display = 'none';
+            }
+        });
+
+        // ログイン処理
+        loginBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    console.log("ログイン成功");
+                    errorMessage.textContent = '';
+                })
+                .catch((error) => {
+                    errorMessage.textContent = 'ログインに失敗しました。';
+                    console.error("ログイン失敗", error);
+                });
+        });
+
+        // ログアウト処理
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        // ファイルアップロード処理
+        uploadBtn.addEventListener('click', () => {
             const file = fileInput.files[0];
+            if (file) {
+                const storageRef = storage.ref('images/' + file.name);
+                const uploadTask = storageRef.put(file);
 
-            if (!file) {
-                showMessage("ファイルを選択してください。", "red");
-                return;
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        uploadMessage.textContent = `アップロード中: ${progress.toFixed(2)}%`;
+                    },
+                    (error) => {
+                        uploadMessage.textContent = 'アップロードに失敗しました。';
+                        console.error("アップロード失敗", error);
+                    },
+                    () => {
+                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                            uploadMessage.textContent = `アップロード完了！URL: ${downloadURL}`;
+                        });
+                    }
+                );
+            } else {
+                uploadMessage.textContent = 'ファイルを選択してください。';
             }
-
-            showMessage("アップロード中...", "blue");
-            uploadButton.disabled = true;
-
-            try {
-                // Storageの参照を作成（例: 'images/ユニークなファイル名.jpg'）
-                const timestamp = Date.now();
-                const fileName = `images/${timestamp}_${file.name}`;
-                const storageRef = storage.ref().child(fileName);
-
-                // ファイルをアップロード
-                const snapshot = await storageRef.put(file);
-
-                // ダウンロードURLを取得
-                const downloadURL = await snapshot.ref.getDownloadURL();
-                
-                showMessage("アップロードが完了しました！", "green");
-                console.log("ダウンロードURL:", downloadURL);
-
-                // 画像をプレビューに表示
-                uploadedImage.src = downloadURL;
-                uploadedImage.style.display = 'block';
-
-            } catch (error) {
-                showMessage(`アップロードに失敗しました: ${error.message}`, "red");
-                console.error("アップロードエラー:", error);
-            } finally {
-                uploadButton.disabled = false;
-            }
-        }
-
-        // ボタンにクリックイベントを設定
-        uploadButton.addEventListener('click', uploadImage);
+        });
     </script>
 </body>
 </html>
-
