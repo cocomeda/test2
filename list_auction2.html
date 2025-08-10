@@ -192,7 +192,10 @@
             endText = '終了しています';
             isEnded = true;
           } else {
-            endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${endTime.getMinutes()} 終了`;
+           
+            const minutes = String(endTime.getMinutes()).padStart(2, '0');
+　　　　　　　endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
+            
           }
         } else {
           endText = '終了日時不明';
@@ -242,4 +245,5 @@ link.innerHTML = `
 
 </body>
 </html>
+
 
