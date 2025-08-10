@@ -878,6 +878,7 @@ function launchConfettiTimes(times) {
 }
     
 // Firestoreから画像データを読み込み
+// Firestoreから画像データを読み込み
 async function loadImagesFromFirestore(docId) {
   console.log('loadImagesFromFirestore: Attempting to load images for docId:', docId);
   try {
@@ -892,26 +893,15 @@ async function loadImagesFromFirestore(docId) {
     const auctionData = docSnap.data();
     console.log('loadImagesFromFirestore: Raw auctionData from Firestore:', auctionData);
     
-    // image, image2, image3... を配列化（空は除外）
-    const images = [
-      auctionData.imageUrl, // 既存のimageUrl
-      auctionData.image,
-      auctionData.image2,
-      auctionData.image3,
-      auctionData.image4, // image4以降も追加
-      auctionData.image5,
-      auctionData.image6,
-      auctionData.image7,
-      auctionData.image8,
-      auctionData.image9,
-      auctionData.image10
-    ].filter(Boolean); // null, undefined, 空文字列を除外
+    // Firestoreのimages配列をそのまま使用（空要素は除外）
+    const images = (auctionData.images || []).filter(Boolean);
 
     console.log('loadImagesFromFirestore: Filtered image URLs:', images);
 
     // スライダー用データ形式に変換
     const sliderData = images.map(url => ({ imageUrl: url }));
     console.log('loadImagesFromFirestore: Formatted slider data:', sliderData);
+    
     return sliderData;
 
   } catch (error) {
@@ -920,6 +910,10 @@ async function loadImagesFromFirestore(docId) {
   }
 }
 
+
+
+
+    
 // Slick Carouselの初期化
 function initializeSlider(data) {
     console.log('initializeSlider: Function called with data:', data);
@@ -1010,4 +1004,5 @@ function updateThumbnailActive(index) {
 
 </body>
 </html>
+
 
