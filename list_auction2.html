@@ -208,9 +208,14 @@
 const statusLabel = isEnded
   ? '<div class="ended-label">終了済</div>'
   : '<div class="active-label">受付中</div>';
-        
+
+const firstImage = Array.isArray(item.images) && item.images.length > 0
+  ? item.images[0]
+  : ''; // 画像がないときは空文字
+
 link.innerHTML = `
-  <img src="${item.image}" alt="${item.title}">
+  <img src="${firstImage}" alt="${item.title}">
+
   <div class="auction-info">
     <div class="auction-title">${item.title}</div>
     <div class="auction-detail">
@@ -245,5 +250,6 @@ link.innerHTML = `
 
 </body>
 </html>
+
 
 
