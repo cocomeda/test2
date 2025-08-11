@@ -472,6 +472,10 @@ button:disabled {
 <pre id="result" style="white-space:pre-wrap;"></pre>
 
 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.3.2/dist/confetti.browser.min.js"></script>
 <script>
     
@@ -880,7 +884,6 @@ function launchConfettiTimes(times) {
 }
     
 // Firestoreから画像データを読み込み
-// Firestoreから画像データを読み込み
 async function loadImagesFromFirestore(docId) {
   console.log('loadImagesFromFirestore: Attempting to load images for docId:', docId);
   try {
@@ -912,10 +915,6 @@ async function loadImagesFromFirestore(docId) {
   }
 }
 
-
-
-
-    
 // Slick Carouselの初期化
 function initializeSlider(data) {
     console.log('initializeSlider: Function called with data:', data);
@@ -924,11 +923,10 @@ function initializeSlider(data) {
         return;
     }
 
-    const slider = $('.slider'); // jQueryオブジェクトを取得
-    const thumbnailContainer = $('.thumbnail-container'); // jQueryオブジェクトを取得
+    const slider = $('.slider');
+    const thumbnailContainer = $('.thumbnail-container');
 
     // 既存のスライダーとサムネイルをクリア
-    // slickが既に初期化されている場合は unslick を呼び出す
     if (slider.hasClass('slick-initialized')) {
         console.log('initializeSlider: Slider already initialized, unslicking...');
         slider.slick('unslick');
@@ -940,60 +938,65 @@ function initializeSlider(data) {
     let imagesLoadedCount = 0;
     const totalImages = data.length;
 
-    // メイン画像追加
-    data.forEach((item, index) => {
-        const imgDiv = $('<div></div>');
-        const img = $(`<img src="${item.imageUrl}" alt="メダカの画像 ${index + 1}">`);
-        
-        img.on('load', function() {
-            imagesLoadedCount++;
-            // 最初の画像が読み込まれたらsetPositionを呼び出す
-            if (imagesLoadedCount === 1) { 
-                console.log('initializeSlider: First image loaded, setting slider position.');
-                slider.slick('setPosition');
-            }
+    // 画像の読み込み完了を待つPromiseの配列を作成
+    const imageLoadPromises = data.map((item, index) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = item.imageUrl;
+            
+            // サムネイルを先にDOMに追加
+            const thumbnailImg = $(`<img src="${item.imageUrl}" data-index="${index}" alt="サムネイル画像 ${index + 1}">`);
+            thumbnailContainer.append(thumbnailImg);
+
+            img.onload = () => {
+                console.log(`initializeSlider: Image loaded: ${item.imageUrl}`);
+                const imgDiv = $('<div></div>');
+                imgDiv.append($(img).clone());
+                slider.append(imgDiv);
+                resolve();
+            };
+            img.onerror = () => {
+                console.error(`initializeSlider: Failed to load image: ${item.imageUrl}`);
+                resolve(); // 画像がロードできなくても処理を継続
+            };
         });
-        imgDiv.append(img);
-        slider.append(imgDiv);
-        console.log(`initializeSlider: Added main image: ${item.imageUrl}`);
     });
 
-    // サムネイル追加
-    data.forEach((item, index) => {
-        thumbnailContainer.append(`<img src="${item.imageUrl}" data-index="${index}" alt="サムネイル画像 ${index + 1}">`);
-        console.log(`initializeSlider: Added thumbnail image: ${item.imageUrl}`);
-    });
+    // すべての画像の読み込みが完了するのを待つ
+    Promise.all(imageLoadPromises).then(() => {
+        console.log('initializeSlider: All images loaded. Initializing Slick Carousel.');
+        // 画像がすべてDOMに追加されてからスライダーを初期化
+        slider.slick({
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            dots: true,
+            arrows: true,
+            infinite: true,
+            adaptiveHeight: true
+        });
 
-    // slick メインスライダーの初期化
-    console.log('initializeSlider: Initializing Slick Carousel...');
-    slider.slick({
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        dots: true,
-        arrows: true,
-        infinite: true,
-        adaptiveHeight: true // 画像の高さに合わせてスライダーの高さを調整
-    });
-    console.log('initializeSlider: Slick Carousel initialized.');
+        // 初期アクティブ枠
+        updateThumbnailActive(0);
 
-    // 初期アクティブ枠
-    updateThumbnailActive(0);
-    console.log('initializeSlider: Initial thumbnail active state set.');
+        // スライド変更時に青枠更新
+        slider.on('afterChange', function(event, slick, currentSlide){
+            console.log('initializeSlider: Slick afterChange event. Current slide:', currentSlide);
+            updateThumbnailActive(currentSlide);
+        });
 
-    // スライド変更時に青枠更新
-    slider.on('afterChange', function(event, slick, currentSlide){
-        console.log('initializeSlider: Slick afterChange event. Current slide:', currentSlide);
-        updateThumbnailActive(currentSlide);
-    });
+        // サムネイルクリックでメインスライド移動
+        thumbnailContainer.on('click', 'img', function() {
+            const index = parseInt($(this).data('index'), 10);
+            console.log('initializeSlider: Thumbnail clicked. Going to slide:', index);
+            slider.slick('slickGoTo', index);
+        });
+        console.log('initializeSlider: Event listeners for slider and thumbnails set.');
 
-    // サムネイルクリックでメインスライド移動
-    thumbnailContainer.on('click', 'img', function() { // イベントデリゲーションを使用
-        const index = parseInt($(this).data('index'), 10);
-        console.log('initializeSlider: Thumbnail clicked. Going to slide:', index);
-        slider.slick('slickGoTo', index);
+    }).catch(error => {
+        console.error('initializeSlider: An error occurred while waiting for images to load:', error);
     });
-    console.log('initializeSlider: Event listeners for slider and thumbnails set.');
 }
+
 
 // 青枠を更新する関数
 function updateThumbnailActive(index) {
@@ -1003,9 +1006,11 @@ function updateThumbnailActive(index) {
 }
     
 </script>
+</script>
 
 </body>
 </html>
+
 
 
 
