@@ -8,106 +8,114 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 20px;
-    }
+        body {
+  font-family: 'Helvetica Neue', sans-serif;
+  margin: 20px;
+  background-color: #f8f8f8; /* 明るいグレー背景 */
+  color: #222; /* 濃いグレー文字 */
+}
 
-    .hidden {
-      display: none;
-    }
+.hidden {
+  display: none;
+}
 
-    .auction-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+.auction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
-    .auction-card {
-      display: flex;
-      align-items: center;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      overflow: hidden;
-      text-decoration: none;
-      color: inherit;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-      background-color: white;
-    }
+.auction-card {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 0; /* 直角 */
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: none; /* シンプルに影なし */
+  transition: background-color 0.2s;
+  background-color: #fff;
+}
 
-    .auction-card:hover {
-      transform: scale(1.02);
-    }
+.auction-card:hover {
+  background-color: #f0f0f0;
+}
 
-    .auction-card img {
-      width: 150px;
-      height: 150px;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
+.auction-card img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
 
-    .auction-info {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+.auction-info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
-    .auction-title {
-      font-size: 1.2em;
-      margin-bottom: 8px;
-      font-weight: bold;
-      padding-left: 5vw;
-    }
+.auction-title {
+  font-size: 1.2em;
+  margin-bottom: 8px;
+  font-weight: bold;
+  padding-left: 5vw;
+}
 
-    .auction-detail {
-      font-size: 0.9em;
-      color: #555;
-      padding-left: 6vw;
-    }
+.auction-detail {
+  font-size: 0.9em;
+  color: #555;
+  padding-left: 6vw;
+}
 
-    .ended-label {
-      display: inline-block;
-      background-color: #e74c3c;
-      color: white;
-      font-size: 0.8em;
-      font-weight: bold;
-      padding: 4px 8px;
-      border-radius: 5px;
-      margin-top: 8px;
-    }
-    
-.active-label {
-  background-color: #98e93a;
+.ended-label {
+  display: inline-block;
+  background-color: #555;
   color: white;
   font-size: 0.8em;
   font-weight: bold;
   padding: 4px 8px;
-  border-radius: 5px;
+  border-radius: 0; /* 直角 */
+  margin-top: 8px;
+}
+
+.active-label {
+  background-color: #222;
+  color: white;
+  font-size: 0.8em;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 0; /* 直角 */
   margin-top: 8px;
   display: inline-block;
 }
 
+.warning-box {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 0; /* 直角 */
+  padding: 20px;
+  max-width: 600px;
+  margin: 50px auto;
+  text-align: center;
+  color: #222;
+}
 
+.warning-box button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  background-color: #222;
+  color: #fff;
+  border: none;
+  border-radius: 0; /* 直角 */
+}
 
-    
-    .warning-box {
-      background: #fffbe0;
-      border: 1px solid #999;
-      border-radius: 10px;
-      padding: 20px;
-      max-width: 600px;
-      margin: 50px auto;
-      text-align: center;
-    }
-
-    .warning-box button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 1em;
-      cursor: pointer;
-    }
+.warning-box button:hover {
+  background-color: #555;
+}
   </style>
 </head>
 <body>
@@ -250,6 +258,7 @@ link.innerHTML = `
 
 </body>
 </html>
+
 
 
 
