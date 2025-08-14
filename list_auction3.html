@@ -182,13 +182,13 @@
     const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2";
     let currentUserId = ''; // ユーザーIDを保持する変数
 
-    function agreeAndShow() {
-        localStorage.setItem('cocoAuctionAgreed', 'true');
-        document.getElementById("warning-box").style.display = "none";
-        document.getElementById("main-content").classList.remove("hidden");
-        // LIFFの初期化とオークションの読み込みをここで行う
-        initializeLiffAndLoadAuctions();
-    }
+
+async function agreeAndShow() {
+    localStorage.setItem('cocoAuctionAgreed', 'true');
+    document.getElementById("warning-box").style.display = "none";
+    document.getElementById("main-content").classList.remove("hidden");
+    await initializeLiffAndLoadAuctions(); // async/await を使用して完了を待つ
+}
 
     // ★修正：LIFF認証とオークション読み込みを統合
     async function initializeLiffAndLoadAuctions() {
