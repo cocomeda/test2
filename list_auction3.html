@@ -125,6 +125,7 @@
   <div class="auction-list" id="auction-list">読み込み中...</div>
 </div>
 
+
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
@@ -137,6 +138,10 @@
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+
+  // ★変更点：あなたのユーザーIDをここに設定します。
+  //   実際には、認証システムなどから取得したIDを代入してください。
+  const myUserId = "your_user_id_here"; 
 
   async function loadAuctions() {
     const container = document.getElementById('auction-list');
@@ -184,42 +189,35 @@
             endText = '終了しています';
             isEnded = true;
           } else {
-            
             const minutes = String(endTime.getMinutes()).padStart(2, '0');
             endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
-            
           }
         } else {
           endText = '終了日時不明';
         }
 
         const displayBid = item.currentBid && item.currentBid > 0 ? item.currentBid : 100;
+        const statusLabel = isEnded ? '<div class="ended-label">終了済</div>' : '<div class="active-label">受付中</div>';
+        const firstImage = Array.isArray(item.images) && item.images.length > 0 ? item.images[0] : '';
 
+        link.innerHTML = `
+          <img src="${firstImage}" alt="${item.title}">
+          <div class="auction-info">
+            <div class="auction-title">${item.title}</div>
+            <div class="auction-detail">
+              <div>現在の価格: ¥${displayBid}</div>
+              <div>${endText}</div>
+              ${statusLabel}
+            </div>
+          </div>
+        `;
 
-
-const statusLabel = isEnded
-  ? '<div class="ended-label">終了済</div>'
-  : '<div class="active-label">受付中</div>';
-
-const firstImage = Array.isArray(item.images) && item.images.length > 0
-  ? item.images[0]
-  : ''; // 画像がないときは空文字
-
-link.innerHTML = `
-  <img src="${firstImage}" alt="${item.title}">
-
-  <div class="auction-info">
-    <div class="auction-title">${item.title}</div>
-    <div class="auction-detail">
-      <div>現在の価格: ¥${displayBid}</div>
-      <div>${endText}</div>
-      ${statusLabel}
-    </div>
-  </div>
-`;
-
+        // ★変更点：終了済みかつ最高入札者が自分だったら、winner-cardクラスを追加する
         if (isEnded) {
-          link.style.opacity = "0.6";
+            link.style.opacity = "0.6";
+            if (item.highestBidderId === myUserId) {
+                link.classList.add('winner-card');
+            }
         }
 
         container.appendChild(link);
