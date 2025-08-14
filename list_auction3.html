@@ -94,10 +94,28 @@
             display: inline-block;
         }
 
-        /* ★追加：落札者用のスタイル */
         .winner-card {
             border: 3px solid #007bff;
             box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        }
+
+        .winner-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffc107;
+            color: #222;
+            font-size: 0.8em;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 5px;
+            margin-left: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+
+        .winner-badge::before {
+            content: '★';
+            margin-right: 4px;
         }
 
         .warning-box {
@@ -125,28 +143,6 @@
         .warning-box button:hover {
             background-color: #555;
         }
-
-/* スタイル */
-.winner-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #ffc107; /* Gold color */
-    color: #222;
-    font-size: 0.8em;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 5px;
-    margin-left: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-}
-
-.winner-badge::before {
-    content: '★'; /* Star icon */
-    margin-right: 4px;
-}
-
-        
     </style>
 </head>
 <body>
@@ -178,21 +174,17 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const LIFF_ID = "1657196041-ALeOLrEa"; // LIFF ID
-    const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2";
-    let currentUserId = ''; // ユーザーIDを保持する変数
+    const LIFF_ID = "1657196041-ALeOLrEa";
+    let currentUserId = '';
 
+    async function agreeAndShow() {
+        localStorage.setItem('cocoAuctionAgreed', 'true');
+        document.getElementById("warning-box").style.display = "none";
+        document.getElementById("main-content").classList.remove("hidden");
+        await initializeLiffAndLoadAuctions();
+    }
 
-async function agreeAndShow() {
-    localStorage.setItem('cocoAuctionAgreed', 'true');
-    document.getElementById("warning-box").style.display = "none";
-    document.getElementById("main-content").classList.remove("hidden");
-    await initializeLiffAndLoadAuctions(); // async/await を使用して完了を待つ
-}
-
-    // ★修正：LIFF認証とオークション読み込みを統合
     async function initializeLiffAndLoadAuctions() {
-        // ローディング開始
         const container = document.getElementById('auction-list');
         container.innerHTML = '認証中...';
 
@@ -204,8 +196,15 @@ async function agreeAndShow() {
                 return;
             }
 
+            // ★修正: liff.getProfile() でユーザーIDを直接取得
+            const profile = await liff.getProfile();
+            currentUserId = profile.userId;
+            console.log('Current User ID (from LIFF profile):', currentUserId);
+
+            // LIFFで取得したIDを使ってFirebaseにサインイン
+            // このサインインは、入札処理などでFirestoreのセキュリティルールを通過するために必要
             const idToken = await liff.getIDToken();
-            const res = await fetch(VERIFY_URL, {
+            const res = await fetch("https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ idToken })
@@ -220,11 +219,8 @@ async function agreeAndShow() {
             const json = await res.json();
             await firebase.auth().signInWithCustomToken(json.firebaseToken);
             
-            // 認証成功後、ユーザーIDを取得して保持
-            currentUserId = firebase.auth().currentUser.uid;
-            console.log('Current User ID:', currentUserId);
+            console.log('Firebase signed in with Custom Token.');
 
-            // 認証成功後、オークションを読み込む
             loadAuctions();
 
         } catch (err) {
@@ -233,98 +229,99 @@ async function agreeAndShow() {
         }
     }
 
-async function loadAuctions() {
-    const container = document.getElementById('auction-list');
-    container.innerHTML = '読み込み中...';
+    async function loadAuctions() {
+        const container = document.getElementById('auction-list');
+        container.innerHTML = '読み込み中...';
 
-    try {
-        const snapshot = await db.collection('auctions')
-            .where('isPublished', '==', true)
-            .orderBy('endTime', 'asc')
-            .get();
+        try {
+            const snapshot = await db.collection('auctions')
+                .where('isPublished', '==', true)
+                .orderBy('endTime', 'asc')
+                .get();
 
-        if (snapshot.empty) {
-            container.innerHTML = '現在、開催中のオークションはありません。';
-            return;
-        }
-
-        container.innerHTML = '';
-        const now = new Date();
-        const activeItems = [];
-        const endedItems = [];
-
-        snapshot.forEach(doc => {
-            const item = doc.data();
-            const auctionId = doc.id;
-            const endTime = item.endTime?.toDate();
-
-            if (endTime && endTime.getTime() < now.getTime()) {
-                endedItems.push({ item, auctionId, endTime });
-            } else {
-                activeItems.push({ item, auctionId, endTime });
+            if (snapshot.empty) {
+                container.innerHTML = '現在、開催中のオークションはありません。';
+                return;
             }
-        });
 
-        ([...activeItems, ...endedItems]).forEach(({ item, auctionId, endTime }) => {
-            const link = document.createElement('a');
-            link.className = 'auction-card';
-            link.href = `auction2.html?id=${auctionId}`;
+            container.innerHTML = '';
+            const now = new Date();
+            const activeItems = [];
+            const endedItems = [];
 
-            let endText = '';
-            let isEnded = false;
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                const auctionId = doc.id;
+                const endTime = item.endTime?.toDate();
 
-            if (endTime) {
-                if (endTime.getTime() < now.getTime()) {
-                    endText = '終了しています';
-                    isEnded = true;
+                if (endTime && endTime.getTime() < now.getTime()) {
+                    endedItems.push({ item, auctionId, endTime });
                 } else {
-                    const minutes = String(endTime.getMinutes()).padStart(2, '0');
-                    endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
+                    activeItems.push({ item, auctionId, endTime });
                 }
-            } else {
-                endText = '終了日時不明';
-            }
+            });
 
-            const displayBid = item.currentBid && item.currentBid > 0 ? item.currentBid : 100;
-            const statusLabel = isEnded ? '<div class="ended-label">終了済</div>' : '<div class="active-label">受付中</div>';
-            const firstImage = Array.isArray(item.images) && item.images.length > 0 ? item.images\[0] : '';
+            [...activeItems, ...endedItems].forEach(({ item, auctionId, endTime }) => {
+                const link = document.createElement('a');
+                link.className = 'auction-card';
+                link.href = `auction2.html?id=${auctionId}`;
 
-            let badgeHTML = '';
-            if (isEnded && currentUserId && item.highestBidderId === currentUserId) {
-                badgeHTML = '<span class="winner-badge">落札！</span>';
-                link.classList.add('winner-card'); // Keep the blue border
-            }
+                let endText = '';
+                let isEnded = false;
 
-            link.innerHTML = `
-                <img src="${firstImage}" alt="${item.title}">
-                <div class="auction-info">
-                    <div class="auction-title">${item.title} ${badgeHTML}</div>
-                    <div class="auction-detail">
-                        <div>現在の価格: ¥${displayBid}</div>
-                        <div>${endText}</div>
-                        ${statusLabel}
+                if (endTime) {
+                    if (endTime.getTime() < now.getTime()) {
+                        endText = '終了しています';
+                        isEnded = true;
+                    } else {
+                        const minutes = String(endTime.getMinutes()).padStart(2, '0');
+                        endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
+                    }
+                } else {
+                    endText = '終了日時不明';
+                }
+
+                const displayBid = item.currentBid && item.currentBid > 0 ? item.currentBid : 100;
+                const statusLabel = isEnded ? '<div class="ended-label">終了済</div>' : '<div class="active-label">受付中</div>';
+                const firstImage = Array.isArray(item.images) && item.images.length > 0 ? item.images[0] : '';
+
+                let badgeHTML = '';
+                // ★修正: LIFFで取得したIDとFirestoreのIDを直接比較
+                if (isEnded && currentUserId && item.highestBidderId === currentUserId) {
+                    badgeHTML = '<span class="winner-badge">落札！</span>';
+                    link.classList.add('winner-card');
+                }
+
+                link.innerHTML = `
+                    <img src="${firstImage}" alt="${item.title}">
+                    <div class="auction-info">
+                        <div class="auction-title">${item.title} ${badgeHTML}</div>
+                        <div class="auction-detail">
+                            <div>現在の価格: ¥${displayBid}</div>
+                            <div>${endText}</div>
+                            ${statusLabel}
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
 
-            if (isEnded) {
-                link.style.opacity = "0.6";
-            }
+                if (isEnded) {
+                    link.style.opacity = "0.6";
+                }
 
-            container.appendChild(link);
-        });
+                container.appendChild(link);
+            });
 
-    } catch (err) {
-        console.error('Firestoreからのデータ取得に失敗しました:', err);
-        container.textContent = 'データの取得に失敗しました';
+        } catch (err) {
+            console.error('Firestoreからのデータ取得に失敗しました:', err);
+            container.textContent = 'データの取得に失敗しました';
+        }
     }
-}
 
     window.addEventListener('DOMContentLoaded', () => {
         if (localStorage.getItem('cocoAuctionAgreed') === 'true') {
             document.getElementById("warning-box").style.display = "none";
             document.getElementById("main-content").classList.remove("hidden");
-            initializeLiffAndLoadAuctions(); // 同意済みならLIFF認証から開始
+            initializeLiffAndLoadAuctions();
         }
     });
 </script>
