@@ -271,7 +271,7 @@
 
                 if (endTime) {
                     if (endTime.getTime() < now.getTime()) {
-                        endText = '終了しています';
+                        endText = '';
                         isEnded = true;
                     } else {
                         const minutes = String(endTime.getMinutes()).padStart(2, '0');
