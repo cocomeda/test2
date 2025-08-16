@@ -235,22 +235,43 @@
 
             container.innerHTML = '';
             const now = new Date();
+            const endedAndWonItems = [];
             const activeItems = [];
-            const endedItems = [];
+            const endedAndLostItems = [];
 
             snapshot.forEach(doc => {
                 const item = doc.data();
                 const auctionId = doc.id;
                 const endTime = item.endTime?.toDate();
 
-                if (endTime && endTime.getTime() < now.getTime()) {
-                    endedItems.push({ item, auctionId, endTime });
-                } else {
-                    activeItems.push({ item, auctionId, endTime });
+                if (endTime) {
+                    if (endTime.getTime() < now.getTime()) {
+                        // オークション終了後25時間経過したら非表示にする
+                        const twentyFiveHoursInMs = 25 * 60 * 60 * 1000;
+                        if (now.getTime() - endTime.getTime() > twentyFiveHoursInMs) {
+                            return; // このオークションはスキップ
+                        }
+
+                        if (currentUserId && item.highestBidderId === currentUserId) {
+                            endedAndWonItems.push({ item, auctionId, endTime });
+                        } else {
+                            endedAndLostItems.push({ item, auctionId, endTime });
+                        }
+                    } else {
+                        activeItems.push({ item, auctionId, endTime });
+                    }
                 }
             });
+            
+            // 優先順位: 落札済み -> 開催中 -> 終了済み（非落札）
+            const sortedItems = [...endedAndWonItems, ...activeItems, ...endedAndLostItems];
 
-            [...activeItems, ...endedItems].forEach(({ item, auctionId, endTime }) => {
+            if (sortedItems.length === 0) {
+                container.innerHTML = '表示可能なオークションはありません。';
+                return;
+            }
+
+            sortedItems.forEach(({ item, auctionId, endTime }) => {
                 const link = document.createElement('a');
                 link.className = 'auction-card';
                 link.href = `auction2.html?id=${auctionId}`;
@@ -258,13 +279,13 @@
                 let endText = '';
                 let isEnded = false;
                 let statusBadgeHTML = '';
-                let priceText = '現在の価格'; // ★ここを変更
+                let priceText = '現在の価格';
 
                 if (endTime) {
                     if (endTime.getTime() < now.getTime()) {
                         endText = '';
                         isEnded = true;
-                        priceText = '落札価格'; // ★ここを変更
+                        priceText = '落札価格';
 
                         if (currentUserId && item.highestBidderId === currentUserId) {
                             statusBadgeHTML = '<div class="winner-badge">落札しました！</div>';
