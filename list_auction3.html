@@ -100,22 +100,14 @@
         }
 
         .winner-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #ffc107;
+            background-color: #ffc107; /* 黄色 */
             color: #222;
             font-size: 0.8em;
             font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 5px;
-            margin-left: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-        }
-
-        .winner-badge::before {
-            content: '★';
-            margin-right: 4px;
+            padding: 4px 8px;
+            border-radius: 0;
+            margin-top: 8px;
+            display: inline-block;
         }
 
         .warning-box {
@@ -196,13 +188,10 @@
                 return;
             }
 
-            // ★修正: liff.getProfile() でユーザーIDを直接取得
             const profile = await liff.getProfile();
             currentUserId = profile.userId;
             console.log('Current User ID (from LIFF profile):', currentUserId);
 
-            // LIFFで取得したIDを使ってFirebaseにサインイン
-            // このサインインは、入札処理などでFirestoreのセキュリティルールを通過するために必要
             const idToken = await liff.getIDToken();
             const res = await fetch("https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2", {
                 method: 'POST',
@@ -268,38 +257,44 @@
 
                 let endText = '';
                 let isEnded = false;
+                let statusBadgeHTML = '';
 
                 if (endTime) {
                     if (endTime.getTime() < now.getTime()) {
-                        endText = '';
+                        endText = '終了しています';
                         isEnded = true;
+
+                        // オークション終了後の判定
+                        if (currentUserId && item.highestBidderId === currentUserId) {
+                            // 落札している場合
+                            statusBadgeHTML = '<div class="winner-badge">落札</div>';
+                            link.classList.add('winner-card');
+                        } else {
+                            // 終了済みだが落札していない場合
+                            statusBadgeHTML = '<div class="ended-label">終了済</div>';
+                        }
                     } else {
+                        // オークション開催中の場合
                         const minutes = String(endTime.getMinutes()).padStart(2, '0');
                         endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
+                        statusBadgeHTML = '<div class="active-label">受付中</div>';
                     }
                 } else {
                     endText = '終了日時不明';
+                    statusBadgeHTML = '<div class="ended-label">終了済</div>';
                 }
 
                 const displayBid = item.currentBid && item.currentBid > 0 ? item.currentBid : 100;
-                const statusLabel = isEnded ? '<div class="ended-label">終了済</div>' : '<div class="active-label">受付中</div>';
                 const firstImage = Array.isArray(item.images) && item.images.length > 0 ? item.images[0] : '';
-
-                let badgeHTML = '';
-                // ★修正: LIFFで取得したIDとFirestoreのIDを直接比較
-                if (isEnded && currentUserId && item.highestBidderId === currentUserId) {
-                    badgeHTML = '<span class="winner-badge">落札！</span>';
-                    link.classList.add('winner-card');
-                }
 
                 link.innerHTML = `
                     <img src="${firstImage}" alt="${item.title}">
                     <div class="auction-info">
-                        <div class="auction-title">${item.title} ${badgeHTML}</div>
+                        <div class="auction-title">${item.title}</div>
                         <div class="auction-detail">
                             <div>現在の価格: ¥${displayBid}</div>
                             <div>${endText}</div>
-                            ${statusLabel}
+                            ${statusBadgeHTML}
                         </div>
                     </div>
                 `;
