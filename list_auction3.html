@@ -83,12 +83,8 @@
             margin-top: 8px;
         }
 
-
-
-
-        
         .active-label {
-            background-color: #7bd217;
+            background-color: #222;
             color: white;
             font-size: 0.8em;
             font-weight: bold;
@@ -104,7 +100,7 @@
         }
 
         .winner-badge {
-            background-color: #ffc107; /* 黄色 */
+            background-color: #ffc107;
             color: #222;
             font-size: 0.8em;
             font-weight: bold;
@@ -262,30 +258,28 @@
                 let endText = '';
                 let isEnded = false;
                 let statusBadgeHTML = '';
+                let priceText = '現在の価格'; // ★ここを変更
 
                 if (endTime) {
                     if (endTime.getTime() < now.getTime()) {
-                        endText = '';
+                        endText = '終了しています';
                         isEnded = true;
+                        priceText = '落札価格'; // ★ここを変更
 
-                        // オークション終了後の判定
                         if (currentUserId && item.highestBidderId === currentUserId) {
-                            // 落札している場合
-                            statusBadgeHTML = '<div class="winner-badge">落札しました</div>';
+                            statusBadgeHTML = '<div class="winner-badge">落札</div>';
                             link.classList.add('winner-card');
                         } else {
-                            // 終了済みだが落札していない場合
-                            statusBadgeHTML = '<div class="ended-label">終了しました</div>';
+                            statusBadgeHTML = '<div class="ended-label">終了済</div>';
                         }
                     } else {
-                        // オークション開催中の場合
                         const minutes = String(endTime.getMinutes()).padStart(2, '0');
                         endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
                         statusBadgeHTML = '<div class="active-label">受付中</div>';
                     }
                 } else {
                     endText = '終了日時不明';
-                    statusBadgeHTML = '<div class="ended-label">終了しました</div>';
+                    statusBadgeHTML = '<div class="ended-label">終了済</div>';
                 }
 
                 const displayBid = item.currentBid && item.currentBid > 0 ? item.currentBid : 100;
@@ -296,7 +290,7 @@
                     <div class="auction-info">
                         <div class="auction-title">${item.title}</div>
                         <div class="auction-detail">
-                            <div>現在の価格: ¥${displayBid}</div>
+                            <div>${priceText}: ¥${displayBid}</div>
                             <div>${endText}</div>
                             ${statusBadgeHTML}
                         </div>
