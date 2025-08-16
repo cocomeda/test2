@@ -22,6 +22,25 @@
             display: none;
         }
 
+        /* ★タイトルとロゴの新しいスタイル */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+        
+        .logo {
+            width: 50px; /* ロゴのサイズを調整 */
+            height: 50px;
+        }
+        /* ★ここまで */
+
         .auction-list {
             display: flex;
             flex-direction: column;
@@ -135,22 +154,9 @@
         .warning-box button:hover {
             background-color: #555;
         }
-
-        /* --- ロゴ用の新しいCSSルール --- */
-        .logo-image {
-            position: fixed; /* 画面に固定 */
-            top: 20px;       /* 上からの距離 */
-            right: 20px;     /* 右からの距離 */
-            width: 100px;    /* ロゴの幅 */
-            height: auto;
-            z-index: 1000;   /* 他の要素より手前に表示 */
-            opacity: 0.8;
-        }
     </style>
 </head>
 <body>
-
-    <img src="http://googleusercontent.com/image_generation_content/0" alt="CoCoオークションのロゴ" class="logo-image">
 
 <div class="warning-box" id="warning-box">
     <h2>ご利用にあたっての注意事項</h2>
@@ -162,7 +168,10 @@
 </div>
 
 <div id="main-content" class="hidden">
-    <h1>開催中オークション</h1>
+    <div class="header">
+        <img src="https://i.imgur.com/eBfD6uX.png" alt="オークションロゴ" class="logo">
+        <h1>開催中オークション</h1>
+    </div>
     <div class="auction-list" id="auction-list">読み込み中...</div>
 </div>
 
@@ -303,8 +312,7 @@
 
                 if (endTime) {
                     if (endTime.getTime() < now.getTime()) {
-                        const minutes = String(endTime.getMinutes()).padStart(2, '0');
-                        endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
+                        endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${String(endTime.getMinutes()).padStart(2, '0')} 終了`;
                         isEnded = true;
                         priceText = '落札価格';
 
