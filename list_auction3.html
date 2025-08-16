@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>CoCoめだかオークション</title>
+    <title>CoCo無人オークション</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -176,7 +176,7 @@
         await initializeLiffAndLoadAuctions();
     }
 
-       async function initializeLiffAndLoadAuctions() {
+    async function initializeLiffAndLoadAuctions() {
         const container = document.getElementById('auction-list');
         container.innerHTML = '認証中...';
 
@@ -227,7 +227,6 @@
         }
     }
 
-    
     async function loadAuctions() {
         const container = document.getElementById('auction-list');
         container.innerHTML = '読み込み中...';
@@ -256,10 +255,9 @@
 
                 if (endTime) {
                     if (endTime.getTime() < now.getTime()) {
-                        // オークション終了後25時間経過したら非表示にする
                         const twentyFiveHoursInMs = 25 * 60 * 60 * 1000;
                         if (now.getTime() - endTime.getTime() > twentyFiveHoursInMs) {
-                            return; // このオークションはスキップ
+                            return;
                         }
 
                         if (currentUserId && item.highestBidderId === currentUserId) {
@@ -273,7 +271,6 @@
                 }
             });
             
-            // 優先順位: 落札済み -> 開催中 -> 終了済み（非落札）
             const sortedItems = [...endedAndWonItems, ...activeItems, ...endedAndLostItems];
 
             if (sortedItems.length === 0) {
@@ -293,7 +290,7 @@
 
                 if (endTime) {
                     if (endTime.getTime() < now.getTime()) {
-                        endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
+                        endText = '';
                         isEnded = true;
                         priceText = '落札価格';
 
