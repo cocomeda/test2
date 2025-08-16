@@ -290,7 +290,7 @@
 
                 if (endTime) {
                     if (endTime.getTime() < now.getTime()) {
-                        endText = '';
+                        endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
                         isEnded = true;
                         priceText = '落札価格';
 
