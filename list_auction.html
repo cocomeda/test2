@@ -1,254 +1,365 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CoCo無人オークション</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CoCo無人オークション</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
 
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 20px;
-    }
+    <style>
+        body {
+            font-family: 'Helvetica Neue', sans-serif;
+            margin: 20px;
+            background-color: #f8f8f8;
+            color: #222;
+        }
 
-    .hidden {
-      display: none;
-    }
+        .hidden {
+            display: none;
+        }
 
-    .auction-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+        .auction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
 
-    .auction-card {
-      display: flex;
-      align-items: center;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      overflow: hidden;
-      text-decoration: none;
-      color: inherit;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-      background-color: white;
-    }
+        .auction-card {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 0;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: none;
+            transition: background-color 0.2s;
+            background-color: #fff;
+        }
 
-    .auction-card:hover {
-      transform: scale(1.02);
-    }
+        .auction-card:hover {
+            background-color: #f0f0f0;
+        }
 
-    .auction-card img {
-      width: 150px;
-      height: 150px;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
+        .auction-card img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
 
-    .auction-info {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+        .auction-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-    .auction-title {
-      font-size: 1.2em;
-      margin-bottom: 8px;
-      font-weight: bold;
-      padding-left: 5vw;
-    }
+        .auction-title {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            font-weight: bold;
+            padding-left: 5vw;
+        }
 
-    .auction-detail {
-      font-size: 0.9em;
-      color: #555;
-      padding-left: 6vw;
-    }
+        .auction-detail {
+            font-size: 0.9em;
+            color: #555;
+            padding-left: 6vw;
+        }
 
-    .ended-label {
-      display: inline-block;
-      background-color: #e74c3c;
-      color: white;
-      font-size: 0.8em;
-      font-weight: bold;
-      padding: 4px 8px;
-      border-radius: 5px;
-      margin-top: 8px;
-    }
-    
-.active-label {
-  background-color: #98e93a;
-  color: white;
-  font-size: 0.8em;
-  font-weight: bold;
-  padding: 4px 8px;
-  border-radius: 5px;
-  margin-top: 8px;
-  display: inline-block;
-}
+        .ended-label {
+            display: inline-block;
+            background-color: #555;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 0;
+            margin-top: 8px;
+        }
 
+        .active-label {
+            background-color: #7bd217;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 0;
+            margin-top: 8px;
+            display: inline-block;
+        }
 
+        .winner-card {
+            border: 3px solid #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        }
 
-    
-    .warning-box {
-      background: #fffbe0;
-      border: 1px solid #999;
-      border-radius: 10px;
-      padding: 20px;
-      max-width: 600px;
-      margin: 50px auto;
-      text-align: center;
-    }
+        .winner-badge {
+            background-color: #ffc107;
+            color: #222;
+            font-size: 0.8em;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 0;
+            margin-top: 8px;
+            display: inline-block;
+        }
 
-    .warning-box button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 1em;
-      cursor: pointer;
-    }
-  </style>
+        .warning-box {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 0;
+            padding: 20px;
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+            color: #222;
+        }
+
+        .warning-box button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #222;
+            color: #fff;
+            border: none;
+            border-radius: 0;
+        }
+
+        .warning-box button:hover {
+            background-color: #555;
+        }
+
+        /* --- ロゴ用の新しいCSSルール --- */
+        .logo-image {
+            position: fixed; /* 画面に固定 */
+            top: 20px;       /* 上からの距離 */
+            right: 20px;     /* 右からの距離 */
+            width: 100px;    /* ロゴの幅 */
+            height: auto;
+            z-index: 1000;   /* 他の要素より手前に表示 */
+            opacity: 0.8;
+        }
+    </style>
 </head>
 <body>
 
+    <img src="http://googleusercontent.com/image_generation_content/0" alt="CoCoオークションのロゴ" class="logo-image">
+
 <div class="warning-box" id="warning-box">
-  <h2>ご利用にあたっての注意事項</h2>
-  <p>無人販売所まで取りに来られる方のみ入札してください。<br>
-  実物をご覧になりたい場合は、CoCo無人販売所までお越しください。<br>
-  同意いただける方のみ、下の「同意する」ボタンを押してオークションを表示してください。</p>
-  <button onclick="agreeAndShow()">同意する</button>
-  <button onclick="history.back()">戻る</button>
+    <h2>ご利用にあたっての注意事項</h2>
+    <p>無人販売所まで取りに来られる方のみ入札してください。<br>
+    実物をご覧になりたい場合は、CoCo無人販売所までお越しください。<br>
+    同意いただける方のみ、下の「同意する」ボタンを押してオークションを表示してください。</p>
+    <button onclick="agreeAndShow()">同意する</button>
+    <button onclick="history.back()">戻る</button>
 </div>
 
 <div id="main-content" class="hidden">
-  <h1>開催中のCoCoオークション</h1>
-  <div class="auction-list" id="auction-list">読み込み中...</div>
+    <h1>開催中オークション</h1>
+    <div class="auction-list" id="auction-list">読み込み中...</div>
 </div>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
-    authDomain: "coco-auction.firebaseapp.com",
-    projectId: "coco-auction",
-    storageBucket: "coco-auction.appspot.com",
-    messagingSenderId: "12632824391",
-    appId: "1:12632824391:web:ab6e784ba311de069eef62"
-  };
+    const firebaseConfig = {
+        apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
+        authDomain: "coco-auction.firebaseapp.com",
+        projectId: "coco-auction",
+        storageBucket: "coco-auction.appspot.com",
+        messagingSenderId: "12632824391",
+        appId: "1:12632824391:web:ab6e784ba311de069eef62"
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-  function agreeAndShow() {
-    localStorage.setItem('cocoAuctionAgreed', 'true');
-    document.getElementById("warning-box").style.display = "none";
-    document.getElementById("main-content").classList.remove("hidden");
-    loadAuctions();
-  }
+    const LIFF_ID = "1657196041-ALeOLrEa";
+    let currentUserId = '';
 
-  async function loadAuctions() {
-    const container = document.getElementById('auction-list');
-    container.innerHTML = '読み込み中...';
+    async function agreeAndShow() {
+        localStorage.setItem('cocoAuctionAgreed', 'true');
+        document.getElementById("warning-box").style.display = "none";
+        document.getElementById("main-content").classList.remove("hidden");
+        await initializeLiffAndLoadAuctions();
+    }
 
-    try {
-      const snapshot = await db.collection('auctions')
-        .where('isPublished', '==', true)
-        .orderBy('endTime', 'asc')
-        .get();
+    async function initializeLiffAndLoadAuctions() {
+        const container = document.getElementById('auction-list');
+        container.innerHTML = '認証中...';
 
-      if (snapshot.empty) {
-        container.innerHTML = '現在、開催中のオークションはありません。';
-        return;
-      }
+        try {
+            await liff.init({ liffId: LIFF_ID });
 
-      container.innerHTML = '';
-      const now = new Date();
-      const activeItems = [];
-      const endedItems = [];
+            if (!liff.isLoggedIn()) {
+                liff.login();
+                return;
+            }
 
-      snapshot.forEach(doc => {
-        const item = doc.data();
-        const auctionId = doc.id;
-        const endTime = item.endTime?.toDate();
+            const profile = await liff.getProfile();
+            currentUserId = profile.userId;
+            console.log('Current User ID (from LIFF profile):', currentUserId);
 
-        if (endTime && endTime.getTime() < now.getTime()) {
-          endedItems.push({ item, auctionId, endTime });
-        } else {
-          activeItems.push({ item, auctionId, endTime });
+            // Firebaseへの認証処理をtry-catchで囲む
+            try {
+                const idToken = await liff.getIDToken();
+                const res = await fetch("https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idToken })
+                });
+
+                if (!res.ok) {
+                    throw new Error(`LINE認証エラー: ${await res.text()}`);
+                }
+                
+                const json = await res.json();
+                await firebase.auth().signInWithCustomToken(json.firebaseToken);
+                
+                console.log('Firebase signed in with Custom Token.');
+
+                loadAuctions();
+
+            } catch (authError) {
+                // Firebase認証でエラーが発生した場合（トークン期限切れなど）
+                console.error('Firebase認証エラー:', authError);
+                
+                // 再度LIFFログインを促す
+                alert('認証情報が切れています。再ログインしてください。');
+                liff.login();
+            }
+
+        } catch (liffInitError) {
+            console.error('LIFF初期化エラー:', liffInitError);
+            container.textContent = '初期化中にエラーが発生しました。';
         }
-      });
+    }
 
-      [...activeItems, ...endedItems].forEach(({ item, auctionId, endTime }) => {
-        const link = document.createElement('a');
-        link.className = 'auction-card';
-        link.href = `auction.html?id=${auctionId}`;
+    async function loadAuctions() {
+        const container = document.getElementById('auction-list');
+        container.innerHTML = '読み込み中...';
 
-        const now = new Date();
-        let endText = '';
-        let isEnded = false;
+        try {
+            const snapshot = await db.collection('auctions')
+                .where('isPublished', '==', true)
+                .orderBy('endTime', 'asc')
+                .get();
 
-        if (endTime) {
-          if (endTime.getTime() < now.getTime()) {
-            endText = '終了しています';
-            isEnded = true;
-          } else {
-           
-            const minutes = String(endTime.getMinutes()).padStart(2, '0');
-　　　　　　　endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
+            if (snapshot.empty) {
+                container.innerHTML = '現在、開催中のオークションはありません。';
+                return;
+            }
+
+            container.innerHTML = '';
+            const now = new Date();
+            const endedAndWonItems = [];
+            const activeItems = [];
+            const endedAndLostItems = [];
+
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                const auctionId = doc.id;
+                const endTime = item.endTime?.toDate();
+
+                if (endTime) {
+                    if (endTime.getTime() < now.getTime()) {
+                        const twentyFiveHoursInMs = 25 * 60 * 60 * 1000;
+                        if (now.getTime() - endTime.getTime() > twentyFiveHoursInMs) {
+                            return;
+                        }
+
+                        if (currentUserId && item.highestBidderId === currentUserId) {
+                            endedAndWonItems.push({ item, auctionId, endTime });
+                        } else {
+                            endedAndLostItems.push({ item, auctionId, endTime });
+                        }
+                    } else {
+                        activeItems.push({ item, auctionId, endTime });
+                    }
+                }
+            });
             
-          }
-        } else {
-          endText = '終了日時不明';
+            const sortedItems = [...endedAndWonItems, ...activeItems, ...endedAndLostItems];
+
+            if (sortedItems.length === 0) {
+                container.innerHTML = '表示可能なオークションはありません。';
+                return;
+            }
+
+            sortedItems.forEach(({ item, auctionId, endTime }) => {
+                const link = document.createElement('a');
+                link.className = 'auction-card';
+                link.href = `auction2.html?id=${auctionId}`;
+
+                let endText = '';
+                let isEnded = false;
+                let statusBadgeHTML = '';
+                let priceText = '現在の価格';
+
+                if (endTime) {
+                    if (endTime.getTime() < now.getTime()) {
+                        const minutes = String(endTime.getMinutes()).padStart(2, '0');
+                        endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
+                        isEnded = true;
+                        priceText = '落札価格';
+
+                        if (currentUserId && item.highestBidderId === currentUserId) {
+                            statusBadgeHTML = '<div class="winner-badge">落札しました！</div>';
+                            link.classList.add('winner-card');
+                        } else {
+                            statusBadgeHTML = '<div class="ended-label">終了済</div>';
+                        }
+                    } else {
+                        const minutes = String(endTime.getMinutes()).padStart(2, '0');
+                        endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${minutes} 終了`;
+                        statusBadgeHTML = '<div class="active-label">受付中</div>';
+                    }
+                } else {
+                    endText = '終了日時不明';
+                    statusBadgeHTML = '<div class="ended-label">終了しています</div>';
+                }
+
+                const displayBid = item.currentBid && item.currentBid > 0 ? item.currentBid : 100;
+                const firstImage = Array.isArray(item.images) && item.images.length > 0 ? item.images[0] : '';
+
+                link.innerHTML = `
+                    <img src="${firstImage}" alt="${item.title}">
+                    <div class="auction-info">
+                        <div class="auction-title">${item.title}</div>
+                        <div class="auction-detail">
+                            <div>${priceText}: ¥${displayBid}</div>
+                            <div>${endText}</div>
+                            ${statusBadgeHTML}
+                        </div>
+                    </div>
+                `;
+
+                if (isEnded) {
+                    link.style.opacity = "0.6";
+                }
+
+                container.appendChild(link);
+            });
+
+        } catch (err) {
+            console.error('Firestoreからのデータ取得に失敗しました:', err);
+            container.textContent = 'データの取得に失敗しました';
         }
+    }
 
-        const displayBid = item.currentBid && item.currentBid > 0 ? item.currentBid : 100;
-
-
-
-const statusLabel = isEnded
-  ? '<div class="ended-label">終了済</div>'
-  : '<div class="active-label">受付中</div>';
-
-const firstImage = Array.isArray(item.images) && item.images.length > 0
-  ? item.images[0]
-  : ''; // 画像がないときは空文字
-
-link.innerHTML = `
-  <img src="${firstImage}" alt="${item.title}">
-
-  <div class="auction-info">
-    <div class="auction-title">${item.title}</div>
-    <div class="auction-detail">
-      <div>現在の価格: ¥${displayBid}</div>
-      <div>${endText}</div>
-      ${statusLabel}
-    </div>
-  </div>
-`;
-
-        if (isEnded) {
-          link.style.opacity = "0.6";
+    window.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('cocoAuctionAgreed') === 'true') {
+            document.getElementById("warning-box").style.display = "none";
+            document.getElementById("main-content").classList.remove("hidden");
+            initializeLiffAndLoadAuctions();
         }
-
-        container.appendChild(link);
-      });
-
-    } catch (err) {
-      console.error('Firestoreからのデータ取得に失敗しました:', err);
-      container.textContent = 'データの取得に失敗しました';
-    }
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('cocoAuctionAgreed') === 'true') {
-      document.getElementById("warning-box").style.display = "none";
-      document.getElementById("main-content").classList.remove("hidden");
-      loadAuctions();
-    }
-  });
+    });
 </script>
 
 </body>
 </html>
-
-
