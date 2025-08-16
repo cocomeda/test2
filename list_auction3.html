@@ -84,7 +84,7 @@
         }
 
         .active-label {
-            background-color: #222;
+            background-color: #7bd217;
             color: white;
             font-size: 0.8em;
             font-weight: bold;
@@ -262,12 +262,12 @@
 
                 if (endTime) {
                     if (endTime.getTime() < now.getTime()) {
-                        endText = '終了しています';
+                        endText = '';
                         isEnded = true;
                         priceText = '落札価格'; // ★ここを変更
 
                         if (currentUserId && item.highestBidderId === currentUserId) {
-                            statusBadgeHTML = '<div class="winner-badge">落札</div>';
+                            statusBadgeHTML = '<div class="winner-badge">落札しました！</div>';
                             link.classList.add('winner-card');
                         } else {
                             statusBadgeHTML = '<div class="ended-label">終了済</div>';
@@ -279,7 +279,7 @@
                     }
                 } else {
                     endText = '終了日時不明';
-                    statusBadgeHTML = '<div class="ended-label">終了済</div>';
+                    statusBadgeHTML = '<div class="ended-label">終了しています</div>';
                 }
 
                 const displayBid = item.currentBid && item.currentBid > 0 ? item.currentBid : 100;
