@@ -347,6 +347,7 @@ button:disabled {
     border: 2px solid blue;
 }
 
+/* 新しいCSS: 入札履歴テーブル用 */
 #bid-history-container {
     margin-top: 20px;
     border: 1px solid #ccc;
@@ -354,20 +355,23 @@ button:disabled {
     border-radius: 5px;
 }
 
-#bid-history-list {
-    list-style-type: none;
-    padding: 0;
+#bid-history-table {
+    width: 100%;
+    border-collapse: collapse; /* セルの境界線を結合 */
+    margin-top: 10px;
 }
 
-#bid-history-list li {
-    padding: 8px 0;
-    border-bottom: 1px dashed #eee;
+#bid-history-table th,
+#bid-history-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
 }
 
-#bid-history-list li:last-child {
-    border-bottom: none;
+#bid-history-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
 }
-    
 
 </style>
 </head>
@@ -482,27 +486,27 @@ button:disabled {
 
 <div style="text-align:center; margin-top:20px;">
   <button id="bid-button">入札する</button>
-
-<pre id="result" style="white-space:pre-wrap;"></pre>  
-
-
-
-    
-
-    
   <button id="show-bids-btn" style="margin-top: 10px;">入札履歴を表示</button>
   <p id="message" class="message"></p>
 </div>
 
 <div id="bid-history-container" style="display:none;">
     <h4>入札履歴</h4>
-    <ul id="bid-history-list">
-        </ul>
+    <table id="bid-history-table">
+        <thead>
+            <tr>
+                <th>入札者ID</th>
+                <th>金額</th>
+                <th>入札時間</th>
+            </tr>
+        </thead>
+        <tbody id="bid-history-body">
+            </tbody>
+    </table>
     <button id="hide-bids-btn" style="margin-top: 10px;">閉じる</button>
 </div>
-
-  
-
+    
+<pre id="result" style="white-space:pre-wrap;"></pre>
 
 
 
@@ -900,9 +904,6 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
     }
 });
 
-
-
-//const bidHistoryList = document.getElementById('bid-history-list');
 
 // === 入札履歴ボタンの機能 ===
 const showBidsBtn = document.getElementById('show-bids-btn');
