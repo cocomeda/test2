@@ -909,18 +909,12 @@ const hideBidsBtn = document.getElementById('hide-bids-btn');
 const bidHistoryContainer = document.getElementById('bid-history-container');
 const bidHistoryBody = document.getElementById('bid-history-body'); // tbody要素を取得
 
-let bidderMap = {};
-let bidderCount = 1;
-
 // 「入札履歴を表示」ボタンのクリックイベント
 showBidsBtn.addEventListener('click', () => {
     if (!auctionId) {
         showStatusMessage('オークションIDが指定されていません。', 'error');
         return;
     }
-    
-    bidderMap = {};
-    bidderCount = 1;
     
     // 履歴コンテナを表示
     bidHistoryContainer.style.display = 'block';
@@ -930,23 +924,27 @@ showBidsBtn.addEventListener('click', () => {
       .orderBy('timestamp', 'desc')
       .limit(10)
       .onSnapshot(snapshot => {
+          // 入札者IDと匿名名のマッピングを保持するオブジェクト
+          const bidderMap = {};
+          let bidderCount = 1;
+          
           // 既存のテーブルボディをクリア
           bidHistoryBody.innerHTML = '';
           
           snapshot.forEach(doc => {
               const bid = doc.data();
-              let bidderName = '不明';
+              let bidderName;
               
               if (bid.userId === currentUserId) {
                   bidderName = 'あなた';
               } else {
-                  if (bid.userId in bidderMap) {
-                      bidderName = bidderMap[bid.userId];
-                  } else {
-                      bidderName = `ユーザー${bidderCount}`;
-                      bidderMap[bid.userId] = bidderName;
+                  if (!bidderMap[bid.userId]) {
+                      // 新しい匿名入札者の場合、新しい名前を割り当ててマップに追加
+                      bidderMap[bid.userId] = `ユーザー${bidderCount}`;
                       bidderCount++;
                   }
+                  // マップから匿名名を取得
+                  bidderName = bidderMap[bid.userId];
               }
               
               const newRow = document.createElement('tr');
