@@ -11,7 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
     
-    <!-- Slick Carousel CSSの読み込み -->
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
 
@@ -347,13 +346,37 @@ button:disabled {
 .thumbnail-container img.active {
     border: 2px solid blue;
 }
-    
+
+/* 新しいCSS: 入札履歴テーブル用 */
+#bid-history-container {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+#bid-history-table {
+    width: 100%;
+    border-collapse: collapse; /* セルの境界線を結合 */
+    margin-top: 10px;
+}
+
+#bid-history-table th,
+#bid-history-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#bid-history-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
 
 </style>
 </head>
 <body>
 
-<!-- jQuery & slick-carousel JS (head内で読み込むか、bodyの閉じタグ直前に移動) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
 
@@ -374,9 +397,7 @@ button:disabled {
     <div class="container1">
         <div class="product-section">
             <h2 id="auction-title" class="title-box">品種名</h2>
-            <!-- メインスライダーのコンテナ -->
             <div class="slider"></div>
-            <!-- サムネイルのコンテナ -->
             <div class="thumbnail-container"></div>
             
             <p id="item-overview" class="product-description">
@@ -465,12 +486,30 @@ button:disabled {
 
 <div style="text-align:center; margin-top:20px;">
   <button id="bid-button">入札する</button>
+  <button id="show-bids-btn" style="margin-top: 10px;">入札履歴を表示</button>
   <p id="message" class="message"></p>
 </div>
 
-    
 <pre id="result" style="white-space:pre-wrap;"></pre>
 
+<div id="bid-history-container" style="display:none;">
+    <h4>入札履歴</h4>
+    <table id="bid-history-table">
+        <thead>
+            <tr>
+                <th>入札者ID</th>
+                <th>金額</th>
+                <th>入札時間</th>
+            </tr>
+        </thead>
+        <tbody id="bid-history-body">
+            </tbody>
+    </table>
+    <button id="hide-bids-btn" style="margin-top: 10px;">閉じる</button>
+</div>
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.3.2/dist/confetti.browser.min.js"></script>
 <script>
@@ -863,6 +902,86 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
     }
 });
 
+
+// === 入札履歴ボタンの機能 ===
+const showBidsBtn = document.getElementById('show-bids-btn');
+const hideBidsBtn = document.getElementById('hide-bids-btn');
+const bidHistoryContainer = document.getElementById('bid-history-container');
+const bidHistoryBody = document.getElementById('bid-history-body'); // tbody要素を取得
+
+let bidderMap = {};
+let bidderCount = 1;
+
+// 「入札履歴を表示」ボタンのクリックイベント
+showBidsBtn.addEventListener('click', () => {
+    if (!auctionId) {
+        showStatusMessage('オークションIDが指定されていません。', 'error');
+        return;
+    }
+    
+    bidderMap = {};
+    bidderCount = 1;
+    
+    // 履歴コンテナを表示
+    bidHistoryContainer.style.display = 'block';
+
+    // bidsサブコレクションをリアルタイムで購読
+    db.collection('auctions').doc(auctionId).collection('bids')
+      .orderBy('timestamp', 'desc')
+      .limit(10)
+      .onSnapshot(snapshot => {
+          // 既存のテーブルボディをクリア
+          bidHistoryBody.innerHTML = '';
+          
+          snapshot.forEach(doc => {
+              const bid = doc.data();
+              let bidderName = '不明';
+              
+              if (bid.userId === currentUserId) {
+                  bidderName = 'あなた';
+              } else {
+                  if (bid.userId in bidderMap) {
+                      bidderName = bidderMap[bid.userId];
+                  } else {
+                      bidderName = `ユーザー${bidderCount}`;
+                      bidderMap[bid.userId] = bidderName;
+                      bidderCount++;
+                  }
+              }
+              
+              const newRow = document.createElement('tr');
+              
+              const bidderCell = document.createElement('td');
+              bidderCell.textContent = bidderName;
+              
+              const amountCell = document.createElement('td');
+              amountCell.textContent = `${formatPrice(bid.amount)}円`;
+
+              // タイムスタンプを日本時間の文字列に変換
+              const timeCell = document.createElement('td');
+              timeCell.textContent = bid.timestamp.toDate().toLocaleString('ja-JP');
+
+              // セルを行に追加
+              newRow.appendChild(bidderCell);
+              newRow.appendChild(amountCell);
+              newRow.appendChild(timeCell);
+              
+              // 行をテーブルのtbodyに追加
+              bidHistoryBody.appendChild(newRow);
+          });
+      }, error => {
+          console.error("入札履歴の取得に失敗しました:", error);
+          alert("入札履歴の取得中にエラーが発生しました。");
+      });
+});
+
+// 「閉じる」ボタンのクリックイベント
+hideBidsBtn.addEventListener('click', () => {
+    bidHistoryContainer.style.display = 'none';
+});
+// ==========================
+
+
 // 紙吹雪アニメーション
 function launchConfettiTimes(times) {
     let count = 0;
@@ -879,7 +998,6 @@ function launchConfettiTimes(times) {
     fire();
 }
     
-// Firestoreから画像データを読み込み
 // Firestoreから画像データを読み込み
 async function loadImagesFromFirestore(docId) {
   console.log('loadImagesFromFirestore: Attempting to load images for docId:', docId);
@@ -912,10 +1030,6 @@ async function loadImagesFromFirestore(docId) {
   }
 }
 
-
-
-
-    
 // Slick Carouselの初期化
 function initializeSlider(data) {
     console.log('initializeSlider: Function called with data:', data);
@@ -924,11 +1038,10 @@ function initializeSlider(data) {
         return;
     }
 
-    const slider = $('.slider'); // jQueryオブジェクトを取得
-    const thumbnailContainer = $('.thumbnail-container'); // jQueryオブジェクトを取得
+    const slider = $('.slider');
+    const thumbnailContainer = $('.thumbnail-container');
 
     // 既存のスライダーとサムネイルをクリア
-    // slickが既に初期化されている場合は unslick を呼び出す
     if (slider.hasClass('slick-initialized')) {
         console.log('initializeSlider: Slider already initialized, unslicking...');
         slider.slick('unslick');
@@ -940,60 +1053,65 @@ function initializeSlider(data) {
     let imagesLoadedCount = 0;
     const totalImages = data.length;
 
-    // メイン画像追加
-    data.forEach((item, index) => {
-        const imgDiv = $('<div></div>');
-        const img = $(`<img src="${item.imageUrl}" alt="メダカの画像 ${index + 1}">`);
-        
-        img.on('load', function() {
-            imagesLoadedCount++;
-            // 最初の画像が読み込まれたらsetPositionを呼び出す
-            if (imagesLoadedCount === 1) { 
-                console.log('initializeSlider: First image loaded, setting slider position.');
-                slider.slick('setPosition');
-            }
+    // 画像の読み込み完了を待つPromiseの配列を作成
+    const imageLoadPromises = data.map((item, index) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = item.imageUrl;
+            
+            // サムネイルを先にDOMに追加
+            const thumbnailImg = $(`<img src="${item.imageUrl}" data-index="${index}" alt="サムネイル画像 ${index + 1}">`);
+            thumbnailContainer.append(thumbnailImg);
+
+            img.onload = () => {
+                console.log(`initializeSlider: Image loaded: ${item.imageUrl}`);
+                const imgDiv = $('<div></div>');
+                imgDiv.append($(img).clone());
+                slider.append(imgDiv);
+                resolve();
+            };
+            img.onerror = () => {
+                console.error(`initializeSlider: Failed to load image: ${item.imageUrl}`);
+                resolve(); // 画像がロードできなくても処理を継続
+            };
         });
-        imgDiv.append(img);
-        slider.append(imgDiv);
-        console.log(`initializeSlider: Added main image: ${item.imageUrl}`);
     });
 
-    // サムネイル追加
-    data.forEach((item, index) => {
-        thumbnailContainer.append(`<img src="${item.imageUrl}" data-index="${index}" alt="サムネイル画像 ${index + 1}">`);
-        console.log(`initializeSlider: Added thumbnail image: ${item.imageUrl}`);
-    });
+    // すべての画像の読み込みが完了するのを待つ
+    Promise.all(imageLoadPromises).then(() => {
+        console.log('initializeSlider: All images loaded. Initializing Slick Carousel.');
+        // 画像がすべてDOMに追加されてからスライダーを初期化
+        slider.slick({
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            dots: true,
+            arrows: true,
+            infinite: true,
+            adaptiveHeight: true
+        });
 
-    // slick メインスライダーの初期化
-    console.log('initializeSlider: Initializing Slick Carousel...');
-    slider.slick({
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        dots: true,
-        arrows: true,
-        infinite: true,
-        adaptiveHeight: true // 画像の高さに合わせてスライダーの高さを調整
-    });
-    console.log('initializeSlider: Slick Carousel initialized.');
+        // 初期アクティブ枠
+        updateThumbnailActive(0);
 
-    // 初期アクティブ枠
-    updateThumbnailActive(0);
-    console.log('initializeSlider: Initial thumbnail active state set.');
+        // スライド変更時に青枠更新
+        slider.on('afterChange', function(event, slick, currentSlide){
+            console.log('initializeSlider: Slick afterChange event. Current slide:', currentSlide);
+            updateThumbnailActive(currentSlide);
+        });
 
-    // スライド変更時に青枠更新
-    slider.on('afterChange', function(event, slick, currentSlide){
-        console.log('initializeSlider: Slick afterChange event. Current slide:', currentSlide);
-        updateThumbnailActive(currentSlide);
-    });
+        // サムネイルクリックでメインスライド移動
+        thumbnailContainer.on('click', 'img', function() {
+            const index = parseInt($(this).data('index'), 10);
+            console.log('initializeSlider: Thumbnail clicked. Going to slide:', index);
+            slider.slick('slickGoTo', index);
+        });
+        console.log('initializeSlider: Event listeners for slider and thumbnails set.');
 
-    // サムネイルクリックでメインスライド移動
-    thumbnailContainer.on('click', 'img', function() { // イベントデリゲーションを使用
-        const index = parseInt($(this).data('index'), 10);
-        console.log('initializeSlider: Thumbnail clicked. Going to slide:', index);
-        slider.slick('slickGoTo', index);
+    }).catch(error => {
+        console.error('initializeSlider: An error occurred while waiting for images to load:', error);
     });
-    console.log('initializeSlider: Event listeners for slider and thumbnails set.');
 }
+
 
 // 青枠を更新する関数
 function updateThumbnailActive(index) {
@@ -1003,9 +1121,7 @@ function updateThumbnailActive(index) {
 }
     
 </script>
+</script>
 
 </body>
 </html>
-
-
-
