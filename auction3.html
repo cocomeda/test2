@@ -327,6 +327,43 @@ button:disabled {
   color: #999;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+#bid-history-container {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+#bid-history-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#bid-history-list li {
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+#bid-history-list li:last-child {
+    border-bottom: none;
+}
+
+
+
+    
+
+    
 </style>
 </head>
 <body>
@@ -768,6 +805,64 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
         document.getElementById('modal-submit-button').disabled = false;
     }
 });
+
+
+
+
+
+
+
+// Firebase SDKの初期化（省略）
+// const db = firebase.firestore();
+
+// 必要な要素を取得
+const showBidsBtn = document.getElementById('show-bids-btn');
+const hideBidsBtn = document.getElementById('hide-bids-btn');
+const bidHistoryContainer = document.getElementById('bid-history-container');
+const bidHistoryList = document.getElementById('bid-history-list');
+
+// 仮のオークションID
+const auctionId = 'your_auction_id_here'; 
+
+showBidsBtn.addEventListener('click', () => {
+    // 入札履歴コンテナを表示
+    bidHistoryContainer.style.display = 'block';
+
+    // 入札履歴をリアルタイムで購読
+    db.collection('auctions').doc(auctionId).collection('bids')
+      .orderBy('timestamp', 'desc')
+      .onSnapshot(snapshot => {
+          // リストをクリア
+          bidHistoryList.innerHTML = '';
+          
+          snapshot.forEach(doc => {
+              const bid = doc.data();
+              const listItem = document.createElement('li');
+              
+              // ハッシュ化されたIDと金額、タイムスタンプを表示
+              // bidderがハッシュ化IDか元のIDかは、Cloud Functionsの実装によります
+              const bidderId = bid.bidder;
+              const formattedTime = bid.timestamp.toDate().toLocaleString('ja-JP');
+
+              listItem.textContent = `ID: ${bidderId}, 金額: ${bid.amount}円, 時間: ${formattedTime}`;
+              bidHistoryList.appendChild(listItem);
+          });
+      }, error => {
+          console.error("入札履歴の取得に失敗しました:", error);
+          alert("入札履歴の取得中にエラーが発生しました。");
+      });
+});
+
+hideBidsBtn.addEventListener('click', () => {
+    // 入札履歴コンテナを非表示にする
+    bidHistoryContainer.style.display = 'none';
+});
+
+
+
+
+
+    
 </script>
 </body>
 </html>
