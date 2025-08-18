@@ -649,7 +649,7 @@ async function initializeLiffAndLoadAuction() {
     }
 }
 
-// ★ 新しい関数: 入札履歴を表示
+// ★ 修正後の showBidHistory() 関数
 async function showBidHistory() {
     const historyContainer = document.getElementById('bid-history-container');
     const historyList = document.getElementById('bid-history');
@@ -677,7 +677,10 @@ async function showBidHistory() {
             const bid = doc.data();
             const bidTime = bid.timestamp.toDate();
             const formattedTime = `${bidTime.getMonth() + 1}/${bidTime.getDate()} ${bidTime.getHours()}:${String(bidTime.getMinutes()).padStart(2, '0')}:${String(bidTime.getSeconds()).padStart(2, '0')}`;
-            const userName = hashUserId(bid.userId); // 匿名ユーザー名
+            
+            // ★ hashedUserId を使用する
+            const userName = bid.hashedUserId ? `匿名ユーザー:${bid.hashedUserId}` : '匿名ユーザー:---';
+            
             const bidItem = document.createElement('div');
             bidItem.className = 'bid-history-item';
             bidItem.innerHTML = `
