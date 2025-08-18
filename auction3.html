@@ -901,11 +901,14 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
 });
 
 
+
+//const bidHistoryList = document.getElementById('bid-history-list');
+
 // === 入札履歴ボタンの機能 ===
 const showBidsBtn = document.getElementById('show-bids-btn');
 const hideBidsBtn = document.getElementById('hide-bids-btn');
 const bidHistoryContainer = document.getElementById('bid-history-container');
-const bidHistoryList = document.getElementById('bid-history-list');
+const bidHistoryBody = document.getElementById('bid-history-body'); // tbody要素を取得
 
 // 「入札履歴を表示」ボタンのクリックイベント
 showBidsBtn.addEventListener('click', () => {
@@ -922,19 +925,32 @@ showBidsBtn.addEventListener('click', () => {
       .orderBy('timestamp', 'desc')
       .limit(10)
       .onSnapshot(snapshot => {
-          // 既存のリストをクリア
-          bidHistoryList.innerHTML = '';
+          // 既存のテーブルボディをクリア
+          bidHistoryBody.innerHTML = '';
           
           snapshot.forEach(doc => {
               const bid = doc.data();
-              const listItem = document.createElement('li');
               
-              // タイムスタンプを日本時間の文字列に変換
-              const formattedTime = bid.timestamp.toDate().toLocaleString('ja-JP');
+              // 新しい行（<tr>）とセル（<td>）を作成
+              const newRow = document.createElement('tr');
+              
+              const bidderCell = document.createElement('td');
+              bidderCell.textContent = bid.bidder;
+              
+              const amountCell = document.createElement('td');
+              amountCell.textContent = `${formatPrice(bid.amount)}円`;
 
-              // ハッシュ化されたIDと金額、タイムスタンプを表示
-              listItem.textContent = `ID: ${bid.bidder}, 金額: ${formatPrice(bid.amount)}円, 時間: ${formattedTime}`;
-              bidHistoryList.appendChild(listItem);
+              // タイムスタンプを日本時間の文字列に変換
+              const timeCell = document.createElement('td');
+              timeCell.textContent = bid.timestamp.toDate().toLocaleString('ja-JP');
+
+              // セルを行に追加
+              newRow.appendChild(bidderCell);
+              newRow.appendChild(amountCell);
+              newRow.appendChild(timeCell);
+              
+              // 行をテーブルのtbodyに追加
+              bidHistoryBody.appendChild(newRow);
           });
       }, error => {
           console.error("入札履歴の取得に失敗しました:", error);
