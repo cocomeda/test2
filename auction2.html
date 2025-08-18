@@ -909,8 +909,9 @@ const hideBidsBtn = document.getElementById('hide-bids-btn');
 const bidHistoryContainer = document.getElementById('bid-history-container');
 const bidHistoryBody = document.getElementById('bid-history-body'); // tbody要素を取得
 
+
 // 「入札履歴を表示」ボタンのクリックイベント
-showBidsBtn.addEventListener('click', () => {
+showBidsBtn.addEventListener('click', async () => {
     if (!auctionId) {
         showStatusMessage('オークションIDが指定されていません。', 'error');
         return;
@@ -919,58 +920,60 @@ showBidsBtn.addEventListener('click', () => {
     // 履歴コンテナを表示
     bidHistoryContainer.style.display = 'block';
 
-    // bidsサブコレクションをリアルタイムで購読
-    db.collection('auctions').doc(auctionId).collection('bids')
-      .orderBy('timestamp', 'desc')
-      .limit(10)
-      .onSnapshot(snapshot => {
-          // 入札者IDと匿名名のマッピングを保持するオブジェクト
-          const bidderMap = {};
-          let bidderCount = 1;
-          
-          // 既存のテーブルボディをクリア
-          bidHistoryBody.innerHTML = '';
-          
-          snapshot.forEach(doc => {
-              const bid = doc.data();
-              let bidderName;
-              
-              if (bid.userId === currentUserId) {
-                  bidderName = 'あなた';
-              } else {
-                  if (!bidderMap[bid.userId]) {
-                      // 新しい匿名入札者の場合、新しい名前を割り当ててマップに追加
-                      bidderMap[bid.userId] = `ユーザー${bidderCount}`;
-                      bidderCount++;
-                  }
-                  // マップから匿名名を取得
-                  bidderName = bidderMap[bid.userId];
-              }
-              
-              const newRow = document.createElement('tr');
-              
-              const bidderCell = document.createElement('td');
-              bidderCell.textContent = bidderName;
-              
-              const amountCell = document.createElement('td');
-              amountCell.textContent = `${formatPrice(bid.amount)}円`;
+    try {
+        // bidsサブコレクションのデータを一度だけ取得する
+        const bidsSnapshot = await db.collection('auctions').doc(auctionId).collection('bids')
+                                     .orderBy('timestamp', 'desc')
+                                     .limit(10)
+                                     .get();
+                                     
+        // 入札者IDと匿名名のマッピングを保持するオブジェクト
+        const bidderMap = {};
+        let bidderCount = 1;
+        
+        // 既存のテーブルボディをクリア
+        bidHistoryBody.innerHTML = '';
+        
+        bidsSnapshot.forEach(doc => {
+            const bid = doc.data();
+            let bidderName;
+            
+            if (bid.userId === currentUserId) {
+                bidderName = 'あなた';
+            } else {
+                if (!bidderMap[bid.userId]) {
+                    // 新しい匿名入札者の場合、新しい名前を割り当ててマップに追加
+                    bidderMap[bid.userId] = `ユーザー${bidderCount}`;
+                    bidderCount++;
+                }
+                // マップから匿名名を取得
+                bidderName = bidderMap[bid.userId];
+            }
+            
+            const newRow = document.createElement('tr');
+            
+            const bidderCell = document.createElement('td');
+            bidderCell.textContent = bidderName;
+            
+            const amountCell = document.createElement('td');
+            amountCell.textContent = `${formatPrice(bid.amount)}円`;
 
-              // タイムスタンプを日本時間の文字列に変換
-              const timeCell = document.createElement('td');
-              timeCell.textContent = bid.timestamp.toDate().toLocaleString('ja-JP');
+            // タイムスタンプを日本時間の文字列に変換
+            const timeCell = document.createElement('td');
+            timeCell.textContent = bid.timestamp.toDate().toLocaleString('ja-JP');
 
-              // セルを行に追加
-              newRow.appendChild(bidderCell);
-              newRow.appendChild(amountCell);
-              newRow.appendChild(timeCell);
-              
-              // 行をテーブルのtbodyに追加
-              bidHistoryBody.appendChild(newRow);
-          });
-      }, error => {
-          console.error("入札履歴の取得に失敗しました:", error);
-          alert("入札履歴の取得中にエラーが発生しました。");
-      });
+            // セルを行に追加
+            newRow.appendChild(bidderCell);
+            newRow.appendChild(amountCell);
+            newRow.appendChild(timeCell);
+            
+            // 行をテーブルのtbodyに追加
+            bidHistoryBody.appendChild(newRow);
+        });
+    } catch(error) {
+        console.error("入札履歴の取得に失敗しました:", error);
+        alert("入札履歴の取得中にエラーが発生しました。");
+    }
 });
 
 // 「閉じる」ボタンのクリックイベント
