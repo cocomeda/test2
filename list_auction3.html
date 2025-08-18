@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>CoCo無人オークション</title>
+    <title>CoCoめだかオークション</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -21,25 +22,6 @@
         .hidden {
             display: none;
         }
-
-        /* ★タイトルとロゴの新しいスタイル */
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 1.8em;
-        }
-        
-        .logo {
-            width: 50px; /* ロゴのサイズを調整 */
-            height: 50px;
-        }
-        /* ★ここまで */
 
         .auction-list {
             display: flex;
@@ -158,13 +140,17 @@
 </head>
 <body>
 
+<div class="warning-box" id="warning-box">
+    <h2>ご利用にあたっての注意事項</h2>
+    <p>無人販売所まで取りに来られる方のみ入札してください。<br>
+    実物をご覧になりたい場合は、CoCo無人販売所までお越しください。<br>
+    同意いただける方のみ、下の「同意する」ボタンを押してオークションを表示してください。</p>
+    <button onclick="agreeAndShow()">同意する</button>
+    <button onclick="history.back()">戻る</button>
+</div>
 
-
-<div id="main-content">
-    <div class="header">
-        <img src="images/auction_icon.png" alt="オークションロゴ" class="logo">
-        <h1>開催中オークション</h1>
-    </div>
+<div id="main-content" class="hidden">
+    <h1>開催中オークション</h1>
     <div class="auction-list" id="auction-list">読み込み中...</div>
 </div>
 
@@ -207,38 +193,29 @@
             currentUserId = profile.userId;
             console.log('Current User ID (from LIFF profile):', currentUserId);
 
-            // Firebaseへの認証処理をtry-catchで囲む
-            try {
-                const idToken = await liff.getIDToken();
-                const res = await fetch("https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idToken })
-                });
+            const idToken = await liff.getIDToken();
+            const res = await fetch("https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken })
+            });
 
-                if (!res.ok) {
-                    throw new Error(`LINE認証エラー: ${await res.text()}`);
-                }
-                
-                const json = await res.json();
-                await firebase.auth().signInWithCustomToken(json.firebaseToken);
-                
-                console.log('Firebase signed in with Custom Token.');
-
-                loadAuctions();
-
-            } catch (authError) {
-                // Firebase認証でエラーが発生した場合（トークン期限切れなど）
-                console.error('Firebase認証エラー:', authError);
-                
-                // 再度LIFFログインを促す
-                alert('認証情報が切れています。再ログインしてください。');
-                liff.login();
+            if (!res.ok) {
+                container.innerHTML = '認証に失敗しました。LINEでログインし直してください。';
+                console.error(`LINE認証エラー: ${await res.text()}`);
+                return;
             }
+            
+            const json = await res.json();
+            await firebase.auth().signInWithCustomToken(json.firebaseToken);
+            
+            console.log('Firebase signed in with Custom Token.');
 
-        } catch (liffInitError) {
-            console.error('LIFF初期化エラー:', liffInitError);
-            container.textContent = '初期化中にエラーが発生しました。';
+            loadAuctions();
+
+        } catch (err) {
+            console.error('LIFF/Firebase認証エラー:', err);
+            container.textContent = '認証中にエラーが発生しました。';
         }
     }
 
@@ -270,9 +247,10 @@
 
                 if (endTime) {
                     if (endTime.getTime() < now.getTime()) {
+                        // オークション終了後25時間経過したら非表示にする
                         const twentyFiveHoursInMs = 25 * 60 * 60 * 1000;
                         if (now.getTime() - endTime.getTime() > twentyFiveHoursInMs) {
-                            return;
+                            return; // このオークションはスキップ
                         }
 
                         if (currentUserId && item.highestBidderId === currentUserId) {
@@ -286,6 +264,7 @@
                 }
             });
             
+            // 優先順位: 落札済み -> 開催中 -> 終了済み（非落札）
             const sortedItems = [...endedAndWonItems, ...activeItems, ...endedAndLostItems];
 
             if (sortedItems.length === 0) {
@@ -296,7 +275,7 @@
             sortedItems.forEach(({ item, auctionId, endTime }) => {
                 const link = document.createElement('a');
                 link.className = 'auction-card';
-                link.href = `auction2.html?id=${auctionId}`;
+                link.href = `auction3.html?id=${auctionId}`;
 
                 let endText = '';
                 let isEnded = false;
@@ -305,7 +284,7 @@
 
                 if (endTime) {
                     if (endTime.getTime() < now.getTime()) {
-                        endText = `${endTime.getMonth() + 1}/${endTime.getDate()} ${endTime.getHours()}:${String(endTime.getMinutes()).padStart(2, '0')} 終了`;
+                        endText = '';
                         isEnded = true;
                         priceText = '落札価格';
 
