@@ -1052,4 +1052,77 @@ function initializeSlider(data) {
     console.log('initializeSlider: Slider and thumbnail containers cleared.');
 
     let imagesLoadedCount = 0;
-    const totalImages = data.length
+    const totalImages = data.length;
+
+    // 画像の読み込み完了を待つPromiseの配列を作成
+    const imageLoadPromises = data.map((item, index) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = item.imageUrl;
+            
+            // サムネイルを先にDOMに追加
+            const thumbnailImg = $(`<img src="${item.imageUrl}" data-index="${index}" alt="サムネイル画像 ${index + 1}">`);
+            thumbnailContainer.append(thumbnailImg);
+
+            img.onload = () => {
+                console.log(`initializeSlider: Image loaded: ${item.imageUrl}`);
+                const imgDiv = $('<div></div>');
+                imgDiv.append($(img).clone());
+                slider.append(imgDiv);
+                resolve();
+            };
+            img.onerror = () => {
+                console.error(`initializeSlider: Failed to load image: ${item.imageUrl}`);
+                resolve(); // 画像がロードできなくても処理を継続
+            };
+        });
+    });
+
+    // すべての画像の読み込みが完了するのを待つ
+    Promise.all(imageLoadPromises).then(() => {
+        console.log('initializeSlider: All images loaded. Initializing Slick Carousel.');
+        // 画像がすべてDOMに追加されてからスライダーを初期化
+        slider.slick({
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            dots: true,
+            arrows: true,
+            infinite: true,
+            adaptiveHeight: true
+        });
+
+        // 初期アクティブ枠
+        updateThumbnailActive(0);
+
+        // スライド変更時に青枠更新
+        slider.on('afterChange', function(event, slick, currentSlide){
+            console.log('initializeSlider: Slick afterChange event. Current slide:', currentSlide);
+            updateThumbnailActive(currentSlide);
+        });
+
+        // サムネイルクリックでメインスライド移動
+        thumbnailContainer.on('click', 'img', function() {
+            const index = parseInt($(this).data('index'), 10);
+            console.log('initializeSlider: Thumbnail clicked. Going to slide:', index);
+            slider.slick('slickGoTo', index);
+        });
+        console.log('initializeSlider: Event listeners for slider and thumbnails set.');
+
+    }).catch(error => {
+        console.error('initializeSlider: An error occurred while waiting for images to load:', error);
+    });
+}
+
+
+// 青枠を更新する関数
+function updateThumbnailActive(index) {
+    $('.thumbnail-container img').removeClass('active');
+    $(`.thumbnail-container img[data-index="${index}"]`).addClass('active');
+    console.log('updateThumbnailActive: Active thumbnail set to index:', index);
+}
+    
+</script>
+</script>
+
+</body>
+</html>
