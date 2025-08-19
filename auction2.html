@@ -936,6 +936,12 @@ showBidsBtn.addEventListener('click', async () => {
         
         bidsSnapshot.forEach(doc => {
             const bid = doc.data();
+            // bid.userIdが有効な値であることを確認
+            if (!bid || !bid.userId) {
+                console.warn("入札データにuserIdがありません。", doc.id);
+                return; // この入札データをスキップして次のループへ
+            }
+
             let bidderName;
             
             if (bid.userId === currentUserId) {
@@ -1126,3 +1132,4 @@ function updateThumbnailActive(index) {
 
 </body>
 </html>
+
