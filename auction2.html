@@ -154,7 +154,7 @@ button {
     border-radius: 5px;
     font-size: 1.1em;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
 button:hover {
@@ -164,6 +164,11 @@ button:hover {
 button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+}
+/* ボタンがクリックされたときに少し縮む */
+button:active {
+  transform: scale(0.98);
+  background-color: #00459c; /* さらに暗い色 */
 }
 
 .message {
@@ -486,7 +491,7 @@ button:disabled {
 
 <div style="text-align:center; margin-top:20px;">
   <button id="bid-button">入札する</button>
-  <button id="show-bids-btn" style="margin-top: 10px;">入札履歴を表示</button>
+  <button id="toggle-bids-btn" style="margin-top: 10px;">入札履歴を表示</button>
   <p id="message" class="message"></p>
 </div>
 
@@ -505,7 +510,6 @@ button:disabled {
         <tbody id="bid-history-body">
             </tbody>
     </table>
-    <button id="hide-bids-btn" style="margin-top: 10px;">閉じる</button>
 </div>
     
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -904,81 +908,85 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
 
 
 // === 入札履歴ボタンの機能 ===
-const showBidsBtn = document.getElementById('show-bids-btn');
-const hideBidsBtn = document.getElementById('hide-bids-btn');
+const toggleBidsBtn = document.getElementById('toggle-bids-btn');
 const bidHistoryContainer = document.getElementById('bid-history-container');
 const bidHistoryBody = document.getElementById('bid-history-body'); // tbody要素を取得
 
 
-// 「入札履歴を表示」ボタンのクリックイベント
-showBidsBtn.addEventListener('click', async () => {
-    if (!auctionId) {
-        showStatusMessage('オークションIDが指定されていません。', 'error');
-        return;
-    }
-    
-    // 履歴コンテナを表示
-    bidHistoryContainer.style.display = 'block';
+// 「入札履歴を表示/閉じる」ボタンのクリックイベント
+toggleBidsBtn.addEventListener('click', async () => {
+    // 履歴が表示されているかどうかのチェック
+    const isVisible = bidHistoryContainer.style.display === 'block';
 
-    try {
-        // bidsサブコレクションのデータを一度だけ取得する
-        const bidsSnapshot = await db.collection('auctions').doc(auctionId).collection('bids')
-                                     .orderBy('timestamp', 'desc')
-                                     .limit(10)
-                                     .get();
-                                     
-        // 入札者IDと匿名名のマッピングを保持するオブジェクト
-        const bidderMap = {};
-        let bidderCount = 1;
-        
-        // 既存のテーブルボディをクリア
-        bidHistoryBody.innerHTML = '';
-        
-        bidsSnapshot.forEach(doc => {
-            const bid = doc.data();
-            let bidderName;
+    if (isVisible) {
+        // 履歴を非表示にする
+        bidHistoryContainer.style.display = 'none';
+        toggleBidsBtn.textContent = '入札履歴を表示';
+    } else {
+        if (!auctionId) {
+            showStatusMessage('オークションIDが指定されていません。', 'error');
+            return;
+        }
+
+        // 履歴を表示にする
+        bidHistoryContainer.style.display = 'block';
+        toggleBidsBtn.textContent = '閉じる';
+
+        try {
+            // bidsサブコレクションのデータを一度だけ取得する
+            const bidsSnapshot = await db.collection('auctions').doc(auctionId).collection('bids')
+                                         .orderBy('timestamp', 'desc')
+                                         .limit(10)
+                                         .get();
+                                         
+            // 入札者IDと匿名名のマッピングを保持するオブジェクト
+            const bidderMap = {};
+            let bidderCount = 1;
             
-            if (bid.userId === currentUserId) {
-                bidderName = 'あなた';
-            } else {
-                if (!bidderMap[bid.userId]) {
-                    // 新しい匿名入札者の場合、新しい名前を割り当ててマップに追加
-                    bidderMap[bid.userId] = `ユーザー${bidderCount}`;
-                    bidderCount++;
+            // 既存のテーブルボディをクリア
+            bidHistoryBody.innerHTML = '';
+            
+            bidsSnapshot.forEach(doc => {
+                const bid = doc.data();
+                let bidderName;
+                
+                if (bid.userId === currentUserId) {
+                    bidderName = 'あなた';
+                } else {
+                    if (!bidderMap[bid.userId]) {
+                        // 新しい匿名入札者の場合、新しい名前を割り当ててマップに追加
+                        bidderMap[bid.userId] = `ユーザー${bidderCount}`;
+                        bidderCount++;
+                    }
+                    // マップから匿名名を取得
+                    bidderName = bidderMap[bid.userId];
                 }
-                // マップから匿名名を取得
-                bidderName = bidderMap[bid.userId];
-            }
-            
-            const newRow = document.createElement('tr');
-            
-            const bidderCell = document.createElement('td');
-            bidderCell.textContent = bidderName;
-            
-            const amountCell = document.createElement('td');
-            amountCell.textContent = `${formatPrice(bid.amount)}円`;
+                
+                const newRow = document.createElement('tr');
+                
+                const bidderCell = document.createElement('td');
+                bidderCell.textContent = bidderName;
+                
+                const amountCell = document.createElement('td');
+                amountCell.textContent = `${formatPrice(bid.amount)}円`;
 
-            // タイムスタンプを日本時間の文字列に変換
-            const timeCell = document.createElement('td');
-            timeCell.textContent = bid.timestamp.toDate().toLocaleString('ja-JP');
+                // タイムスタンプを日本時間の文字列に変換
+                const timeCell = document.createElement('td');
+                timeCell.textContent = bid.timestamp.toDate().toLocaleString('ja-JP');
 
-            // セルを行に追加
-            newRow.appendChild(bidderCell);
-            newRow.appendChild(amountCell);
-            newRow.appendChild(timeCell);
-            
-            // 行をテーブルのtbodyに追加
-            bidHistoryBody.appendChild(newRow);
-        });
-    } catch(error) {
-        console.error("入札履歴の取得に失敗しました:", error);
-        alert("入札履歴の取得中にエラーが発生しました。");
+                // セルを行に追加
+                newRow.appendChild(bidderCell);
+                newRow.appendChild(amountCell);
+                newRow.appendChild(timeCell);
+                
+                // 行をテーブルのtbodyに追加
+                bidHistoryBody.appendChild(newRow);
+            });
+        } catch(error) {
+            console.error("入札履歴の取得に失敗しました:", error);
+            alert("入札履歴の取得中にエラーが発生しました。");
+        }
     }
-});
-
-// 「閉じる」ボタンのクリックイベント
-hideBidsBtn.addEventListener('click', () => {
-    bidHistoryContainer.style.display = 'none';
 });
 // ==========================
 
@@ -1103,26 +1111,4 @@ function initializeSlider(data) {
         // サムネイルクリックでメインスライド移動
         thumbnailContainer.on('click', 'img', function() {
             const index = parseInt($(this).data('index'), 10);
-            console.log('initializeSlider: Thumbnail clicked. Going to slide:', index);
-            slider.slick('slickGoTo', index);
-        });
-        console.log('initializeSlider: Event listeners for slider and thumbnails set.');
-
-    }).catch(error => {
-        console.error('initializeSlider: An error occurred while waiting for images to load:', error);
-    });
-}
-
-
-// 青枠を更新する関数
-function updateThumbnailActive(index) {
-    $('.thumbnail-container img').removeClass('active');
-    $(`.thumbnail-container img[data-index="${index}"]`).addClass('active');
-    console.log('updateThumbnailActive: Active thumbnail set to index:', index);
-}
-    
-</script>
-</script>
-
-</body>
-</html>
+            console.log('initializeSlider: Thumbnail clicked
