@@ -154,7 +154,7 @@ button {
     border-radius: 5px;
     font-size: 1.1em;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
@@ -164,11 +164,6 @@ button:hover {
 button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
-}
-/* ボタンがクリックされたときに少し縮む */
-button:active {
-  transform: scale(0.98);
-  background-color: #00459c; /* さらに暗い色 */
 }
 
 .message {
@@ -491,7 +486,6 @@ button:active {
 
 <div style="text-align:center; margin-top:20px;">
   <button id="bid-button">入札する</button>
-  <button id="toggle-bids-btn" style="margin-top: 10px;">入札履歴を表示</button>
   <p id="message" class="message"></p>
 </div>
 
@@ -510,6 +504,10 @@ button:active {
         <tbody id="bid-history-body">
             </tbody>
     </table>
+</div>
+
+<div style="text-align:center; margin-top:20px;">
+    <button id="toggle-bids-btn">入札履歴を表示</button>
 </div>
     
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -913,25 +911,25 @@ const bidHistoryContainer = document.getElementById('bid-history-container');
 const bidHistoryBody = document.getElementById('bid-history-body'); // tbody要素を取得
 
 
-// 「入札履歴を表示/閉じる」ボタンのクリックイベント
+// 「入札履歴を表示/非表示」ボタンのクリックイベント
 toggleBidsBtn.addEventListener('click', async () => {
-    // 履歴が表示されているかどうかのチェック
-    const isVisible = bidHistoryContainer.style.display === 'block';
-
-    if (isVisible) {
-        // 履歴を非表示にする
+    if (!auctionId) {
+        showStatusMessage('オークションIDが指定されていません。', 'error');
+        return;
+    }
+    
+    // 現在の表示状態をチェック
+    if (bidHistoryContainer.style.display === 'block') {
+        // 既に表示されている場合は非表示にする
         bidHistoryContainer.style.display = 'none';
         toggleBidsBtn.textContent = '入札履歴を表示';
+        showStatusMessage('入札履歴を非表示にしました', 'info');
     } else {
-        if (!auctionId) {
-            showStatusMessage('オークションIDが指定されていません。', 'error');
-            return;
-        }
-
-        // 履歴を表示にする
+        // 非表示の場合は表示する
         bidHistoryContainer.style.display = 'block';
-        toggleBidsBtn.textContent = '閉じる';
-
+        toggleBidsBtn.textContent = '入札履歴を隠す';
+        showStatusMessage('入札履歴を更新中...', 'info');
+        
         try {
             // bidsサブコレクションのデータを一度だけ取得する
             const bidsSnapshot = await db.collection('auctions').doc(auctionId).collection('bids')
@@ -982,9 +980,10 @@ toggleBidsBtn.addEventListener('click', async () => {
                 // 行をテーブルのtbodyに追加
                 bidHistoryBody.appendChild(newRow);
             });
+            showStatusMessage('入札履歴を更新しました', 'success');
         } catch(error) {
             console.error("入札履歴の取得に失敗しました:", error);
-            alert("入札履歴の取得中にエラーが発生しました。");
+            showStatusMessage("入札履歴の取得中にエラーが発生しました。", 'error');
         }
     }
 });
@@ -1111,4 +1110,26 @@ function initializeSlider(data) {
         // サムネイルクリックでメインスライド移動
         thumbnailContainer.on('click', 'img', function() {
             const index = parseInt($(this).data('index'), 10);
-            console.log('initializeSlider: Thumbnail clicked
+            console.log('initializeSlider: Thumbnail clicked. Going to slide:', index);
+            slider.slick('slickGoTo', index);
+        });
+        console.log('initializeSlider: Event listeners for slider and thumbnails set.');
+
+    }).catch(error => {
+        console.error('initializeSlider: An error occurred while waiting for images to load:', error);
+    });
+}
+
+
+// 青枠を更新する関数
+function updateThumbnailActive(index) {
+    $('.thumbnail-container img').removeClass('active');
+    $(`.thumbnail-container img[data-index="${index}"]`).addClass('active');
+    console.log('updateThumbnailActive: Active thumbnail set to index:', index);
+}
+    
+</script>
+</script>
+
+</body>
+</html>
