@@ -455,9 +455,9 @@ button:disabled {
     <h2 style="margin-top: 0;">入札内容を入力</h2>
     
     <div class="input-group currency-input">
-      <label for="modal-bid-amount">入札金額 (100円単位):</label>
+      <label for="modal-bid-amount">入札金額 (10円単位):</label>
       <div class="input-wrapper" style="position: relative;">
-        <input type="number" id="modal-bid-amount" min="100" step="100" placeholder="例: 1500" required>
+        <input type="number" id="modal-bid-amount" min="10" step="10" placeholder="例: 1500" required>
         <span class="yen-label" style="
           position: absolute;
           right: 10px;
@@ -849,8 +849,8 @@ document.getElementById('modal-submit-button').addEventListener('click', async (
         return;
     }
 
-    if (isNaN(newBidAmount) || newBidAmount < 100 || newBidAmount % 100 !== 0) {
-        showModalMessage('100円単位で正しい入札金額を入力してください。', 'error');
+    if (isNaN(newBidAmount) || newBidAmount < 10 || newBidAmount % 10 !== 0) {
+        showModalMessage('10円単位で正しい入札金額を入力してください。', 'error');
         return;
     }
 
