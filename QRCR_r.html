@@ -229,7 +229,11 @@ $(document).ready(function() {
 
         // QRコードデータとIDトークンをGASに送信
         $.ajax({
-            url: 'https://script.google.com/macros/s/AKfycbzeGgWljzalqzgFHSWqzd7napJIsXN7zukNj-MSKMJ3AdpjQ9oSIScQJK2uQtcN8zsr/exec',    
+
+url: 'https://script.google.com/macros/s/AKfycbwkdJeAx1mKwkGCRkWqtl3VyrQcblCSTKNkBvA1itn2btywLxHt8_HF4yhkTo8HxbAY/exec',    
+       
+            
+          //  url: 'https://script.google.com/macros/s/AKfycbzeGgWljzalqzgFHSWqzd7napJIsXN7zukNj-MSKMJ3AdpjQ9oSIScQJK2uQtcN8zsr/exec',    
             type: 'POST',
             data: { idToken: idToken, qr_data: qr_data },
             success: function (response) {
