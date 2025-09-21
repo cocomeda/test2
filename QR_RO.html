@@ -5,18 +5,17 @@
   <title>LIFFルーレット抽選</title>
   <style>
     body { font-family: sans-serif; text-align: center; padding: 20px; }
-    #rouletteSection { display: none; margin-top: 20px; position: relative; display: inline-block; }
+    #rouletteSection { display: none; margin-top: 20px; }
     canvas { border: 2px solid #333; border-radius: 50%; }
     #pointer {
-      position: absolute;
-      top: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-bottom: 30px solid red;
+      width: 0; 
+      height: 0; 
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 40px solid red;
+      margin: 0 auto;
+      position: relative;
+      top: -10px;
     }
     #result { margin-top: 20px; font-size: 18px; font-weight: bold; }
     button { padding: 10px 20px; margin: 10px; font-size: 16px; }
@@ -35,23 +34,21 @@
   </div>
 
   <script>
-    // ★ LIFF IDを差し替え
-   const LIFF_ID = "1657196041-ALeOLrEa";  
-    // ★ GASの公開URLを差し替え
+    // ★ 差し替え部分
+    const LIFF_ID = "1657196041-ALeOLrEa";  
     const GAS_URL = "https://script.google.com/macros/s/XXXXX/exec";
 
-    // 当たり確率設定（ここで調整）
-    // "あたり"を増やせば確率UP、"はずれ"を増やせば確率DOWN
-    const segments = ["はずれ", "はずれ", "はずれ", "あたり"];
-    const colors   = ["#f66", "#6f6", "#66f", "#ff0"];
+    // ★ 当たり確率（1/3にしたいなら ["あたり", "はずれ", "はずれ"]）
+    const segments = ["あたり", "はずれ", "はずれ", "はずれ"];
+    const colors = ["#6f6", "#f66", "#f66", "#f66"];
 
     const canvas = document.getElementById("roulette");
     const ctx = canvas.getContext("2d");
 
     let angle = 0;
     let spinning = false;
+    let stopping = false;
     let speed = 0;
-    let state = "idle"; // idle, spinning, stopping
 
     function drawRoulette() {
       const arc = (2 * Math.PI) / segments.length;
@@ -64,7 +61,7 @@
         ctx.save();
         ctx.translate(150, 150);
         ctx.rotate(i * arc + arc / 2);
-        ctx.fillStyle = "#000";
+        ctx.fillStyle = "#fff";
         ctx.font = "16px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(segments[i], 70, 10);
@@ -84,15 +81,15 @@
       drawRoulette();
       ctx.restore();
 
-      if (state === "stopping") {
+      if (stopping) {
         if (speed > 0.002) {
-          speed *= 0.98; // 減速
+          speed *= 0.97; // 減速
           requestAnimationFrame(spin);
         } else {
           spinning = false;
-          state = "idle";
-          document.getElementById("controlBtn").innerText = "スタート";
+          stopping = false;
           showResult();
+          document.getElementById("controlBtn").innerText = "スタート";
         }
       } else {
         requestAnimationFrame(spin);
@@ -101,8 +98,8 @@
 
     function showResult() {
       const arc = (2 * Math.PI) / segments.length;
-      // ポインタ（上側）にある区画を判定
-      const index = Math.floor(((2 * Math.PI - angle) % (2 * Math.PI)) / arc);
+      // ポインタは「真上」を基準に判定
+      const index = Math.floor(((2 * Math.PI - angle + arc/2) % (2 * Math.PI)) / arc);
       const result = segments[index];
 
       if (result === "あたり") {
@@ -121,14 +118,13 @@
     }
 
     document.getElementById("controlBtn").addEventListener("click", () => {
-      if (state === "idle") {
+      if (!spinning) {
         spinning = true;
-        state = "spinning";
-        speed = 0.3;
+        speed = 0.3; // 初速
         document.getElementById("controlBtn").innerText = "ストップ";
         spin();
-      } else if (state === "spinning") {
-        state = "stopping";
+      } else {
+        stopping = true;
       }
     });
 
@@ -142,8 +138,8 @@
           liff.scanCodeV2().then(result => {
             const scannedValue = result.value;
             if (scannedValue === "SPECIAL") {
+              document.getElementById("rouletteSection").style.display = "block";
               document.getElementById("scanBtn").style.display = "none";
-              document.getElementById("rouletteSection").style.display = "inline-block";
             } else {
               alert("対象外のQRコードです");
             }
@@ -156,17 +152,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
