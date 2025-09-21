@@ -39,16 +39,30 @@ let speed = 0;
 let drawId;
 let currentValue = 0; // 停止時の数字
 
+
+
+
+let hitStart = null;
+let hitEnd = null;
+
 function drawRoulette() {
-  const arc = 2*Math.PI/segments;
-  for(let i=0;i<segments;i++){
+  const arc = 2 * Math.PI / segments;
+  for (let i = 0; i < segments; i++) {
     ctx.beginPath();
-    ctx.fillStyle = i%2===0?"#6f6":"#f66";
-    ctx.moveTo(150,150);
-    ctx.arc(150,150,150,i*arc,(i+1)*arc);
+
+    // 当たりゾーンだけ赤く
+    if (hitStart !== null && hitEnd !== null && i >= hitStart && i <= hitEnd) {
+      ctx.fillStyle = "#f66"; // 赤
+    } else {
+      ctx.fillStyle = "#6f6"; // 緑
+    }
+
+    ctx.moveTo(150, 150);
+    ctx.arc(150, 150, 150, i * arc, (i + 1) * arc);
     ctx.fill();
   }
 }
+  
 
 function spin(){
   if(!spinning) return;
