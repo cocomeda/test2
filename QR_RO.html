@@ -25,7 +25,7 @@
 
   <script>
     // ★ LIFF IDを差し替え
-    const LIFF_ID = "YOUR_LIFF_ID";  
+    const LIFF_ID = "1657196041-ALeOLrEa";  
     // ★ GASの公開URLを差し替え
     const GAS_URL = "https://script.google.com/macros/s/XXXXX/exec";
 
@@ -111,7 +111,7 @@
     drawRoulette();
 
     // LIFF初期化
-    liff.init({ liffId: 1657196041-ALeOLrEa })
+    liff.init({ liffId: LIFF_ID })
       .then(() => {
         document.getElementById("scanBtn").addEventListener("click", () => {
           liff.scanCodeV2().then(result => {
