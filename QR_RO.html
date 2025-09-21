@@ -124,13 +124,16 @@ liff.init({liffId:LIFF_ID})
       const scannedValue = result.value;
       if(scannedValue==="SPECIAL"){
         // 抽選IDをGASで取得
-        fetch(GAS_URL+"?action=init")
-        .then(res=>res.json())
-        .then(data=>{
-          drawId = data.drawId;
-          document.getElementById("rouletteSection").style.display="block";
-          document.getElementById("scanBtn").style.display="none";
-        });
+fetch(GAS_URL + "?action=init")
+  .then(res => res.json())
+  .then(data => {
+    drawId = data.drawId;
+    hitStart = data.start;  // サーバーからもらった当たりゾーン
+    hitEnd = data.end;
+    document.getElementById("rouletteSection").style.display = "block";
+    document.getElementById("scanBtn").style.display = "none";
+    drawRoulette(); // 初期描画し直す
+  });
       }else{
         alert("対象外のQRコードです");
       }
@@ -139,6 +142,20 @@ liff.init({liffId:LIFF_ID})
 })
 .catch(err=>console.error(err));
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 </body>
 </html>
 
