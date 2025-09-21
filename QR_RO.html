@@ -49,16 +49,13 @@ function drawRoulette() {
   const arc = 2 * Math.PI / segments;
   for (let i = 0; i < segments; i++) {
     ctx.beginPath();
-
-    // 当たりゾーンだけ赤く
     if (hitStart !== null && hitEnd !== null && i >= hitStart && i <= hitEnd) {
-      ctx.fillStyle = "#f66"; // 赤
+      ctx.fillStyle = "#f66"; // 赤（当たり）
     } else {
       ctx.fillStyle = "#6f6"; // 緑
     }
-
     ctx.moveTo(150, 150);
-    ctx.arc(150, 150, 150, i * arc, (i + 1) * arc);
+    ctx.arc(150, 150, 150, i * arc - Math.PI/2, (i+1) * arc - Math.PI/2);
     ctx.fill();
   }
 }
@@ -91,16 +88,21 @@ function spin(){
   }
 }
 
-function checkResult(){
-  const arc = 2*Math.PI/segments;
-  currentValue = Math.floor((segments - Math.floor(angle/arc))%segments);
-  fetch(GAS_URL+"?action=check&drawId="+drawId+"&value="+currentValue)
-  .then(res=>res.json())
-  .then(data=>{
-    document.getElementById("result").innerText = data.message;
-  });
+function checkResult() {
+  const arc = 2 * Math.PI / segments;
+  // 爪は上側（-90度位置）にあるので補正
+  let adjustedAngle = (angle + Math.PI/2) % (2*Math.PI);
+  currentValue = Math.floor((segments - Math.floor(adjustedAngle / arc)) % segments);
+
+  fetch(GAS_URL + "?action=check&drawId=" + drawId + "&value=" + currentValue)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("result").innerText = data.message + " (止まった値: " + currentValue + ")";
+    });
 }
 
+
+  
 document.getElementById("controlBtn").addEventListener("click",()=>{
   if(!spinning){
     spinning=true;
