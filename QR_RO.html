@@ -1,177 +1,131 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>LIFFルーレット抽選</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; }
-    #rouletteSection { display: none; margin-top: 20px; }
-    canvas { border: 2px solid #333; border-radius: 50%; }
-    #pointer {
-      width: 0; 
-      height: 0; 
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-bottom: 40px solid red;
-      margin: 0 auto;
-      position: relative;
-      top: -10px;
-    }
-    #result { margin-top: 20px; font-size: 18px; font-weight: bold; }
-    button { padding: 10px 20px; margin: 10px; font-size: 16px; }
-  </style>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<meta charset="UTF-8">
+<title>折衷ルーレット</title>
+<style>
+body { font-family:sans-serif; text-align:center; padding:20px; }
+#rouletteSection { display:none; margin-top:20px; }
+canvas { border:2px solid #333; border-radius:50%; }
+#pointer { width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-bottom:40px solid red;margin:0 auto;position:relative;top:-10px;}
+#result { margin-top:20px; font-size:18px; font-weight:bold; }
+button { padding:10px 20px; margin:10px; font-size:16px; }
+</style>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
-  <h2>QR抽選ルーレット</h2>
-  <button id="scanBtn">QRコードを読み取る</button>
+<h2>QR抽選ルーレット</h2>
+<button id="scanBtn">QRコードを読み取る</button>
 
-  <div id="rouletteSection">
-    <div id="pointer"></div>
-    <canvas id="roulette" width="300" height="300"></canvas><br>
-    <button id="controlBtn">スタート</button>
-    <div id="result"></div>
-  </div>
+<div id="rouletteSection">
+  <div id="pointer"></div>
+  <canvas id="roulette" width="300" height="300"></canvas><br>
+  <button id="controlBtn">スタート</button>
+  <div id="result"></div>
+</div>
 
-  <script>
-    // ★ 差し替え部分
-    const LIFF_ID = "1657196041-ALeOLrEa";  
-    const GAS_URL = "https://script.google.com/macros/s/XXXXX/exec";
+<script>
+const LIFF_ID = "1657196041-ALeOLrEa";  
+const GAS_URL = "https://script.google.com/macros/s/XXXXX/exec";
 
-    // ★ 当たり確率（1/3にしたいなら ["あたり", "はずれ", "はずれ"]）
-    const segments = ["あたり", "はずれ", "はずれ", "はずれ"];
-    const colors = ["#6f6", "#f66", "#f66", "#f66"];
+const canvas = document.getElementById("roulette");
+const ctx = canvas.getContext("2d");
+let segments = 100; // 0〜100
+let angle = 0;
+let spinning = false;
+let stopping = false;
+let speed = 0;
+let drawId;
+let currentValue = 0; // 停止時の数字
 
-    const canvas = document.getElementById("roulette");
-    const ctx = canvas.getContext("2d");
-
-    let angle = 0;
-    let spinning = false;
-    let stopping = false;
-    let speed = 0;
-
-    function drawRoulette() {
-      const arc = (2 * Math.PI) / segments.length;
-      for (let i = 0; i < segments.length; i++) {
-        ctx.beginPath();
-        ctx.fillStyle = colors[i];
-        ctx.moveTo(150, 150);
-        ctx.arc(150, 150, 150, i * arc, (i + 1) * arc);
-        ctx.fill();
-        ctx.save();
-        ctx.translate(150, 150);
-        ctx.rotate(i * arc + arc / 2);
-        ctx.fillStyle = "#fff";
-        ctx.font = "16px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText(segments[i], 70, 10);
-        ctx.restore();
-      }
-    }
-
-    function spin() {
-      if (!spinning) return;
-      angle += speed;
-      angle %= 2 * Math.PI;
-      ctx.clearRect(0, 0, 300, 300);
-      ctx.save();
-      ctx.translate(150, 150);
-      ctx.rotate(angle);
-      ctx.translate(-150, -150);
-      drawRoulette();
-      ctx.restore();
-
-      if (stopping) {
-        if (speed > 0.002) {
-          speed *= 0.97; // 減速
-          requestAnimationFrame(spin);
-        } else {
-          spinning = false;
-          stopping = false;
-          showResult();
-          document.getElementById("controlBtn").innerText = "スタート";
-        }
-      } else {
-        requestAnimationFrame(spin);
-      }
-    }
-
-
-function showResult() {
-  const arc = (2 * Math.PI) / segments.length;
-  // 12時の位置を基準に判定
-  let index = Math.floor(((angle % (2 * Math.PI)) / arc));
-  index = (segments.length - index) % segments.length; // 補正して逆回転分を調整
-  const result = segments[index];
-
-  if (result === "あたり") {
-    fetch(GAS_URL)
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("result").innerText = data.message;
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById("result").innerText = "エラーが発生しました";
-      });
-  } else {
-    document.getElementById("result").innerText = "残念！はずれです。";
+function drawRoulette() {
+  const arc = 2*Math.PI/segments;
+  for(let i=0;i<segments;i++){
+    ctx.beginPath();
+    ctx.fillStyle = i%2===0?"#6f6":"#f66";
+    ctx.moveTo(150,150);
+    ctx.arc(150,150,150,i*arc,(i+1)*arc);
+    ctx.fill();
   }
 }
-    
-    function showResult_2() {
-      const arc = (2 * Math.PI) / segments.length;
-      // ポインタは「真上」を基準に判定
-      const index = Math.floor(((2 * Math.PI - angle + arc/2) % (2 * Math.PI)) / arc);
-      const result = segments[index];
 
-      if (result === "あたり") {
-        fetch(GAS_URL)
-          .then(res => res.json())
-          .then(data => {
-            document.getElementById("result").innerText = data.message;
-          })
-          .catch(err => {
-            console.error(err);
-            document.getElementById("result").innerText = "エラーが発生しました";
-          });
-      } else {
-        document.getElementById("result").innerText = "残念！はずれです。";
-      }
+function spin(){
+  if(!spinning) return;
+  angle += speed;
+  angle %= 2*Math.PI;
+  ctx.clearRect(0,0,300,300);
+  ctx.save();
+  ctx.translate(150,150);
+  ctx.rotate(angle);
+  ctx.translate(-150,-150);
+  drawRoulette();
+  ctx.restore();
+
+  if(stopping){
+    if(speed>0.002){
+      speed*=0.97;
+      requestAnimationFrame(spin);
+    }else{
+      spinning=false;
+      stopping=false;
+      checkResult();
+      document.getElementById("controlBtn").innerText="スタート";
     }
+  }else{
+    requestAnimationFrame(spin);
+  }
+}
 
-    document.getElementById("controlBtn").addEventListener("click", () => {
-      if (!spinning) {
-        spinning = true;
-        speed = 0.3; // 初速
-        document.getElementById("controlBtn").innerText = "ストップ";
-        spin();
-      } else {
-        stopping = true;
+function checkResult(){
+  const arc = 2*Math.PI/segments;
+  currentValue = Math.floor((segments - Math.floor(angle/arc))%segments);
+  fetch(GAS_URL+"?action=check&drawId="+drawId+"&value="+currentValue)
+  .then(res=>res.json())
+  .then(data=>{
+    document.getElementById("result").innerText = data.message;
+  });
+}
+
+document.getElementById("controlBtn").addEventListener("click",()=>{
+  if(!spinning){
+    spinning=true;
+    stopping=false;
+    speed=0.3;
+    document.getElementById("controlBtn").innerText="ストップ";
+    spin();
+  }else{
+    stopping=true;
+  }
+});
+
+// 初期描画
+drawRoulette();
+
+// LIFF初期化
+liff.init({liffId:LIFF_ID})
+.then(()=>{
+  document.getElementById("scanBtn").addEventListener("click",()=>{
+    liff.scanCodeV2().then(result=>{
+      const scannedValue = result.value;
+      if(scannedValue==="SPECIAL"){
+        // 抽選IDをGASで取得
+        fetch(GAS_URL+"?action=init")
+        .then(res=>res.json())
+        .then(data=>{
+          drawId = data.drawId;
+          document.getElementById("rouletteSection").style.display="block";
+          document.getElementById("scanBtn").style.display="none";
+        });
+      }else{
+        alert("対象外のQRコードです");
       }
     });
-
-    // 初期描画
-    drawRoulette();
-
-    // LIFF初期化
-    liff.init({ liffId: LIFF_ID })
-      .then(() => {
-        document.getElementById("scanBtn").addEventListener("click", () => {
-          liff.scanCodeV2().then(result => {
-            const scannedValue = result.value;
-            if (scannedValue === "SPECIAL") {
-              document.getElementById("rouletteSection").style.display = "block";
-              document.getElementById("scanBtn").style.display = "none";
-            } else {
-              alert("対象外のQRコードです");
-            }
-          });
-        });
-      })
-      .catch(err => {
-        console.error("LIFF init error", err);
-      });
-  </script>
+  });
+})
+.catch(err=>console.error(err));
+</script>
 </body>
 </html>
+
+
