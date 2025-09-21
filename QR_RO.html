@@ -153,40 +153,32 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbzdYDGB-AMnPaN65P1W-89z
   /**************************************************************************
    * 停止後処理：爪（上）に来ているセグメント番号を計算してサーバーに問い合わせる
    **************************************************************************/
-  function doAfterStop() {
-    // angle はホイールの現在回転量
-    // ホイールを angle 回転させたとき、"上（-PI/2）" に来ているホイール側角度は angle + PI/2
-    const angleAtPointer = (angle + Math.PI / 2) % (2 * Math.PI);
-    // pointerの位置に来ているセグメント番号を計算
-    let index = Math.floor((2 * Math.PI - angleAtPointer) / arc) % segments;
-    if (index < 0) index += segments;
+function doAfterStop() {
+  // angle = ホイールの回転角度
+  // 爪は常に「真上 = -π/2」
+  const rawAngle = (angle - Math.PI/2 + 2*Math.PI) % (2*Math.PI);
+  let index = Math.floor(rawAngle / arc) % segments;
 
-    // デバッグ表示（止まった値）
-    debugEl.textContent = `止まった値: ${index} (当たり範囲: ${hitStart}〜${hitEnd})`;
+  debugEl.textContent = `止まった値: ${index} (当たり範囲: ${hitStart}〜${hitEnd})`;
 
-    // サーバーに判定を投げる（doCheck）
-    // drawId がない場合はローカル判定（ただし安全性はなくなります）
-    if (drawId) {
-      fetch(`${GAS_URL}?action=check&drawId=${encodeURIComponent(drawId)}&value=${encodeURIComponent(index)}`)
-        .then(r => r.json())
-        .then(json => {
-          if (json && json.result) {
-            resultEl.textContent = json.message || (json.result === "hit" ? "当たり！" : "残念、はずれ");
-          } else {
-            resultEl.textContent = "サーバ応答が不正です";
-            console.error("check invalid response:", json);
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          resultEl.textContent = "サーバ接続エラー";
-        });
-    } else {
-      // エッジケース：drawIdがない場合はローカル判定（開発用）
-      const isHitLocally = isIndexInHitRange(index);
-      resultEl.textContent = isHitLocally ? "当たり！(ローカル判定)" : "はずれ(ローカル判定)";
-    }
+  if (drawId) {
+    fetch(`${GAS_URL}?action=check&drawId=${encodeURIComponent(drawId)}&value=${encodeURIComponent(index)}`)
+      .then(r => r.json())
+      .then(json => {
+        if (json && json.result) {
+          resultEl.textContent = json.message || (json.result === "hit" ? "当たり！" : "残念、はずれ");
+        } else {
+          resultEl.textContent = "サーバ応答が不正です";
+        }
+      })
+      .catch(() => {
+        resultEl.textContent = "サーバ接続エラー";
+      });
+  } else {
+    const isHitLocally = isIndexInHitRange(index);
+    resultEl.textContent = isHitLocally ? "当たり！(ローカル判定)" : "はずれ(ローカル判定)";
   }
+}
 
   function isIndexInHitRange(idx) {
     if (hitStart === null || hitEnd === null) return false;
