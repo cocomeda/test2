@@ -5,8 +5,19 @@
   <title>LIFFルーレット抽選</title>
   <style>
     body { font-family: sans-serif; text-align: center; padding: 20px; }
-    #rouletteSection { display: none; margin-top: 20px; }
+    #rouletteSection { display: none; margin-top: 20px; position: relative; display: inline-block; }
     canvas { border: 2px solid #333; border-radius: 50%; }
+    #pointer {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-bottom: 30px solid red;
+    }
     #result { margin-top: 20px; font-size: 18px; font-weight: bold; }
     button { padding: 10px 20px; margin: 10px; font-size: 16px; }
   </style>
@@ -17,6 +28,7 @@
   <button id="scanBtn">QRコードを読み取る</button>
 
   <div id="rouletteSection">
+    <div id="pointer"></div>
     <canvas id="roulette" width="300" height="300"></canvas><br>
     <button id="controlBtn">スタート</button>
     <div id="result"></div>
@@ -24,19 +36,22 @@
 
   <script>
     // ★ LIFF IDを差し替え
-    const LIFF_ID = "1657196041-ALeOLrEa";  
+   const LIFF_ID = "1657196041-ALeOLrEa";  
     // ★ GASの公開URLを差し替え
     const GAS_URL = "https://script.google.com/macros/s/XXXXX/exec";
 
-    // ルーレット設定
+    // 当たり確率設定（ここで調整）
+    // "あたり"を増やせば確率UP、"はずれ"を増やせば確率DOWN
+    const segments = ["はずれ", "はずれ", "はずれ", "あたり"];
+    const colors   = ["#f66", "#6f6", "#66f", "#ff0"];
+
     const canvas = document.getElementById("roulette");
     const ctx = canvas.getContext("2d");
-    const segments = ["はずれ", "はずれ", "あたり"];
-    const colors = ["#f66", "#6f6", "#66f"];
+
     let angle = 0;
     let spinning = false;
-    let stopping = false;
     let speed = 0;
+    let state = "idle"; // idle, spinning, stopping
 
     function drawRoulette() {
       const arc = (2 * Math.PI) / segments.length;
@@ -49,7 +64,7 @@
         ctx.save();
         ctx.translate(150, 150);
         ctx.rotate(i * arc + arc / 2);
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle = "#000";
         ctx.font = "16px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(segments[i], 70, 10);
@@ -69,13 +84,13 @@
       drawRoulette();
       ctx.restore();
 
-      if (stopping) {
+      if (state === "stopping") {
         if (speed > 0.002) {
           speed *= 0.98; // 減速
           requestAnimationFrame(spin);
         } else {
           spinning = false;
-          stopping = false;
+          state = "idle";
           document.getElementById("controlBtn").innerText = "スタート";
           showResult();
         }
@@ -86,6 +101,7 @@
 
     function showResult() {
       const arc = (2 * Math.PI) / segments.length;
+      // ポインタ（上側）にある区画を判定
       const index = Math.floor(((2 * Math.PI - angle) % (2 * Math.PI)) / arc);
       const result = segments[index];
 
@@ -105,18 +121,14 @@
     }
 
     document.getElementById("controlBtn").addEventListener("click", () => {
-      if (!spinning) {
-        // スタート処理
+      if (state === "idle") {
         spinning = true;
-        stopping = false;
+        state = "spinning";
         speed = 0.3;
         document.getElementById("controlBtn").innerText = "ストップ";
-        document.getElementById("result").innerText = "";
         spin();
-      } else if (!stopping) {
-        // ストップ処理
-        stopping = true;
-        document.getElementById("controlBtn").innerText = "停止中...";
+      } else if (state === "spinning") {
+        state = "stopping";
       }
     });
 
@@ -130,7 +142,8 @@
           liff.scanCodeV2().then(result => {
             const scannedValue = result.value;
             if (scannedValue === "SPECIAL") {
-              document.getElementById("rouletteSection").style.display = "block";
+              document.getElementById("scanBtn").style.display = "none";
+              document.getElementById("rouletteSection").style.display = "inline-block";
             } else {
               alert("対象外のQRコードです");
             }
@@ -143,6 +156,13 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+    
 
 
 
