@@ -96,7 +96,30 @@
       }
     }
 
-    function showResult() {
+
+function showResult() {
+  const arc = (2 * Math.PI) / segments.length;
+  // 12時の位置を基準に判定
+  let index = Math.floor(((angle % (2 * Math.PI)) / arc));
+  index = (segments.length - index) % segments.length; // 補正して逆回転分を調整
+  const result = segments[index];
+
+  if (result === "あたり") {
+    fetch(GAS_URL)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("result").innerText = data.message;
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById("result").innerText = "エラーが発生しました";
+      });
+  } else {
+    document.getElementById("result").innerText = "残念！はずれです。";
+  }
+}
+    
+    function showResult_2() {
       const arc = (2 * Math.PI) / segments.length;
       // ポインタは「真上」を基準に判定
       const index = Math.floor(((2 * Math.PI - angle + arc/2) % (2 * Math.PI)) / arc);
