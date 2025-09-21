@@ -1,164 +1,278 @@
 
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>折衷ルーレット</title>
-<style>
-body { font-family:sans-serif; text-align:center; padding:20px; }
-#rouletteSection { display:none; margin-top:20px; }
-canvas { border:2px solid #333; border-radius:50%; }
-#pointer { width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-bottom:40px solid red;margin:0 auto;position:relative;top:-10px;}
-#result { margin-top:20px; font-size:18px; font-weight:bold; }
-button { padding:10px 20px; margin:10px; font-size:16px; }
-</style>
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <meta charset="utf-8" />
+  <title>LIFF 抽選ルーレット</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 16px; }
+    #scanBtn, #controlBtn { padding: 10px 18px; font-size: 16px; margin: 8px; }
+    #rouletteSection { display: none; margin-top: 12px; }
+    canvas { border-radius: 50%; display: block; margin: 0 auto; background: #fff; }
+    /* 爪（pointer）を上中央に表示 */
+    #pointer {
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-bottom: 34px solid #222;
+      margin: 0 auto;
+      position: relative;
+      top: 6px;
+    }
+    #result { margin-top: 12px; font-weight: bold; font-size: 18px; }
+  </style>
+
+  <!-- LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
-<h2>QR抽選ルーレット</h2>
-<button id="scanBtn">QRコードを読み取る</button>
+  <h2>QR抽選ルーレット</h2>
+  <button id="scanBtn">QRコードを読み取る</button>
 
-<div id="rouletteSection">
-  <div id="pointer"></div>
-  <canvas id="roulette" width="300" height="300"></canvas><br>
-  <button id="controlBtn">スタート</button>
-  <div id="result"></div>
-</div>
+  <div id="rouletteSection">
+    <div id="pointer" aria-hidden="true"></div>
+    <canvas id="wheel" width="320" height="320"></canvas>
+    <div>
+      <button id="controlBtn">スタート</button>
+    </div>
+    <div id="result"></div>
+    <div id="debug" style="margin-top:6px;color:#666;font-size:13px;"></div>
+  </div>
 
-<script>
+  <script>
+  /**************************************************************************
+   * 設定（必ずここをあなたの値に置き換えてください）
+   **************************************************************************/
 const LIFF_ID = "1657196041-ALeOLrEa";  
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyhb8RCtW00hbACeVhv32HckAqQo7OfilKu2eLGmkw5J4DMpwamioyGXGA-DNw9Dhyl7g/exec";
 
-const canvas = document.getElementById("roulette");
-const ctx = canvas.getContext("2d");
-let segments = 100; // 0〜100
-let angle = 0;
-let spinning = false;
-let stopping = false;
-let speed = 0;
-let drawId;
-let currentValue = 0; // 停止時の数字
 
+  /**************************************************************************
+   * 内部状態
+   **************************************************************************/
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
+  const scanBtn = document.getElementById("scanBtn");
+  const controlBtn = document.getElementById("controlBtn");
+  const rouletteSection = document.getElementById("rouletteSection");
+  const resultEl = document.getElementById("result");
+  const debugEl = document.getElementById("debug");
 
-
-
-let hitStart = null;
-let hitEnd = null;
-
-function drawRoulette() {
+  const segments = 100; // 0..99 (100分割)
   const arc = 2 * Math.PI / segments;
-  for (let i = 0; i < segments; i++) {
-    ctx.beginPath();
-    if (hitStart !== null && hitEnd !== null && i >= hitStart && i <= hitEnd) {
-      ctx.fillStyle = "#f66"; // 赤（当たり）
-    } else {
-      ctx.fillStyle = "#6f6"; // 緑
-    }
-    ctx.moveTo(150, 150);
-    ctx.arc(150, 150, 150, i * arc - Math.PI/2, (i+1) * arc - Math.PI/2);
-    ctx.fill();
-  }
-}
-  
+  let angle = 0;        // 現在の回転角（ラジアン）
+  let spinning = false; // 回転中フラグ（演出）
+  let stopping = false; // 減速フラグ
+  let speed = 0;        // 回転速度（ラジアン/frame的）
+  let drawId = null;    // GASが返す抽選ID
+  let hitStart = null;  // サーバーが指定した当たり開始 (0〜99)
+  let hitEnd = null;    // サーバーが指定した当たり終了 (0〜99)
+  let scannedValue = null; // 読み取ったQRの値（必要ならGASに渡す）
 
-function spin(){
-  if(!spinning) return;
-  angle += speed;
-  angle %= 2*Math.PI;
-  ctx.clearRect(0,0,300,300);
-  ctx.save();
-  ctx.translate(150,150);
-  ctx.rotate(angle);
-  ctx.translate(-150,-150);
-  drawRoulette();
-  ctx.restore();
+  /**************************************************************************
+   * 描画関数：当たりゾーン（hitStart..hitEnd）だけ赤く、それ以外は緑
+   * 描画基準：各セグメントは角度 [i*arc - PI/2, (i+1)*arc - PI/2) に描画
+   * つまり「上（真上＝-PI/2）」が爪の位置
+   **************************************************************************/
+  function drawWheelBase() {
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const radius = Math.min(cx, cy);
 
-  if(stopping){
-    if(speed>0.002){
-      speed*=0.97;
-      requestAnimationFrame(spin);
-    }else{
-      spinning=false;
-      stopping=false;
-      checkResult();
-      document.getElementById("controlBtn").innerText="スタート";
-    }
-  }else{
-    requestAnimationFrame(spin);
-  }
-}
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-function checkResult() {
-  const arc = 2 * Math.PI / segments;
-  // 爪は上側（-90度位置）にあるので補正
-  let adjustedAngle = (angle + Math.PI/2) % (2*Math.PI);
-  currentValue = Math.floor((segments - Math.floor(adjustedAngle / arc)) % segments);
-
-  fetch(GAS_URL + "?action=check&drawId=" + drawId + "&value=" + currentValue)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("result").innerText = data.message + " (止まった値: " + currentValue + ")";
-    });
-}
-
-
-  
-document.getElementById("controlBtn").addEventListener("click",()=>{
-  if(!spinning){
-    spinning=true;
-    stopping=false;
-    speed=0.3;
-    document.getElementById("controlBtn").innerText="ストップ";
-    spin();
-  }else{
-    stopping=true;
-  }
-});
-
-// 初期描画
-drawRoulette();
-
-// LIFF初期化
-liff.init({liffId:LIFF_ID})
-.then(()=>{
-  document.getElementById("scanBtn").addEventListener("click",()=>{
-    liff.scanCodeV2().then(result=>{
-      const scannedValue = result.value;
-      if(scannedValue==="SPECIAL"){
-        // 抽選IDをGASで取得
-fetch(GAS_URL + "?action=init")
-  .then(res => res.json())
-  .then(data => {
-    drawId = data.drawId;
-    hitStart = data.start;  // サーバーからもらった当たりゾーン
-    hitEnd = data.end;
-    document.getElementById("rouletteSection").style.display = "block";
-    document.getElementById("scanBtn").style.display = "none";
-    drawRoulette(); // 初期描画し直す
-  });
-      }else{
-        alert("対象外のQRコードです");
+    for (let i = 0; i < segments; i++) {
+      // セグメントが当たり範囲に含まれるか判定（環状を考慮）
+      let isHit = false;
+      if (hitStart !== null && hitEnd !== null) {
+        if (hitStart <= hitEnd) {
+          isHit = (i >= hitStart && i <= hitEnd);
+        } else {
+          // 範囲が折り返す場合（例: start=95, end=4）
+          isHit = (i >= hitStart || i <= hitEnd);
+        }
       }
-    });
+
+      ctx.beginPath();
+      const startAngle = i * arc - Math.PI / 2;
+      const endAngle = (i + 1) * arc - Math.PI / 2;
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, radius, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fillStyle = isHit ? "#f66" : "#6f6";
+      ctx.fill();
+      ctx.strokeStyle = "#333";
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+  }
+
+  /**************************************************************************
+   * アニメーション（spin）
+   * start -> 高速回転し続ける
+   * stop  -> stopping=true にして減速して止め、停止後 checkResult()
+   **************************************************************************/
+  function animate() {
+    if (!spinning) return;
+    angle += speed;
+    // 角度を2πに収める
+    angle = angle % (2 * Math.PI);
+
+    // 回転描画（canvas全体を回転させ、その上にwheelを描画）
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(angle);
+    ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    drawWheelBase();
+    ctx.restore();
+
+    if (stopping) {
+      // 減速ロジック（イージング）
+      if (speed > 0.0008) {
+        speed *= 0.96; // 減速率（必要に応じて調整）
+        requestAnimationFrame(animate);
+      } else {
+        // 完全停止
+        spinning = false;
+        stopping = false;
+        controlBtn.innerText = "スタート";
+        doAfterStop();
+      }
+    } else {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  /**************************************************************************
+   * 停止後処理：爪（上）に来ているセグメント番号を計算してサーバーに問い合わせる
+   **************************************************************************/
+  function doAfterStop() {
+    // angle はホイールの現在回転量
+    // ホイールを angle 回転させたとき、"上（-PI/2）" に来ているホイール側角度は angle + PI/2
+    const angleAtPointer = (angle + Math.PI / 2) % (2 * Math.PI);
+    // pointerの位置に来ているセグメント番号を計算
+    let index = Math.floor((2 * Math.PI - angleAtPointer) / arc) % segments;
+    if (index < 0) index += segments;
+
+    // デバッグ表示（止まった値）
+    debugEl.textContent = `止まった値: ${index} (当たり範囲: ${hitStart}〜${hitEnd})`;
+
+    // サーバーに判定を投げる（doCheck）
+    // drawId がない場合はローカル判定（ただし安全性はなくなります）
+    if (drawId) {
+      fetch(`${GAS_URL}?action=check&drawId=${encodeURIComponent(drawId)}&value=${encodeURIComponent(index)}`)
+        .then(r => r.json())
+        .then(json => {
+          if (json && json.result) {
+            resultEl.textContent = json.message || (json.result === "hit" ? "当たり！" : "残念、はずれ");
+          } else {
+            resultEl.textContent = "サーバ応答が不正です";
+            console.error("check invalid response:", json);
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          resultEl.textContent = "サーバ接続エラー";
+        });
+    } else {
+      // エッジケース：drawIdがない場合はローカル判定（開発用）
+      const isHitLocally = isIndexInHitRange(index);
+      resultEl.textContent = isHitLocally ? "当たり！(ローカル判定)" : "はずれ(ローカル判定)";
+    }
+  }
+
+  function isIndexInHitRange(idx) {
+    if (hitStart === null || hitEnd === null) return false;
+    if (hitStart <= hitEnd) return idx >= hitStart && idx <= hitEnd;
+    return idx >= hitStart || idx <= hitEnd;
+  }
+
+  /**************************************************************************
+   * 控えめなUI: スタート/ストップ共通ボタン動作
+   **************************************************************************/
+  controlBtn.addEventListener("click", () => {
+    resultEl.textContent = "";
+    debugEl.textContent = "";
+    if (!spinning) {
+      // start
+      spinning = true;
+      stopping = false;
+      speed = 0.32 + Math.random() * 0.12; // 初速（調整可能）
+      controlBtn.innerText = "ストップ";
+      requestAnimationFrame(animate);
+    } else {
+      // stop: 減速モードに入る
+      stopping = true;
+    }
   });
-})
-.catch(err=>console.error(err));
-</script>
 
+  /**************************************************************************
+   * LIFF 初期化 & QRスキャン起動
+   * QR読み取り成功時にサーバーへ init を要求して drawId, hitStart, hitEnd を取得
+   **************************************************************************/
+  liff.init({ liffId: LIFF_ID })
+    .then(() => {
+      scanBtn.addEventListener("click", () => {
+        // scanCodeV2 を使う
+        liff.scanCodeV2()
+          .then(result => {
+            // LIFFのスキャンの戻り値は result.value にテキストが入る
+            scannedValue = result && result.value ? result.value : null;
 
+            // サーバーに init をリクエスト（QRの値を渡してもOK）
+            // 返却: { status:"ok", drawId:..., start:NN, end:MM }
+            fetch(`${GAS_URL}?action=init&qr=${encodeURIComponent(scannedValue || "")}`)
+              .then(r => r.json())
+              .then(json => {
+                if (json && json.status === "ok") {
+                  drawId = json.drawId;
+                  hitStart = Number(json.start);
+                  hitEnd = Number(json.end);
+                  // 当たり範囲が不正なら null に
+                  if (Number.isNaN(hitStart) || Number.isNaN(hitEnd)) {
+                    hitStart = null;
+                    hitEnd = null;
+                    console.warn("invalid hit range from server", json);
+                  }
 
+                  // 表示して初期描画
+                  rouletteSection.style.display = "block";
+                  scanBtn.style.display = "none";
+                  resultEl.textContent = "";
+                  drawWheelBase(); // 一度描いておく
+                } else {
+                  alert("抽選初期化に失敗しました");
+                  console.error("init failed", json);
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                alert("サーバ接続エラー（初期化）");
+              });
+          })
+          .catch(err => {
+            console.error("scan error", err);
+            alert("QR読み取りがキャンセルされるかエラーが発生しました");
+          });
+      });
+    })
+    .catch(err => {
+      console.error("LIFF init failed:", err);
+      alert("LIFF初期化に失敗しました。LIFF_IDを確認してください。");
+    });
 
-
-
-
-
-
-
-
-
-
-  
+  // 最低限の初期描画（当たり範囲未設定時は全部緑）
+  drawWheelBase();
+  </script>
 </body>
 </html>
 
+  
 
