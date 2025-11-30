@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoCoメダカオークション</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
+    
+    <!-- Slick Carousel CSSの読み込み -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
+
+<style>
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+
+}
+
+.container {
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+h1, h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 4vw;
+}
+
+hr {
+    border: none;
+    border-top: 1px dashed #e0e0e0;
+    margin: 1vw 0;
+}
+
+.product-section {
+    text-align: center;
+}
+
+/* Slick Carouselの画像に適用されるスタイル */
+.slider img {
+    max-width: 100%; /* 親要素の幅を超えないようにする */
+    height: auto; /* 画像の比率を維持する */
+    border-radius: 8px;
+    margin: 0 auto 15px auto; /* 中央寄せと下マージン */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    /* width: 80vw; /* ここで画像の横幅を300pxに指定 - スライダーの幅で制御されるためコメントアウト */
+}
+
+.product-description {
+    font-size: 0.95em;
+    color: #555;
+    text-align: left;
+}
+
+.auction-info0 {
+    text-align: center;
+    font-size: 8vw;
+    font-weight: bold;
+    color:black;
+}
+
+.auction-info {
+    text-align: center;
+    font-size: 6vw;
+    font-weight: bold;
+    color:black;
+}
+
+
+.auction-info2 {
+    text-align: center;
+    font-size: 4vw;
+    font-weight: bold;
+    color:#27ae60; /* 緑色で目立たせる */
+}    
+
+.bid-section {
+    padding: 15px 20px 20px 20px; /* 上パディングを少し減らす */
+    margin-top: 10px;             /* 必要ならここも減らす */
+    background-color:lightblue;    /* #f9f9f9;*/
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.bid-section h2 {
+    margin-top: 0;
+    margin-bottom: 1px;
+    font-size: 1.2em;
+}
+
+    
+.bid-section_current {
+    padding: 15px 20px 20px 20px; /* 上パディングを少し減らす */
+    margin-top: 10px;             /* 必要ならここも減らす */
+    background-color:;    /* #f9f9f9;*/
+    border-radius: 0.2vw;
+    border: 1px solid black;
+    box-shadow: 3px 2px 2px gray;
+}
+
+.bid-section_current h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+    
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.input-group input[type="number"] {
+    width: calc(100% - 20px); /* パディング分を考慮して幅を調整 */
+    padding: 12px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box; /* パディングを含めて幅を計算 */
+}
+
+.input-group input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 1vw;
+    background-color: #007bff; /* 青色ボタン */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.message {
+    text-align: center;
+    margin-top: 20px;
+    font-weight: bold;
+    color: #d35400; /* エラーや警告はオレンジ */
+}
+
+.status-message {
+    font-size: 1.2em;
+    font-weight: normal;
+    color: #27ae60; /* 自分の状態は緑色 */
+    margin-top: 5px;
+    font-weight: bold;
+    
+}
+
+/* モバイル対応のメディアクエリ */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    .container {
+        padding: 20px;
+        margin: 10px auto;
+    }
+    /* スライダーの幅も調整 */
+    .slider, .thumbnail-container {
+        width: 95%; /* 小さい画面では横幅いっぱいに表示 */
+    }
+    .thumbnail-container img {
+        width: 60px; /* サムネイルも小さく */
+    }
+}
+
+.input-group.horizontal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* チェックボックスのサイズと位置調整 */
+.input-group.horizontal input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #007bff;
+    margin: 0;
+    display: inline-block;
+}
+
+/* ラベルの位置調整（高さを合わせる） */
+.input-group.horizontal label {
+    margin: 0;
+    line-height: 1;
+    display: inline-block;
+}
+
+/* 金額入力欄の右寄せと円表示用スタイル */
+.currency-input .input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.currency-input input[type="number"] {
+    width: 100%;
+    padding: 12px 35px 12px 10px; /* 右に余白を追加して円ラベル分を確保 */
+    text-align: right; /* 右寄せ */
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.currency-input .yen-label {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #555;
+    font-size: 1em;
+}
+
+/* 追加スタイル */
+.time-info {
+    text-align: center;
+    font-size: 1em;
+    color: #555;
+    margin-top: 10px;
+}
+.countdown {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #e74c3c; /* カウントダウンは赤色で目立たせる */
+    margin-top: 5px;
+    text-align: center;
+}
+
+
+
+#bid-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+#modal-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+#modal-content {
+    position: relative;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 1000;
+    width: 90vw;
+    max-width: 400px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+/* ローディング用のくるくる */
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #007bff;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.title-box {
+  background-color: #f9f9f9;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 1.5em;
+  text-align: center;
+  margin: 20px 0;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+}
+    
+/* メインスライダー */
+.slider {
+    width: 80%; /* 幅を調整 */
+    margin: 2vw auto;
+}
+.slider img {
+    width: 100%;
+    height: auto;
+}
+
+/* 固定サムネイル */
+.thumbnail-container {
+    width: 80%; /* 幅を調整 */
+    margin: 2vw auto;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.thumbnail-container img {
+    width: 15vw; /* サムネイルの幅を調整 */
+    height: auto;
+    cursor: pointer;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+    border-radius: 5px; /* サムネイルにも角丸を適用 */
+}
+.thumbnail-container img.active {
+    border: 2px solid blue;
+}
+    
+
+</style>
+</head>
+<body>
+
+<!-- jQuery & slick-carousel JS (head内で読み込むか、bodyの閉じタグ直前に移動) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+
+
+<div id="loading-screen" style="
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+">
+  <div class="loader"></div>
+</div>
+
+
+    <div class="container1">
+        <div class="product-section">
+            <h2 id="auction-title" class="title-box">品種名</h2>
+            <!-- メインスライダーのコンテナ -->
+            <div class="slider"></div>
+            <!-- サムネイルのコンテナ -->
+            <div class="thumbnail-container"></div>
+            
+            <p id="item-overview" class="product-description">
+                ----
+            </p>
+        </div>
+
+      
+      <div class="bid-section_current">
+        <div class="auction-info">
+            <p id="current-price-display">現在の価格: <span id="current-bid">--円</span></p>
+     </div>
+
+          
+<div class="auction-info2">
+            <p id="your-status" class="status-message"></p>
+        
+            </div>
+      </div>
+
+   
+<p class="countdown"><span id="time-remaining">--日--時間--分--秒</span></p>
+
+
+          
+          <div id="passcode-display" style="display: none; margin-top: 20px;">
+    <p class="auction-info0" id="passcode-value"></p>
+          </div>
+
+
+    <p class="payment-info" id="payment-method-info" style="font-size: 0.8em; color: #666; margin-top: 5px;">
+    ※代金は代金箱に入れるか、PayPayでお支払いください。
+    </p>
+    </div>
+
+        
+        
+
+<div id="bid-modal" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;">
+  <div style="
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 80vw;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+    
+    <h2 style="margin-top: 0;">入札内容を入力</h2>
+    
+    <div class="input-group currency-input">
+      <label for="modal-bid-amount">入札金額 (100円単位):</label>
+      <div class="input-wrapper" style="position: relative;">
+        <input type="number" id="modal-bid-amount" min="100" step="100" placeholder="例: 1500" required>
+        <span class="yen-label" style="
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #555;">円</span>
+      </div>
+    </div>
+
+<div class="input-group horizontal" style="margin-top: 15px;">
+  <input type="checkbox" id="modal-agree-checkbox" required>
+  <label for="modal-agree-checkbox">
+    <a href="TOS.html" target="_blank">オークション規約</a>に同意する
+  </label>
+</div>
+      
+    <p id="modal-message" class="message" style="margin-top: 10px;"></p>
+
+    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+      <button id="modal-cancel-button" style="width: 45%; background: #ccc;">キャンセル</button>
+      <button id="modal-submit-button" style="width: 45%;">入札する</button>
+    </div>
+
+  </div>
+</div>
+
+<div style="text-align:center; margin-top:20px;">
+  <button id="bid-button">入札する</button>
+  <p id="message" class="message"></p>
+</div>
+
+    
+<pre id="result" style="white-space:pre-wrap;"></pre>
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.3.2/dist/confetti.browser.min.js"></script>
+<script>
+    
+// 価格をフォーマットする関数 (例: 123456 -> 123,456)
+function formatPrice(price) {
+    if (typeof price !== 'number' && typeof price !== 'string' || isNaN(Number(price))) {
+        console.warn('formatPrice: Invalid number passed', price);
+        return price; 
+    }
+    const numericPrice = Number(price);
+    return new Intl.NumberFormat('ja-JP').format(numericPrice);
+}
+
+const auctionId = getQueryParam("id");
+
+// Firebaseの設定
+const firebaseConfig = {
+    apiKey: "AIzaSyBImwBMbP_4rbm-dsB2R8dhtlblA9HTBS8",
+    authDomain: "coco-auction.firebaseapp.com",
+    projectId: "coco-auction",
+    storageBucket: "coco-auction.appspot.com",
+    messagingSenderId: "12632824391",
+    appId: "1:12632824391:web:ab6e784ba311de069eef62"
+};
+firebase.initializeApp(firebaseConfig);
+
+let auctionEndTime;
+let currentUserId = '';
+let currentUserName = '';
+let lastBidTime = 0;
+const BID_COOLDOWN_SECONDS = 30;
+    
+const db = firebase.firestore();
+    
+const LIFF_ID = "1657196041-ALeOLrEa";
+const VERIFY_URL = "https://us-central1-coco-auction.cloudfunctions.net/verifyLineTokenAndSignIn2";
+
+// ローディング画面の表示/非表示
+function showLoading() {
+    document.getElementById('loading-screen').style.display = 'flex';
+}
+function hideLoading() {
+    document.getElementById('loading-screen').style.display = 'none';
+}
+
+// モーダル内のメッセージ表示
+function showModalMessage(text, type = 'info') {
+    const msgEl = document.getElementById('modal-message');
+    msgEl.textContent = text;
+    msgEl.style.color = {
+        success: '#27ae60',
+        error: '#e74c3c',
+        info: '#2980b9'
+    }[type] || '#333';
+}
+
+// 画面下部のステータスメッセージ表示
+function showStatusMessage(text, type = 'info') {
+    const msgEl = document.getElementById('message');
+    msgEl.textContent = text;
+    msgEl.style.color = {
+        success: '#27ae60',
+        error: '#e74c3c',
+        info: '#2980b9'
+    }[type] || '#333';
+}
+
+// カウントダウンの更新
+function updateCountdown() {
+    if (!auctionEndTime) return;
+
+    const now = new Date().getTime();
+    const distance = auctionEndTime.getTime() - now;
+
+    const bidButton = document.getElementById('bid-button');
+    const yourStatusElement = document.getElementById('your-status');
+    const passcodeDisplay = document.getElementById('passcode-display');
+    const passcodeValue = document.getElementById('passcode-value');
+    const currentPriceDisplayElement = document.getElementById('current-price-display');
+    const paymentMethodInfo = document.getElementById('payment-method-info');
+
+    if (distance < 0) {
+        document.getElementById('time-remaining').textContent = 'オークションは終了しました';
+        bidButton.disabled = true;
+
+        const currentAuctionData = window.currentAuctionData;
+        if (currentAuctionData) {
+            if (currentUserId && currentAuctionData.highestBidderId === currentUserId) {
+                currentPriceDisplayElement.innerHTML = `おめでとうございます！<br>${formatPrice(currentAuctionData.currentBid || currentAuctionData.startPrice || 100)}円で落札しました🎉`;
+                yourStatusElement.textContent = '';
+
+                if (distance > -2000) { // 終了直後のみ紙吹雪
+                    launchConfettiTimes(1); 
+                }
+                
+                // privateAuctionInfo コレクションからパスコードを非同期で取得
+                db.collection('privateAuctionInfo').doc(auctionId).get().then(privateInfoDoc => {
+                    if (privateInfoDoc.exists) {
+                        const privateInfoData = privateInfoDoc.data();
+                        passcodeValue.textContent = `暗証番号: ${privateInfoData.passcode || '---'}`;
+                    } else {
+                        passcodeValue.textContent = `暗証番号: --- (情報なし)`;
+                    }
+                    passcodeDisplay.style.display = 'block';
+                    paymentMethodInfo.style.display = 'block';
+                }).catch(error => {
+                    console.error("Failed to get private auction info:", error);
+                    passcodeValue.textContent = `暗証番号: --- (取得エラー)`;
+                    passcodeDisplay.style.display = 'block';
+                    paymentMethodInfo.style.display = 'block';
+                });
+
+            } else {
+                currentPriceDisplayElement.textContent = `最終価格：${formatPrice(currentAuctionData.currentBid || currentAuctionData.startPrice || 100)}円`;
+                yourStatusElement.textContent = `落札できませんでした。`;
+                passcodeDisplay.style.display = 'none';
+                paymentMethodInfo.style.display = 'none';
+            }
+        }
+        return;
+    }
+    // オークションがまだ終了していない場合の処理
+    else {
+        bidButton.disabled = false;
+        passcodeDisplay.style.display = 'none';
+        paymentMethodInfo.style.display = 'none';
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById('time-remaining').textContent =
+        `終了まで：${days}日${hours}時間${minutes}分${seconds}秒`;
+}
+
+// UI反映
+function updateAuctionUI(auctionData, latestBidAmount = 100, highestBidderId = null) {
+    document.getElementById('auction-title').textContent = auctionData.title || '品種名';
+    // 画像はスライダーで表示されるため、medaka-imageは不要
+    document.getElementById('item-overview').textContent = auctionData.description || '----';
+    document.getElementById('current-bid').textContent = `${formatPrice(latestBidAmount)}円`;
+    
+    if (currentUserId && highestBidderId === currentUserId) {
+        document.getElementById('your-status').textContent = `現在、最高入札者です。`;
+    } else {
+        document.getElementById('your-status').textContent = `落札には入札が必要です。`;
+    }
+
+    window.currentAuctionData = auctionData;
+    updateCountdown();
+}
+
+// URLからパラメータを取得する関数
+function getQueryParam(name) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
+
+// LIFF初期化とデータ読み込み
+async function initializeLiffAndLoadAuction() {
+    showLoading();
+    document.getElementById('bid-button').disabled = true;
+
+    try {
+        console.log('LIFF initialization started.');
+        await liff.init({ liffId: LIFF_ID });
+        console.log('LIFF initialized.');
+          
+        if (!liff.isLoggedIn()) {
+            console.log('Not logged in to LIFF. Redirecting for login.');
+            liff.login();
+            return; // ページがリダイレクトされるため、ここで hideLoading() は不要
+        }
+
+        console.log('Fetching ID token...');
+        const idToken = await liff.getIDToken();
+        console.log('ID token fetched.');
+
+        console.log('Verifying LINE token and signing into Firebase...');
+        const res = await fetch(VERIFY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken })
+        });
+          
+        if (!res.ok) {
+            showStatusMessage(`LINE認証エラー (status ${res.status})`, 'error');
+            const text = await res.text();
+            console.error(`LINE認証エラー詳細: ${text}`);
+            hideLoading(); // LINE認証エラー時にローディングを非表示
+            return;
+        }
+
+        const json = await res.json();
+        console.log('Firebase token received. Signing in to Firebase...');
+        await firebase.auth().signInWithCustomToken(json.firebaseToken);
+        console.log('Firebase sign-in complete.');
+       
+        currentUserId = firebase.auth().currentUser.uid;
+        console.log('Current User ID:', currentUserId);
+
+        if (!auctionId) {
+            showStatusMessage('オークションIDが指定されていません。', 'error');
+            console.error('Auction ID is missing.');
+            hideLoading(); // オークションIDがない場合にローディングを非表示
+            return;
+        }
+
+        console.log('Setting up Firestore onSnapshot listener for auction data...');
+        // Firestoreからオークションデータをリアルタイムで購読
+        db.collection('auctions').doc(auctionId).onSnapshot(async (doc) => {
+            console.log('Firestore snapshot received.');
+            if (doc.exists) {
+                const auctionData = doc.data();
+                auctionEndTime = auctionData.endTime ? auctionData.endTime.toDate() : null;
+                console.log('Auction Data:', auctionData);
+
+                let yourBid = 0;
+                if (currentUserId) {
+                    console.log('Fetching user bids...');
+                    const userBidsSnapshot = await db.collection('auctions').doc(auctionId)
+                                                    .collection('bids')
+                                                    .where('userId', '==', currentUserId)
+                                                    .orderBy('timestamp', 'desc')
+                                                    .limit(1)
+                                                    .get();
+                    if (!userBidsSnapshot.empty) {
+                        yourBid = userBidsSnapshot.docs[0].data().amount;
+                        lastBidTime = userBidsSnapshot.docs[0].data().timestamp.toDate().getTime();
+                        console.log('User bid found:', yourBid);
+                    } else {
+                        console.log('No user bid found.');
+                    }
+                }
+                
+                const initialDisplayBid = auctionData.currentBid || auctionData.startPrice || 100; 
+                updateAuctionUI(auctionData, initialDisplayBid, auctionData.highestBidderId);
+                console.log('Auction UI updated.');
+
+                // 画像スライダーの初期化
+                console.log('Loading images from Firestore...');
+                const imageData = await loadImagesFromFirestore(auctionId);
+                console.log('Images loaded. Initializing slider with', imageData.length, 'images.');
+                
+                // 画像データがある場合のみスライダーを初期化
+                if (imageData.length > 0) {
+                    initializeSlider(imageData); 
+                    console.log('Slider initialized.');
+                } else {
+                    console.warn('No image data found for slider initialization.');
+                }
+
+                if (auctionEndTime && new Date().getTime() < auctionEndTime.getTime()) {
+                    document.getElementById('bid-button').disabled = false;
+                    console.log('Bid button enabled.');
+                } else {
+                    document.getElementById('bid-button').disabled = true;
+                    console.log('Bid button disabled (auction ended or no end time).');
+                }
+
+                showStatusMessage('オークション情報を更新しました', 'success');
+                console.log('Auction info updated message shown.');
+
+            } else {
+                showStatusMessage('指定されたオークションは見つかりませんでした。', 'error');
+                document.getElementById('bid-button').disabled = true;
+                console.error('Auction document not found.');
+            }
+            hideLoading(); // 初期データロード後、またはエラー時にローディングを非表示
+            console.log('Loading screen hidden.');
+        }, (error) => {
+            console.error("Firestoreリアルタイム更新エラー:", error);
+            showStatusMessage('オークション情報の取得に失敗しました。', 'error');
+            hideLoading(); // Firestoreエラー時にローディングを非表示
+            console.log('Loading screen hidden due to Firestore error.');
+        });
+
+        // カウントダウンの更新を開始
+        setInterval(updateCountdown, 1000);
+        console.log('Countdown interval started.');
+
+    } catch (err) {
+        console.error('🚫 実行中エラー (initializeLiffAndLoadAuction):', err);
+        showStatusMessage(`初期化またはログインに失敗しました: ${err.message}`, 'error');
+        hideLoading(); // エラー発生時もローディングを非表示にする
+        console.log('Loading screen hidden due to initialization error.');
+    }
+}
+
+// DOMContentLoadedでメインの初期化関数を実行
+window.addEventListener('DOMContentLoaded', initializeLiffAndLoadAuction);
+
+// 入札モーダル表示
+document.getElementById('bid-button').addEventListener('click', () => {
+    if (auctionEndTime && new Date().getTime() >= auctionEndTime.getTime()) {
+        showStatusMessage('オークションは既に終了しています。', 'error');
+        return;
+    }
+    document.getElementById('modal-bid-amount').value = '';
+    document.getElementById('modal-agree-checkbox').checked = false;
+    showModalMessage('');
+    document.getElementById('bid-modal').style.display = 'flex';
+});
+
+// モーダルキャンセル
+document.getElementById('modal-cancel-button').addEventListener('click', () => {
+    document.getElementById('bid-modal').style.display = 'none';
+});
+
+// Firebase Functionsのインスタンスを取得
+const functions = firebase.functions();
+// エミュレータを使う場合はコメントを外す (ローカル開発時)
+// functions.useFunctionsEmulator('http://localhost:5001'); // functionsエミュレータのURL
+
+document.getElementById('modal-submit-button').addEventListener('click', async () => {
+    const bidAmountInput = document.getElementById('modal-bid-amount');
+    const newBidAmount = Number(bidAmountInput.value); // Number() で数値に変換
+    
+    const agreed = document.getElementById('modal-agree-checkbox').checked;
+
+    // --- クライアントサイドでの基本的な入力検証 ---
+    // (サーバーサイドでも同様の検証が必要です)
+    if (!agreed) {
+        showModalMessage('規約に同意してください。', 'error');
+        return;
+    }
+
+    if (isNaN(newBidAmount) || newBidAmount < 100 || newBidAmount % 100 !== 0) {
+        showModalMessage('100円単位で正しい入札金額を入力してください。', 'error');
+        return;
+    }
+
+    if (!currentUserId) { // currentUserId はグローバルで取得済みと仮定
+        showModalMessage('LINEユーザー情報が取得できていません。LIFFを再起動してください。', 'error');
+        return;
+    }
+
+    if (!auctionId) { // auctionId もグローバルで取得済みと仮定
+        showModalMessage('オークションIDが見つかりません。', 'error');
+        return;
+    }
+
+    // --- クールダウンチェック（クライアント側でのUX向上のため） ---
+    const now = new Date().getTime();
+    if (lastBidTime && (now - lastBidTime) < (BID_COOLDOWN_SECONDS * 1000)) {
+        const remainingTime = Math.ceil((BID_COOLDOWN_SECONDS * 1000 - (now - lastBidTime)) / 1000);
+        showModalMessage(`前回の入札から${BID_COOLDOWN_SECONDS}秒経過していません。あと${remainingTime}秒お待ちください。`, 'error');
+        return;
+    }
+
+    // 入札ボタンを無効化し、ユーザーに処理中であることを示す
+    document.getElementById('modal-submit-button').disabled = true;
+    showModalMessage('入札中...', 'info');
+
+    try {
+        // Cloud Function 'bidAuction' を呼び出す
+        const bidAuctionFunction = functions.httpsCallable('bidAuction');
+        const result = await bidAuctionFunction({ auctionId: auctionId, amount: newBidAmount });
+
+        // Cloud Functionからのレスポンスを処理
+        // Cloud Function内で成功/失敗のフラグやメッセージを返すように設計する
+        if (result.data && result.data.success) {
+            showStatusMessage(`入札が成功しました！`, 'success');
+            document.getElementById('bid-modal').style.display = 'none'; // モーダルを閉じる
+            lastBidTime = now; // 成功した場合のみクールダウン時間を更新
+
+        } else if (result.data && result.data.message) {
+            // Cloud Functionが成功レスポンスを返したが、ビジネスロジックで失敗したケース
+            showModalMessage(`入札失敗: ${result.data.message}`, 'error');
+            console.error('Cloud Functionからの入札失敗メッセージ:', result.data.message);
+        } else {
+            // 予期せぬレスポンス形式
+            throw new Error('Cloud Functionからの予期せぬレスポンス形式。');
+        }
+    } catch (error) {
+        console.error('入札エラー:', error);
+        // Cloud FunctionからHttpsErrorが返された場合（例: `functions.https.Callable`からのエラー）
+        if (error.code) {
+            showModalMessage(`入札エラー: ${error.message} (${error.code})`, 'error');
+        } else {
+            // その他のクライアントサイドでのエラー
+            showModalMessage(`入札中に予期せぬエラーが発生しました: ${error.message}`, 'error');
+        }
+    } finally {
+        // 処理が完了したらボタンを再度有効化
+        document.getElementById('modal-submit-button').disabled = false;
+    }
+});
+
+// 紙吹雪アニメーション
+function launchConfettiTimes(times) {
+    let count = 0;
+    function fire() {
+        if (count >= times) return;
+        confetti({
+            particleCount: 90,
+            spread: 80,
+            origin: { y: 0.6 }
+        });
+        count++;
+        setTimeout(fire, 500);
+    }
+    fire();
+}
+    
+// Firestoreから画像データを読み込み
+async function loadImagesFromFirestore(docId) {
+  console.log('loadImagesFromFirestore: Attempting to load images for docId:', docId);
+  try {
+    const docRef = db.collection("auctions").doc(docId);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      console.error("loadImagesFromFirestore: データが見つかりません (Document does not exist).");
+      return [];
+    }
+
+    const auctionData = docSnap.data();
+    console.log('loadImagesFromFirestore: Raw auctionData from Firestore:', auctionData);
+    
+    // Firestoreのimages配列をそのまま使用（空要素は除外）
+    const images = (auctionData.images || []).filter(Boolean);
+
+    console.log('loadImagesFromFirestore: Filtered image URLs:', images);
+
+    // スライダー用データ形式に変換
+    const sliderData = images.map(url => ({ imageUrl: url }));
+    console.log('loadImagesFromFirestore: Formatted slider data:', sliderData);
+    
+    return sliderData;
+
+  } catch (error) {
+    console.error("loadImagesFromFirestore: Firestore取得エラー:", error);
+    return [];
+  }
+}
+
+// Slick Carouselの初期化
+function initializeSlider(data) {
+    console.log('initializeSlider: Function called with data:', data);
+    if (!data || data.length === 0) {
+        console.warn('initializeSlider: No data provided or data is empty. Slider will not be initialized.');
+        return;
+    }
+
+    const slider = $('.slider');
+    const thumbnailContainer = $('.thumbnail-container');
+
+    // 既存のスライダーとサムネイルをクリア
+    if (slider.hasClass('slick-initialized')) {
+        console.log('initializeSlider: Slider already initialized, unslicking...');
+        slider.slick('unslick');
+    }
+    slider.empty();
+    thumbnailContainer.empty();
+    console.log('initializeSlider: Slider and thumbnail containers cleared.');
+
+    let imagesLoadedCount = 0;
+    const totalImages = data.length;
+
+    // 画像の読み込み完了を待つPromiseの配列を作成
+    const imageLoadPromises = data.map((item, index) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = item.imageUrl;
+            
+            // サムネイルを先にDOMに追加
+            const thumbnailImg = $(`<img src="${item.imageUrl}" data-index="${index}" alt="サムネイル画像 ${index + 1}">`);
+            thumbnailContainer.append(thumbnailImg);
+
+            img.onload = () => {
+                console.log(`initializeSlider: Image loaded: ${item.imageUrl}`);
+                const imgDiv = $('<div></div>');
+                imgDiv.append($(img).clone());
+                slider.append(imgDiv);
+                resolve();
+            };
+            img.onerror = () => {
+                console.error(`initializeSlider: Failed to load image: ${item.imageUrl}`);
+                resolve(); // 画像がロードできなくても処理を継続
+            };
+        });
+    });
+
+    // すべての画像の読み込みが完了するのを待つ
+    Promise.all(imageLoadPromises).then(() => {
+        console.log('initializeSlider: All images loaded. Initializing Slick Carousel.');
+        // 画像がすべてDOMに追加されてからスライダーを初期化
+        slider.slick({
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            dots: true,
+            arrows: true,
+            infinite: true,
+            adaptiveHeight: true
+        });
+
+        // 初期アクティブ枠
+        updateThumbnailActive(0);
+
+        // スライド変更時に青枠更新
+        slider.on('afterChange', function(event, slick, currentSlide){
+            console.log('initializeSlider: Slick afterChange event. Current slide:', currentSlide);
+            updateThumbnailActive(currentSlide);
+        });
+
+        // サムネイルクリックでメインスライド移動
+        thumbnailContainer.on('click', 'img', function() {
+            const index = parseInt($(this).data('index'), 10);
+            console.log('initializeSlider: Thumbnail clicked. Going to slide:', index);
+            slider.slick('slickGoTo', index);
+        });
+        console.log('initializeSlider: Event listeners for slider and thumbnails set.');
+
+    }).catch(error => {
+        console.error('initializeSlider: An error occurred while waiting for images to load:', error);
+    });
+}
+
+
+// 青枠を更新する関数
+function updateThumbnailActive(index) {
+    $('.thumbnail-container img').removeClass('active');
+    $(`.thumbnail-container img[data-index="${index}"]`).addClass('active');
+    console.log('updateThumbnailActive: Active thumbnail set to index:', index);
+}
+    
+</script>
+</script>
+
+</body>
+</html>
+
+
+
