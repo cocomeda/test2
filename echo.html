@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Web Echo System</title>
+    <style>
+        body { background: #111; color: #0f0; font-family: monospace; text-align: center; }
+        canvas { border: 1px solid #0f0; width: 80%; height: 300px; background: #000; }
+        button { padding: 10px 20px; font-size: 1.2rem; cursor: pointer; background: #0f0; border: none; }
+    </style>
+</head>
+<body>
+    <h1>Echo Tester</h1>
+    <p>「Ping」を鳴らして、マイクが拾った音の変化を観察してください。</p>
+    <button id="pingBtn">Pingを発信</button><br><br>
+    <canvas id="visualizer"></canvas>
+
+    <script>
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+        let audioCtx, analyser, dataArray;
+
+        async function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const source = audioCtx.createMediaStreamSource(stream);
+            
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 2048;
+            source.connect(analyser);
+            
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            draw();
+        }
+
+        // 音を発信する関数（パルス生成）
+        function sendPing() {
+            if (!audioCtx) initAudio();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sine'; // 澄んだ音
+            osc.frequency.setValueAtTime(3000, audioCtx.currentTime); // 3kHz
+            
+            // 短いパルス音（0.05秒で消える）を作る
+            gain.gain.setValueAtTime(1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        // 可視化（マイクが拾っている音を表示）
+        function draw() {
+            requestAnimationFrame(draw);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = (canvas.width / dataArray.length) * 2.5;
+            let x = 0;
+
+            for (let i = 0; i < dataArray.length; i++) {
+                const barHeight = dataArray[i];
+                ctx.fillStyle = `rgb(0, ${barHeight + 100}, 0)`;
+                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                x += barWidth + 1;
+            }
+        }
+
+        document.getElementById('pingBtn').addEventListener('click', () => {
+            if (!audioCtx) initAudio().then(sendPing);
+            else sendPing();
+        });
+    </script>
+</body>
+</html>
