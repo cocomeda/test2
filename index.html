@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CoCoめだか 無人販売所</title>
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <style>
-        /* --- 基本設定 --- */
         :root {
-            --bg-color: #F8F5F0;     /* 落ち着いたベージュ */
-            --main-text: #333333;    /* 墨色 */
-            --accent-color: #8E9775; /* 抹茶・オリーブ系（メダカのイメージ） */
+            --bg-color: #F8F5F0;
+            --main-text: #333333;
+            --accent-color: #8E9775;
             --card-bg: #ffffff;
             --border-color: #E0DDD5;
         }
@@ -19,134 +19,77 @@
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             background-color: var(--bg-color);
             color: var(--main-text);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
+            margin: 0; padding: 0; line-height: 1.6;
         }
 
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
 
         /* --- ローディング --- */
         #loading {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
+            position: fixed; inset: 0; background: var(--bg-color);
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(0,0,0,0.1);
-            border-top: 3px solid var(--accent-color);
-            border-radius: 50%;
+            width: 40px; height: 40px; border: 3px solid rgba(0,0,0,0.1);
+            border-top: 3px solid var(--accent-color); border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* --- ヘッダー・ステータス --- */
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-top: 20px;
-        }
-        .logo-main {
-            font-size: 1.8rem;
-            letter-spacing: 0.2em;
-            margin: 0;
-            font-weight: 700;
-        }
-        .logo-sub {
-            font-size: 0.9rem;
-            letter-spacing: 0.5em;
-            color: #777;
-        }
+        /* --- ヘッダー --- */
+        header { text-align: center; margin-bottom: 25px; padding-top: 10px; }
+        .logo-main { font-size: 1.6rem; letter-spacing: 0.2em; margin: 0; font-weight: 700; }
+        .logo-sub { font-size: 0.8rem; letter-spacing: 0.4em; color: #777; }
 
+        /* --- ステータスカード --- */
         .status-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 20px;
+            background: var(--card-bg); border-radius: 15px; padding: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            margin-bottom: 30px;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 25px; position: relative;
         }
-        .rank-display {
-            text-align: center;
-        }
-        .rank-label { font-size: 0.8rem; color: #888; }
+        .rank-info { flex-grow: 1; }
+        .rank-label { font-size: 0.75rem; color: #888; }
         .rank-value { 
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            border-bottom: 2px solid var(--accent-color);
-            padding: 0 10px;
+            font-size: 1.1rem; font-weight: bold; display: inline-block;
+            padding: 2px 15px; border-radius: 20px; border: 1px solid var(--border-color);
+            margin-top: 5px; transition: background-color 0.3s;
         }
-        .point-display {
-            font-size: 2.2rem;
-            font-weight: bold;
-        }
-        .point-unit { font-size: 1rem; margin-left: 4px; }
+        .point-display { text-align: right; margin-right: 15px; }
+        .point-val { font-size: 2.2rem; font-weight: bold; }
+        .point-unit { font-size: 0.9rem; margin-left: 2px; }
 
-        /* --- ボタンエリア --- */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+        .progress-track {
+            width: 8px; height: 60px; background: #eee;
+            border-radius: 4px; position: relative;
         }
-        .menu-item {
-            text-decoration: none;
-            color: var(--main-text);
-            text-align: center;
+        .progress-fill {
+            width: 100%; background: var(--accent-color);
+            border-radius: 4px; position: absolute; bottom: 0;
+            transition: height 0.8s ease-out;
         }
+
+        /* --- メニュー --- */
+        .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
+        .menu-item { text-decoration: none; color: var(--main-text); text-align: center; }
         .menu-icon {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            background: var(--card-bg);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.2s;
-            border: 1px solid var(--border-color);
+            width: 100%; aspect-ratio: 1/1; background: var(--card-bg);
+            border-radius: 12px; display: flex; justify-content: center; align-items: center;
+            border: 1px solid var(--border-color); overflow: hidden;
         }
-        .menu-icon:active { transform: scale(0.95); }
-        .menu-icon img { width: 60%; height: auto; border-radius: 5px; }
-        .menu-label { font-size: 0.7rem; margin-top: 8px; font-weight: bold; }
+        .menu-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .menu-label { font-size: 0.7rem; margin-top: 6px; font-weight: bold; }
 
-        /* --- テキストコンテンツ --- */
+        /* --- セクション --- */
         .info-section {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            font-size: 0.85rem;
-            border: 1px solid var(--border-color);
+            background: var(--card-bg); border-radius: 12px; padding: 18px;
+            margin-bottom: 15px; font-size: 0.8rem; border: 1px solid var(--border-color);
         }
-        h2 {
-            font-size: 1rem;
-            border-left: 4px solid var(--accent-color);
-            padding-left: 10px;
-            margin-bottom: 15px;
-        }
-        .info-section p { margin-bottom: 10px; }
+        h2 { font-size: 0.95rem; border-left: 4px solid var(--accent-color); padding-left: 10px; margin: 0 0 12px 0; }
         ul { padding-left: 1.2em; margin: 0; }
-        li { margin-bottom: 8px; }
+        li { margin-bottom: 6px; }
 
-        footer {
-            text-align: center;
-            font-size: 0.7rem;
-            color: #aaa;
-            padding: 40px 0;
-        }
+        footer { text-align: center; font-size: 0.7rem; color: #aaa; padding: 30px 0; }
     </style>
 </head>
 <body>
@@ -162,12 +105,15 @@
         </header>
 
         <section class="status-card">
-            <div class="rank-display">
-                <div class="rank-label">現在のランク</div>
-                <div class="rank-value" id="user-rank">シルバー</div>
+            <div class="rank-info">
+                <div class="rank-label">CURRENT RANK</div>
+                <div class="rank-value" id="user-rank">---</div>
             </div>
             <div class="point-display">
-                <span id="user-points">45</span><span class="point-unit">℗</span>
+                <span class="point-val" id="user-points">0</span><span class="point-unit">℗</span>
+            </div>
+            <div class="progress-track">
+                <div id="progressBar_vertical" class="progress-fill" style="height: 0%;"></div>
             </div>
         </section>
 
@@ -185,106 +131,115 @@
                 <div class="menu-label">予約注文</div>
             </a>
             <a href="list_auction3.html" class="menu-item">
-                <div class="menu-icon"><img src="IMG/u_c.jpg" alt="工事中"></div>
-                <div class="menu-label">工事中</div>
+                <div class="menu-icon"><img src="IMG/u_c.jpg" alt="準備中"></div>
+                <div class="menu-label">準備中</div>
             </a>
             <a href="list_auction.html" class="menu-item">
                 <div class="menu-icon"><img src="IMG/quiz.jpg" alt="クイズ"></div>
                 <div class="menu-label">クイズ</div>
             </a>
             <a href="list_auction2.html" class="menu-item">
-                <div class="menu-icon"><img src="IMG/rou.jpg" alt="ルーレット"></div>
+                <div class="menu-icon"><img src="IMG/rou.jpg" alt="抽選"></div>
                 <div class="menu-label">ルーレット</div>
             </a>
         </nav>
 
-        <article class="info-section">
-            <h2>CoCoポイントとは？</h2>
-            <p>貯めると素敵な特典があるかもしれない、CoCoめだか独自のポイントシステムです。</p>
-        </article>
-
-        <article class="info-section">
+        <div class="info-section">
             <h2>ポイント取得方法</h2>
             <ul>
                 <li>商品記載の4桁の数字を登録する。</li>
-                <li>販売所の専用QRコードを読み取る（1日1回）。</li>
-                <li>サイト内のクイズに正解する。</li>
+                <li>専用QRコードを読み取る（1日1回）。</li>
+                <li>クイズに正解する。</li>
             </ul>
-        </article>
+        </div>
 
-        <article class="info-section">
-            <h2>ランク特典</h2>
-            <ul>
-                <li><strong>シルバー以上:</strong> 予約注文が利用可能。</li>
-                <li><strong>ゴールド以上:</strong> 素敵な景品プレゼント？</li>
-            </ul>
-        </article>
-
-        <footer>
-            &copy; Coco Medaka35
-        </footer>
+        <footer>&copy; Coco Medaka35</footer>
     </div>
 
     <script>
-        // --- 画面表示制御 ---
+        // LIFF ID
+        const MY_LIFF_ID = '1657196041-ALeOLrEa';
+        // GAS URL
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbwU-jlTWnEyMNN7WHoD-tQjFyV_7opWSvNSB6n4nDqub7Hr7TDLmwHW3FBgmkfZ2VEfFw/exec';
+
         $(window).on("load", function() {
+            // ローディング画面の制御
             setTimeout(function() {
                 $("#loading").fadeOut(500, function() {
-                    $("#main").fadeIn(500);
+                    $("#main-content").fadeIn(500);
                 });
             }, 800);
+
+            // LIFFの初期化実行
+            initializeLiff();
         });
 
-        // --- LIFF & GAS 通信 (元の機能を復元) ---
-        liff.init({ liffId: '1657196041-ALeOLrEa' }, () => {
-            if (liff.isLoggedIn()) {
-                sendIdTokenToGAS();
-            } else {
-                liff.login();
-            }
-        });
+        function initializeLiff() {
+            liff.init({ liffId: MY_LIFF_ID })
+                .then(() => {
+                    if (liff.isLoggedIn()) {
+                        sendIdTokenToGAS();
+                    } else {
+                        // ブラウザ環境（ローカル）では自動ログインさせない
+                        if (!liff.isInClient()) {
+                            console.log("Not in LINE client. Please login on LINE.");
+                        } else {
+                            liff.login();
+                        }
+                    }
+                })
+                .catch((err) => {
+                    console.error("LIFF Initialization failed", err);
+                });
+        }
 
         function sendIdTokenToGAS() {
             const idToken = liff.getIDToken();
+            if (!idToken) return;
+
             $.ajax({
-                url: 'https://script.google.com/macros/s/AKfycbwU-jlTWnEyMNN7WHoD-tQjFyV_7opWSvNSB6n4nDqub7Hr7TDLmwHW3FBgmkfZ2VEfFw/exec',
+                url: GAS_URL,
                 type: 'POST',
                 data: { idToken: idToken },
                 success: function (response) {
-                    displayData(response);
+                    try {
+                        const jsonData = JSON.parse(response);
+                        updateUI(jsonData);
+                    } catch (e) {
+                        console.error("Data Parse Error", e);
+                    }
                 },
                 error: function (error) {
-                    console.error("GAS Error:", error);
+                    console.error("GAS Connection Error", error);
                 }
             });
         }
 
-        function displayData(data) {
-            const jsonData = JSON.parse(data);
-            
+        function updateUI(jsonData) {
             // スコアとランクの表示更新
-            $("#data-container2").text(`${jsonData.score}℗`);
-            $("#data-container3").text(jsonData.rank);
+            $("#user-points").text(jsonData.score);
+            $("#user-rank").text(jsonData.rank);
             
-            // プログレスバーの更新
+            // プログレスバー更新
             const rate = (jsonData.progress_rate * 100) || 0;
             $("#progressBar_vertical").css("height", rate + "%");
 
-            // ランク別カラー設定 (元のロジックをクラスやスタイルに適用)
+            // ランク別カラー設定
             const rankColors = {
                 "レギュラー": "#f5deb3",
-                "シルバー": "#f5f5f5",
+                "シルバー": "#e8e8e8",
                 "ゴールド": "#f0e68c",
                 "プラチナ": "#add8e6",
                 "ダイヤモンド": "#b0c4de"
             };
 
             if (rankColors[jsonData.rank]) {
-                $("#data-container3").css("background-color", rankColors[jsonData.rank]);
+                $("#user-rank").css({
+                    "background-color": rankColors[jsonData.rank],
+                    "border-color": "transparent"
+                });
             }
         }
     </script>
 </body>
 </html>
-
- 
