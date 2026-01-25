@@ -1,185 +1,151 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoCoめだか 35</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/style_spinner.css">
-    
+    <title>CoCoめだか 無人販売所</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-    <script src="index.js"></script>
-    
     <style>
+        /* --- 基本設定 --- */
         :root {
-            --primary-blue: #3498db;
-            --bg-color: #f4f7f9;
+            --bg-color: #F8F5F0;     /* 落ち着いたベージュ */
+            --main-text: #333333;    /* 墨色 */
+            --accent-color: #8E9775; /* 抹茶・オリーブ系（メダカのイメージ） */
             --card-bg: #ffffff;
-            --text-dark: #2c3e50;
-            --text-sub: #7f8c8d;
+            --border-color: #E0DDD5;
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-            text-align: center;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--main-text);
             margin: 0;
             padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-dark);
-            -webkit-tap-highlight-color: transparent;
+            line-height: 1.6;
         }
 
-        /* --- ヘッダー・スコアエリア --- */
-        .header-box {
-            background: linear-gradient(135deg, #ffffff 0%, #e9ecef 100%);
-            padding: 40px 20px;
-            border-bottom-left-radius: 40px;
-            border-bottom-right-radius: 40px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-            position: relative;
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        h1.topo { 
-            font-size: 8vw;
-            margin: 0;
-            letter-spacing: 0.5vw;
-            font-weight: 900;
-            color: var(--text-dark);
-        }
-
-        h1.topo2 { 
-            font-size: 4.5vw;
-            margin: 5px 0 20px 0;
-            color: var(--text-sub);
-            font-weight: normal;
-        }
-
-        /* ランク・スコアのコンテナ */
-        .status-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        #data-container3 {
-            background: var(--card-bg);
-            padding: 8px 18px;
-            border-radius: 50px;
-            font-size: 3.5vw;
-            font-weight: bold;
-            border: 2px solid #ddd;
-            /* JSで背景色が変わるため、初期はシンプルに */
-        }
-
-        #data-container2 {
-            font-size: 11vw;
-            font-weight: 800;
-            color: var(--primary-blue);
-        }
-
-        /* プログレスバー（縦型） */
-        .progress-aside {
-            position: absolute;
-            right: 25px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .vertical-progress-bar {
-            height: 90px;
-            width: 12px;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .vertical-progress-bar-inner {
-            background: linear-gradient(to top, var(--primary-blue), #5dade2);
-            width: 100%;
-            height: 0%; /* JSで制御 */
-            transition: height 1s ease-out;
-        }
-
-        /* --- ボタンナビゲーション --- */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            padding: 0 15px;
-            max-width: 600px;
-            margin: 0 auto 30px auto;
-        }
-
-        .menu-card {
-            background: var(--card-bg);
-            border-radius: 18px;
-            padding: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: transform 0.2s;
-            display: block;
-        }
-
-        .menu-card:active {
-            transform: scale(0.92);
-        }
-
-        .img-button {
-            width: 100%;
-            aspect-ratio: 1/1;
-            object-fit: cover;
-            border-radius: 12px;
-            display: block;
-        }
-
-        /* --- 説明テキストセクション --- */
-        .description-card {
-            background: var(--card-bg);
-            margin: 0 15px 30px 15px;
-            padding: 25px 20px;
-            border-radius: 25px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            text-align: left;
-        }
-
-        .htu3 {
-            font-size: 4.8vw;
-            color: var(--primary-blue);
-            margin: 20px 0 10px 0;
-            border-left: 4px solid var(--primary-blue);
-            padding-left: 10px;
-            font-weight: bold;
-        }
-
-        .honbun, .honbun0 {
-            font-size: 3.8vw;
-            line-height: 1.8;
-            color: #555;
-            margin: 0 0 15px 0;
-        }
-
-        /* --- ローディング・メイン表示切替 --- */
+        /* --- ローディング --- */
         #loading {
             position: fixed;
             inset: 0;
-            background: #fff;
+            background: var(--bg-color);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10000;
+            z-index: 9999;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- ヘッダー・ステータス --- */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 20px;
+        }
+        .logo-main {
+            font-size: 1.8rem;
+            letter-spacing: 0.2em;
+            margin: 0;
+            font-weight: 700;
+        }
+        .logo-sub {
+            font-size: 0.9rem;
+            letter-spacing: 0.5em;
+            color: #777;
         }
 
-        #main { display: none; }
+        .status-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+        .rank-display {
+            text-align: center;
+        }
+        .rank-label { font-size: 0.8rem; color: #888; }
+        .rank-value { 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            border-bottom: 2px solid var(--accent-color);
+            padding: 0 10px;
+        }
+        .point-display {
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+        .point-unit { font-size: 1rem; margin-left: 4px; }
+
+        /* --- ボタンエリア --- */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .menu-item {
+            text-decoration: none;
+            color: var(--main-text);
+            text-align: center;
+        }
+        .menu-icon {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: var(--card-bg);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s;
+            border: 1px solid var(--border-color);
+        }
+        .menu-icon:active { transform: scale(0.95); }
+        .menu-icon img { width: 60%; height: auto; border-radius: 5px; }
+        .menu-label { font-size: 0.7rem; margin-top: 8px; font-weight: bold; }
+
+        /* --- テキストコンテンツ --- */
+        .info-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+        }
+        h2 {
+            font-size: 1rem;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+            margin-bottom: 15px;
+        }
+        .info-section p { margin-bottom: 10px; }
+        ul { padding-left: 1.2em; margin: 0; }
+        li { margin-bottom: 8px; }
 
         footer {
-            padding: 30px 0;
-            color: #bdc3c7;
-            font-size: 3vw;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #aaa;
+            padding: 40px 0;
         }
     </style>
 </head>
@@ -189,52 +155,73 @@
         <div class="spinner"></div>
     </div>
 
-    <div id="main">
-        <header class="header-box">
-            <h1 class="topo">CoCoめだか</h1>
-            <h1 class="topo2">無人販売所</h1>
-            
-            <div class="status-container">
-                <div id="data-container3">--</div>
-                <div id="data-container2">--℗</div>
-            </div>
-
-            <div class="progress-aside">
-                <div class="vertical-progress-bar">
-                    <div id="progressBar_vertical" class="vertical-progress-bar-inner"></div>
-                </div>
-            </div>
+    <div class="container" id="main-content" style="display:none;">
+        <header>
+            <h1 class="logo-main">CoCoめだか</h1>
+            <div class="logo-sub">無人販売所</div>
         </header>
 
+        <section class="status-card">
+            <div class="rank-display">
+                <div class="rank-label">現在のランク</div>
+                <div class="rank-value" id="user-rank">シルバー</div>
+            </div>
+            <div class="point-display">
+                <span id="user-points">45</span><span class="point-unit">℗</span>
+            </div>
+        </section>
+
         <nav class="menu-grid">
-            <a href="QRCR_r.html" class="menu-card"><img src="QRCR_r1.jpg" class="img-button"></a> 
-            <a href="numberForm.html" class="menu-card"><img src="4kfm1.jpg" class="img-button"></a>
-            <div class="menu-card"><img src="RSVT1a.jpg" class="img-button"></div>
-            <a href="quiz2.html" class="menu-card"><img src="quiz2.jpg" class="img-button"></a>
-            <a href="k.html" class="menu-card"><img src="u_c.jpg" class="img-button"></a>
-            <a href="rou.html" class="menu-card"><img src="rou.jpg" class="img-button"></a>
+            <a href="QRCR_r.html" class="menu-item">
+                <div class="menu-icon"><img src="images/qr.jpg" alt="QR"></div>
+                <div class="menu-label">QRリーダー</div>
+            </a>
+            <a href="numberForm.html" class="menu-item">
+                <div class="menu-icon"><img src="images/form.jpg" alt="入力"></div>
+                <div class="menu-label">コード入力</div>
+            </a>
+            <a href="reservation.html" class="menu-item">
+                <div class="menu-icon"><img src="images/reserve.jpg" alt="予約"></div>
+                <div class="menu-label">予約注文</div>
+            </a>
+            <a href="list_auction3.html" class="menu-item">
+                <div class="menu-icon"><img src="images/u_c.jpg" alt="工事中"></div>
+                <div class="menu-label">工事中</div>
+            </a>
+            <a href="list_auction.html" class="menu-item">
+                <div class="menu-icon"><img src="images/quiz.jpg" alt="クイズ"></div>
+                <div class="menu-label">クイズ</div>
+            </a>
+            <a href="list_auction2.html" class="menu-item">
+                <div class="menu-icon"><img src="images/rou.jpg" alt="ルーレット"></div>
+                <div class="menu-label">ルーレット</div>
+            </a>
         </nav>
 
-        <article class="description-card">
-            <div class="htu3">CoCoポイントとは？</div>
-            <p class="honbun">
-                貯めるとイイコトがある、当店オリジナルのポイントサービスです。
-                <br><b>【貯め方】</b>
-                1. 商品に付いている4桁番号を入力
-                <br>2. 店内のQRコードをスキャン（1日1回）
-            </p>
+        <article class="info-section">
+            <h2>CoCoポイントとは？</h2>
+            <p>貯めると素敵な特典があるかもしれない、CoCoめだか独自のポイントシステムです。</p>
+        </article>
 
-            <div class="htu3">ランク制度</div>
-            <p class="honbun0">
-                獲得ポイントに応じてランクがアップ！
-                <br>・シルバー：20 pt 〜
-                <br>・ゴールド：70 pt 〜
-                <br>・プラチナ：150 pt 〜
-            </p>
+        <article class="info-section">
+            <h2>ポイント取得方法</h2>
+            <ul>
+                <li>商品記載の4桁の数字を登録する。</li>
+                <li>販売所の専用QRコードを読み取る（1日1回）。</li>
+                <li>サイト内のクイズに正解する。</li>
+            </ul>
+        </article>
+
+        <article class="info-section">
+            <h2>ランク特典</h2>
+            <ul>
+                <li><strong>シルバー以上:</strong> 予約注文が利用可能。</li>
+                <li><strong>ゴールド以上:</strong> 素敵な景品プレゼント？</li>
+            </ul>
         </article>
 
         <footer>
-            © Coco Medaka 35
+            &copy; Coco Medaka35
         </footer>
     </div>
 
@@ -300,4 +287,4 @@
 </body>
 </html>
 
-
+ 
