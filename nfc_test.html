@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC 累計カウンター</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 30px; background: #f0f2f5; }
+        .card { background: white; padding: 20px; border-radius: 15px; shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        #count { font-size: 4rem; font-weight: bold; color: #007bff; margin: 20px 0; }
+        button { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 1rem; cursor: pointer; }
+        #log { margin-top: 20px; font-size: 0.9rem; color: #555; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>NFC タッチ累計</h2>
+        <div id="count">0</div>
+        <button id="startBtn">スキャン開始</button>
+        <div id="log">タグをスキャンしてください</div>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const countDisplay = document.getElementById('count');
+        const logDisplay = document.getElementById('log');
+
+        startBtn.addEventListener('click', async () => {
+            if (!('NDEFReader' in window)) {
+                logDisplay.innerText = "エラー: Web NFC非対応のブラウザです";
+                return;
+            }
+
+            try {
+                const ndef = new NDEFReader();
+                await ndef.scan();
+                logDisplay.innerText = "スキャン中... タグをかざしてください";
+
+                ndef.onreading = event => {
+                    const tagId = event.serialNumber;
+                    
+                    // localStorageから現在のカウントを取得（なければ0）
+                    let currentCount = parseInt(localStorage.getItem(tagId)) || 0;
+                    
+                    // カウントを増やして保存
+                    currentCount++;
+                    localStorage.setItem(tagId, currentCount);
+
+                    // 画面表示を更新
+                    countDisplay.innerText = currentCount;
+                    logDisplay.innerText = `ID: ${tagId} を認識しました`;
+                };
+
+            } catch (error) {
+                logDisplay.innerText = "エラー: " + error;
+            }
+        });
+    </script>
+</body>
+</html>
